@@ -10,7 +10,7 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 |---|---|
 | GPU budget is **USD 50 of Modal** credit in total | Every GPU step has a dollar cap, a timeout, and a ledger entry (§4). Training is a small, honestly-reported experiment. |
 | **No external API keys** (no OpenAI or other paid model APIs) | Every model the project uses, including the external benchmark's simulated customer, is an open-weight model served with vLLM on Modal. Grading never uses a paid LLM judge. |
-| Human review happens **later**, before any GPU spend | Phases 1–9 run without review. Phase 10 is a hard gate: no Modal GPU job runs until the pre-GPU review is signed off. |
+| Human review happens **later**, and only where it matters | Phases 1–9 run without review. The external-benchmark baselines (Phase 11A) do not use our tasks, so they run **without** review, as soon as Modal access exists. Phase 10 is a hard gate only for GPU runs that use our tasks (our baselines and training). |
 | No real company data | All companies, vendors, documents, and amounts are fictional and generated consistently from code. |
 | Portfolio quality | Every phase ends with automated tests and an exit gate. Nothing is claimed in documentation that has not been measured. |
 
@@ -43,9 +43,10 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 | 7 | Agent interfaces (OpenEnv server, TRL adapter, runners, play CLI, replay) | No | Not started |
 | 8 | Container packaging and isolation tests | No | Not started |
 | 9 | Local evaluation pipeline with scripted policies | No | Not started |
-| 10 | **Gate: pre-GPU human review** | No | Waiting on Phases 1–9 |
-| 11 | Modal setup and compatibility spike | Yes (≈ $3.40) | Blocked by Phase 10 |
-| 12 | Baseline evaluation (our tasks, τ²-bench, BFCL) | Yes (≈ $13.90) | Blocked by Phase 11 |
+| 11A | Modal setup, serving checks, and external-benchmark baselines (τ²-bench, BFCL) | Yes (≈ $9.95) | Blocked only by Modal access |
+| 10 | **Gate: pre-GPU human review** (for runs that use our tasks) | No | Waiting on Phases 1–9 |
+| 11B | GRPO compatibility smoke test on our tasks | Yes (≈ $0.85) | Blocked by Phase 10 |
+| 12 | Baseline evaluation on our tasks | Yes (≈ $6.50) | Blocked by Phase 11B |
 | 13 | GRPO training experiment | Yes (≈ $15.80) | Blocked by Phase 12 |
 | 14 | Final held-out evaluation, τ²-bench and BFCL re-runs, report | Yes (≈ $6.55) | Blocked by Phase 13 |
 | 15 | Showcase release | No | Blocked by Phase 14 |
@@ -72,7 +73,7 @@ Every version and API fact below was checked on **22 October 2026** by installin
 | TRL 1.16.0's `vllm` extra requires **`vllm>=0.22.0,<=0.31.0`**, so the newest vLLM (0.32.0) cannot be used with it. | TRL wheel `METADATA`. |
 | vLLM `0.31.0` pins **`torch==2.13.0`** and requires **`transformers>=5.10.4,<5.18.0`** and **`mcp>=2.0.0`**. | PyPI JSON for vllm 0.31.0. |
 | **`openenv==0.10.0` and `vllm==0.31.0` cannot be installed together** (`openenv` → `fastmcp<4` → `mcp<2`; vLLM → `mcp>=2`). | `uv pip compile` reported the conflict. |
-| This set resolves cleanly for Python 3.12 on x86-64 Linux: `trl==1.16.0`, `vllm==0.31.0`, `transformers==5.17.0`, `torch==2.13.0`, `peft==0.21.2`, `accelerate==1.15.0`, `datasets==5.1.0`, `pydantic==2.14.1`. | `uv pip compile` succeeded; the lock is committed in Phase 11 as `modal_app/requirements-train.txt`. |
+| This set resolves cleanly for Python 3.12 on x86-64 Linux: `trl==1.16.0`, `vllm==0.31.0`, `transformers==5.17.0`, `torch==2.13.0`, `peft==0.21.2`, `accelerate==1.15.0`, `datasets==5.1.0`, `pydantic==2.14.1`. | `uv pip compile` succeeded; the lock is committed in Phase 11A as `modal_app/requirements-train.txt`. |
 | Modal client latest stable is `1.6.2`. `@app.function` accepts `gpu` (e.g. `"H100"`, `"H100:8"`), `timeout` (default 300 s), `max_containers`, `retries`, `volumes`, `secrets`, `scaledown_window`, `single_use_containers`, `block_network`. | Installed `modal==1.6.2`; read `modal/app.py` and `_functions.py`. |
 | **τ²-bench** (Sierra Research, MIT license) is not on PyPI; version `2.0.0` at commit `318fa35b1431a42e3ffdad05197378f506fac9d4` (22 Oct 2026) was cloned and read. It needs Python `>=3.12,<3.14` and `litellm>=1.80.15,<1.82.7`. | `git clone`; read `pyproject.toml`, `LICENSE`. |
 | τ²-bench's **retail** domain has 114 tasks with a fixed split of 74 train / 40 test (`split_tasks.json`). 112 tasks are graded on `DB` + `NL_ASSERTION`, 2 on `DB` only. Airline has 50 tasks (30 / 20), graded on `DB` + `COMMUNICATE`. | Parsed `data/tau2/domains/*/tasks.json` and `split_tasks.json`. |
@@ -89,12 +90,12 @@ Every version and API fact below was checked on **22 October 2026** by installin
 
 ### 2.3 Facts that could not be verified from the build machine
 
-The build machine's network policy blocks `huggingface.co` and `modal.com`. These items are therefore verified on Modal in **Phase 11, step 11.3**, before any GPU job:
+The build machine's network policy blocks `huggingface.co` and `modal.com`. These items are therefore verified on Modal in **Phase 11A, step 11.3**, before any GPU job:
 
 - Each candidate model's license, architecture, chat template, tool-calling support, and the exact revision (commit SHA) to pin.
 - Whether `transformers==5.17.0` and `vllm==0.31.0` load each candidate model, and whether the FP8 build of the reference model (`Qwen/Qwen3-30B-A3B-Instruct-2507-FP8`) exists and loads.
 - Whether τ²-bench runs end to end against our vLLM servers with `EvaluationType.ENV`, and how long one simulation takes (used to confirm its budget line).
-- Current Modal GPU prices. Third-party trackers list H100 at about **$3.95/h** and L40S at about **$1.95/h** ([Spheron, 2026](https://www.spheron.network/blog/modal-gpu-pricing-2026-per-second-billing/); [ComputePrices](https://computeprices.com/providers/modal/gpus/l40s)). The budget in §4 uses these figures, and Phase 11 step 11.1 replaces them with the rates shown in the user's Modal dashboard.
+- Current Modal GPU prices. Third-party trackers list H100 at about **$3.95/h** and L40S at about **$1.95/h** ([Spheron, 2026](https://www.spheron.network/blog/modal-gpu-pricing-2026-per-second-billing/); [ComputePrices](https://computeprices.com/providers/modal/gpus/l40s)). The budget in §4 uses these figures, and Phase 11A step 1 replaces them with the rates shown in the user's Modal dashboard.
 
 ---
 
@@ -127,7 +128,7 @@ Selection criteria: open weights under a permissive license; native tool calling
 | **Candidate (trained)** | **`Qwen/Qwen3-4B-Instruct-2507`** | `Qwen/Qwen3.5-4B` | Text-only 4B instruct model with a tool-calling chat template, widely used with TRL. Qwen3.5-4B is newer and reports strong tool-use scores, but it is published as a multimodal image-text-to-text model ([model page](https://huggingface.co/Qwen/Qwen3.5-4B/tree/main)), which adds a vision path TRL would have to handle. We start with the lower-risk text-only model. |
 | **Reference (evaluated only)** | **`Qwen/Qwen3-30B-A3B-Instruct-2507`** | `Qwen/Qwen3-8B` | Mixture-of-experts model with about 3B active parameters, so it is fast to serve, but it is far more capable than the candidate. Bf16 weights (about 61 GB) fit one 80 GB H100 with a short context. |
 
-**Decision rule, not assumption.** Phase 11 runs, for each primary model: (a) a CPU check of the model card's license, architecture, and chat template, recording the revision SHA; (b) a vLLM load and a two-tool round-trip; (c) for the candidate only, a three-step GRPO smoke test. A model is used only if all three pass. If the primary fails, the fallback goes through the same checks. If both fail, we stop and report rather than spend the budget elsewhere.
+**Decision rule, not assumption.** Phases 11A and 11B run, for each primary model: (a) a CPU check of the model card's license, architecture, and chat template, recording the revision SHA; (b) a vLLM load and a two-tool round-trip; (c) for the candidate only, a three-step GRPO smoke test. A model is used only if all three pass. If the primary fails, the fallback goes through the same checks. If both fail, we stop and report rather than spend the budget elsewhere.
 
 Every result records the model ID **and revision SHA**, the prompt version, decoding parameters, and the environment and verifier hashes.
 
@@ -149,7 +150,7 @@ Our own test split shows whether the model got better at *our* tasks. External b
 |---|---|---|
 | Version | τ²-bench `2.0.0`, commit `318fa35b1431a42e3ffdad05197378f506fac9d4`, installed from git in its own virtual environment | Not on PyPI; pinning the commit makes runs reproducible. |
 | Domain and tasks | **Retail, the official 40-task `test` split** | Retail has the most tasks and the most state-changing actions. Airline (20 test tasks) is an optional extension. |
-| Trials | 4 per task, 160 simulations per model | Lets us report pass@1 and pass^4 the way τ²-bench does. If the Phase 11 timing shows this would exceed the budget line, trials drop to 2. This rule is fixed before any result is seen. |
+| Trials | 4 per task, 160 simulations per model | Lets us report pass@1 and pass^4 the way τ²-bench does. If the Phase 11A timing shows this would exceed the budget line, trials drop to 2. This rule is fixed before any result is seen. |
 | Agent under test | The candidate (before) and the LoRA-trained checkpoint (after), served by vLLM 0.31 | |
 | Simulated customer | **`Qwen/Qwen3-30B-A3B-Instruct-2507`** (FP8 build if verified, else bf16) at temperature 0, with a fixed seed, served by vLLM on the same H100 | No external API is available. The same customer model, revision, and decoding are used for every run, so before/after differences come from the agent. |
 | Grading | **`EvaluationType.ENV`**: final database state and environment assertions only | Deterministic and judge-free. τ²-bench's default also runs LLM judges (`NL_ASSERTION`, `COMMUNICATE`), which would need a paid API, so those components are not used. |
@@ -164,7 +165,7 @@ The Berkeley Function Calling Leaderboard, package `bfcl-eval==2026.3.23` (Apach
 - `bfcl generate --skip-server-setup` uses an existing endpoint from `LOCAL_SERVER_ENDPOINT`/`LOCAL_SERVER_PORT`, so it can use our own vLLM 0.31 server. Its `oss-eval-vllm` extra pins `vllm==0.8.5`, which we therefore do **not** install.
 - It accepts LoRA modules for the vLLM backend, so the trained adapter can be evaluated without merging weights.
 - Scoring is by AST matching and, for multi-turn, by checking execution state. No LLM judge or paid API is involved.
-- Its core dependencies pin `numpy==1.26.4`, so it runs in its own virtual environment inside the evaluation container, talking to vLLM over HTTP. Phase 11 verifies this setup.
+- Its core dependencies pin `numpy==1.26.4`, so it runs in its own virtual environment inside the evaluation container, talking to vLLM over HTTP. Phase 11A verifies this setup.
 
 **Categories used** (no web search, no API keys): `simple_python` (400), `multiple` (200), `parallel` (200), `parallel_multiple` (200), `irrelevance` (240), `live_simple` (258), `live_multiple` (1,053), and `multi_turn_base` (200). Category sizes were counted from the packaged data files.
 
@@ -178,7 +179,7 @@ Per benchmark (and per BFCL category): before vs. after, with the benchmark vers
 
 ### 4.1 One-time setup by the project owner
 
-1. **Modal account.** Create or confirm an account at modal.com, and in the dashboard set a workspace spending limit if one is offered for your plan. Record the H100 and L40S per-second prices shown on the pricing page in `modal_app/budget.yaml` (Phase 11 step 11.1).
+1. **Modal account.** Create or confirm an account at modal.com, and in the dashboard set a workspace spending limit if one is offered for your plan. Record the H100 and L40S per-second prices shown on the pricing page in `modal_app/budget.yaml` (Phase 11A step 1).
 2. **API token.** Create a token in the Modal dashboard (Settings → API Tokens). Add it to this project's Claude Code cloud environment as environment secrets named **`MODAL_TOKEN_ID`** and **`MODAL_TOKEN_SECRET`** (the cloud environment menu in the session's title bar → Edit → Network secrets, or Environment variables if that section is not offered). Never paste tokens into chat or commit them.
 3. **Network access.** In the same environment settings, allow **`api.modal.com`** under Allowed domains (keep "Allow package managers" ticked). If a later Modal call is denied, the error names the host to add.
 4. **Hugging Face token (optional).** Only needed if a chosen model is gated. If so, create a read-only token and store it as a Modal secret named `huggingface` with key `HF_TOKEN` (`modal secret create huggingface HF_TOKEN=...` from your own terminal).
@@ -207,20 +208,20 @@ Retries are 0 so that a failure never silently re-spends money. Every function w
 
 ### 4.3 Budget: USD 50
 
-Rates used for planning: H100 $3.95/h, L40S $1.95/h, CPU negligible. These are replaced with dashboard rates in Phase 11.
+Rates used for planning: H100 $3.95/h, L40S $1.95/h, CPU negligible. These are replaced with dashboard rates in Phase 11A.
 
 | Phase | Work | GPU time | Cap |
 |---|---|---|---|
-| 11 | Model inspection (CPU) | n/a | $0.05 |
-| 11 | vLLM serve, tool round-trip, BFCL smoke; candidate (L40S) and reference (H100) | 15 min + 15 min | $1.50 |
-| 11 | τ²-bench smoke: 2 retail tasks, both servers on one H100, timing measured | 15 min | $1.00 |
-| 11 | GRPO 3-step smoke test (H100) | 13 min | $0.85 |
+| 11A | Model inspection (CPU) | n/a | $0.05 |
+| 11A | vLLM serve, tool round-trip, BFCL smoke; candidate (L40S) and reference (H100) | 15 min + 15 min | $1.50 |
+| 11A | τ²-bench smoke: 2 retail tasks, both servers on one H100, timing measured | 15 min | $1.00 |
+| 11B | GRPO 3-step smoke test (H100) | 13 min | $0.85 |
 | 12 | Learnability probe + development baseline, candidate (L40S) | 45 min | $1.50 |
 | 12 | Our test split, candidate, prompts v1 and v2 (L40S) | 60 min | $2.00 |
 | 12 | Our test split, reference model (H100) | 45 min | $3.00 |
-| 12 | τ²-bench retail test, untrained candidate (H100) | 50 min | $3.30 |
-| 12 | τ²-bench retail test, reference model as agent (H100), for context | 50 min | $3.30 |
-| 12 | BFCL, untrained candidate (L40S) | 25 min | $0.80 |
+| 11A | τ²-bench retail test, untrained candidate (H100) | 50 min | $3.30 |
+| 11A | τ²-bench retail test, reference model as agent (H100), for context | 50 min | $3.30 |
+| 11A | BFCL, untrained candidate (L40S) | 25 min | $0.80 |
 | 13 | GRPO training with LoRA (H100) | 240 min | $15.80 |
 | 14 | Checkpoint selection on development + our final test (L40S) | 75 min | $2.45 |
 | 14 | τ²-bench retail test, trained checkpoint (H100) | 50 min | $3.30 |
@@ -518,29 +519,39 @@ Each phase lists its steps in build order, followed by the exit gate that must p
 
 Follow [`docs/review/PRE_GPU_REVIEW.md`](docs/review/PRE_GPU_REVIEW.md). The reviewer blind-solves a sample of tasks, reviews specifications, inspects verifier mutation results and replays, and signs off. Every problem found is fixed and retested before sign-off.
 
-**Exit gate:** signed `docs/review/signoff/pre-gpu.md` committed. **No Modal GPU function runs before this file exists**; the budget guard checks for it.
+**Exit gate:** signed `docs/review/signoff/pre-gpu.md` committed. **No Modal GPU function that uses InvoiceOps tasks runs before this file exists**; the budget guard checks for it. Functions that only serve models or run external benchmarks (`inspect_models`, `smoke_serve`, `smoke_tau2`, `evaluate_tau2`, `evaluate_bfcl`) are exempt, because they cannot be affected by mistakes in our tasks.
 
-### Phase 11: Modal setup and compatibility spike (cap ≈ $3.40)
+### Phase 11A: Modal setup, serving checks, and external-benchmark baselines (cap ≈ $9.95)
+
+Needs only Modal access (§4.1). It does **not** need the pre-GPU review or our environment, because nothing here touches InvoiceOps tasks. It can therefore run in parallel with Phases 1–9.
 
 1. Record the dashboard rates in `modal_app/budget.yaml`; confirm the ledger works with a CPU-only "hello" function.
-2. Commit `modal_app/requirements-train.txt` (the resolved set from §2.1) and `requirements-serve.txt`; build both images.
-3. `inspect_models` (CPU): download each candidate's model card and config; record license, architecture, chat template tool support, and revision SHA in `reports/model_verification.json`.
-4. `smoke_serve`: start vLLM 0.31.0 with each primary model, call two tools on one dev task, and confirm the tool-call format parses. In the same container, install `bfcl-eval==2026.3.23` in a separate virtual environment and run 5 entries of `simple_python` and 2 of `multi_turn_base` against the server with `--skip-server-setup`.
-5. `smoke_tau2`: on one H100, start two vLLM servers (the candidate as agent and the simulated-customer model), install τ²-bench at the pinned commit in its own virtual environment, and run 2 retail test tasks × 1 trial with `EvaluationType.ENV`. Confirm both models are reached through `api_base`, no external API is called (the container runs with outbound access limited to Hugging Face), and the reward is computed. Record seconds per simulation and recompute the τ²-bench budget lines from it.
-6. `smoke_train`: three GRPO steps with LoRA on two dev tasks via `environment_factory`; confirm rewards flow, tool tokens are masked, and a checkpoint saves.
-7. Apply the decision rule (§3.2) and record the chosen models and revisions.
+2. Commit `modal_app/requirements-train.txt` (the resolved set from §2.1) and `requirements-serve.txt`; build the serving image.
+3. `inspect_models` (CPU): download each candidate's model card and config; record license, architecture, chat template tool support, and revision SHA in `reports/model_verification.json`. Confirm whether the FP8 build of the reference model exists.
+4. `smoke_serve`: start vLLM 0.31.0 with each primary model and send one OpenAI-style request with two tool definitions; confirm the tool call parses. In the same container, install `bfcl-eval==2026.3.23` in a separate virtual environment and run 5 entries of `simple_python` and 2 of `multi_turn_base` against the server with `--skip-server-setup`.
+5. `smoke_tau2`: on one H100, start two vLLM servers (the candidate as agent and the simulated-customer model), install τ²-bench at the pinned commit in its own virtual environment, and run 2 retail test tasks × 1 trial with `EvaluationType.ENV`. Confirm both models are reached through `api_base`, no external API is called (outbound access limited to Hugging Face), and the reward is computed. Record seconds per simulation and recompute the τ²-bench budget lines from it.
+6. Apply the decision rule (§3.2) to the serving checks and record the chosen models and revisions.
+7. **External baselines:** τ²-bench retail test split (40 tasks × 4 trials) with the untrained candidate as agent, then with the reference model as agent, against the same simulated customer (§3.4), saved to `reports/tau2/before/` and `reports/tau2/reference/`. BFCL on the untrained candidate, saved to `reports/bfcl/before/`.
+8. Write `reports/external_baseline.md` with the real numbers and the run settings.
 
-**Exit gate:** `reports/compatibility.md` lists exact versions and revisions and the spend so far.
+**Exit gate:** `reports/compatibility.md` and `reports/external_baseline.md` committed; spend reconciled with the dashboard. These baselines are frozen: Phase 14 re-runs the identical configuration on the trained checkpoint.
 
-### Phase 12: Baseline evaluation (cap ≈ $13.90)
+### Phase 11B: GRPO compatibility check on our tasks (cap ≈ $0.85)
+
+Requires Phase 10 sign-off.
+
+1. Build the training image from `modal_app/requirements-train.txt`.
+2. `smoke_train`: three GRPO steps with LoRA on two dev tasks via `environment_factory`; confirm rewards flow, tool tokens are masked, and a checkpoint saves. Confirm the candidate's tool calls on one dev task parse identically under vLLM serving and under TRL.
+
+**Exit gate:** `reports/compatibility.md` updated with the training stack result.
+
+### Phase 12: Baseline evaluation on our tasks (cap ≈ $6.50)
 
 1. Learnability probe: 8 attempts on each training task with the untrained candidate. If almost every task always fails, or always succeeds, stop and adjust the curriculum before training.
 2. Development baseline (prompt v1), used for harness debugging only.
 3. Freeze prompt v2, then test the candidate with prompts v1 and v2: 24 tasks × 4 attempts each.
 4. Test the reference model: 24 × 4.
-5. τ²-bench retail test split (40 tasks × 4 trials) with the untrained candidate as agent, then with the reference model as agent, both against the same simulated customer (§3.4). Saved to `reports/tau2/before/` and `reports/tau2/reference/`.
-6. BFCL on the untrained candidate (categories in §3.4), saved to `reports/bfcl/before/`. The reference model's BFCL run is optional and only done if the reserve allows.
-7. Write `reports/baseline.md` with real numbers, confidence intervals, a per-family breakdown, and failure examples.
+5. Write `reports/baseline.md` with real numbers, confidence intervals, a per-family breakdown, failure examples, and the external baselines from Phase 11A.
 
 **Exit gate:** baseline report committed; spend reconciled with the dashboard.
 
@@ -587,14 +598,14 @@ Follow [`docs/review/PRE_GPU_REVIEW.md`](docs/review/PRE_GPU_REVIEW.md). The rev
 
 | Risk | Mitigation |
 |---|---|
-| Training stack incompatibility on Modal | Versions resolved before building (§2.1); smoke tests in Phase 11 cost under $3.40 before training. |
+| Training stack incompatibility on Modal | Versions resolved before building (§2.1); serving and training smoke tests (Phases 11A, 11B) run before any long job. |
 | Budget overrun | Budget guard refuses launches over the cap; retries disabled; timeouts on every function; 21% reserve. |
 | Training improves our tasks but hurts general tool use | τ²-bench and BFCL before/after (§3.4); regressions reported in the final report. |
-| τ²-bench runs cost more than planned | Timing measured in the Phase 11 smoke test; the pre-declared rule reduces trials from 4 to 2 rather than overspending. |
+| τ²-bench runs cost more than planned | Timing measured in the Phase 11A smoke test; the pre-declared rule reduces trials from 4 to 2 rather than overspending. |
 | Simulated customer differs from τ²-bench's default | Same open customer model, revision, and decoding for every run; results labelled as not comparable with the public leaderboard. |
 | Tasks too hard or too easy for a 4B model | Learnability probe before training; curriculum adjusted on train/dev only. |
 | Verifier exploitable | Mutation harness on every task; adversarial family F10; reviewer inspection in Phase 10. |
-| Tool-call format differs between evaluation and training | Same vLLM version; Phase 11 step 11.4 confirms the parsed format matches TRL's. |
+| Tool-call format differs between evaluation and training | Same vLLM version; Phase 11B step 2 confirms the parsed format matches TRL's. |
 | Always-hold looks safe | Every family mixes outcomes; hold appropriateness reported separately. |
 | Unrealistic AP practice | Labelled as a fictional policy simulator until a practitioner reviews it. |
 
