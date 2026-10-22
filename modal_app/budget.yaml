@@ -1,0 +1,31 @@
+# Modal GPU budget for the whole project (BUILD_PLAN.md section 4.3).
+#
+# Before the first launch, replace the rates below with the per-hour prices shown in your Modal
+# dashboard and set rates_confirmed to true. The launcher refuses to run until you do.
+total_usd: 50.0
+rates_confirmed: false
+rates_usd_per_hour:
+  H100: 3.95
+  L40S: 1.95
+  CPU: 0.0
+
+# Each job: the plan's dollar cap, the function's hard timeout, and whether it needs the
+# pre-GPU human review sign-off (only jobs that use InvoiceOps tasks do).
+# The launcher refuses a job if its worst case (timeout x rate) exceeds what is left after
+# setting aside the caps of every job that has not run yet.
+jobs:
+  inspect_models:         {phase: 11A, gpu: CPU,  cap_usd: 0.05,  timeout_min: 10,  needs_signoff: false}
+  smoke_serve_candidate:  {phase: 11A, gpu: L40S, cap_usd: 0.50,  timeout_min: 20,  needs_signoff: false}
+  smoke_serve_reference:  {phase: 11A, gpu: H100, cap_usd: 1.00,  timeout_min: 20,  needs_signoff: false}
+  smoke_tau2:             {phase: 11A, gpu: H100, cap_usd: 1.00,  timeout_min: 25,  needs_signoff: false}
+  tau2_before:            {phase: 11A, gpu: H100, cap_usd: 3.30,  timeout_min: 60,  needs_signoff: false}
+  tau2_reference:         {phase: 11A, gpu: H100, cap_usd: 3.30,  timeout_min: 60,  needs_signoff: false}
+  bfcl_before:            {phase: 11A, gpu: L40S, cap_usd: 0.80,  timeout_min: 35,  needs_signoff: false}
+  smoke_train:            {phase: 11B, gpu: H100, cap_usd: 0.85,  timeout_min: 20,  needs_signoff: true}
+  probe_and_dev:          {phase: 12,  gpu: L40S, cap_usd: 1.50,  timeout_min: 50,  needs_signoff: true}
+  test_candidate:         {phase: 12,  gpu: L40S, cap_usd: 2.00,  timeout_min: 65,  needs_signoff: true}
+  test_reference:         {phase: 12,  gpu: H100, cap_usd: 3.00,  timeout_min: 50,  needs_signoff: true}
+  train_grpo:             {phase: 13,  gpu: H100, cap_usd: 15.80, timeout_min: 250, needs_signoff: true}
+  select_and_test:        {phase: 14,  gpu: L40S, cap_usd: 2.45,  timeout_min: 80,  needs_signoff: true}
+  tau2_after:             {phase: 14,  gpu: H100, cap_usd: 3.30,  timeout_min: 60,  needs_signoff: true}
+  bfcl_after:             {phase: 14,  gpu: L40S, cap_usd: 0.80,  timeout_min: 35,  needs_signoff: true}

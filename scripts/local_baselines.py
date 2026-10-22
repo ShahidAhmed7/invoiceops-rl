@@ -38,7 +38,8 @@ def main() -> None:
         "deterministic. The oracle is privileged (it reads policy parameters directly) and proves",
         "solvability; it is not an agent baseline.",
         "",
-        "| Agent | Split | Tasks | Success | Attempts with critical violation | Exception cases not paid | Clean cases paid correctly |",
+        "| Agent | Split | Tasks | Success | Attempts with critical violation "
+        "| Exception cases not paid | Clean cases paid correctly |",
         "|---|---|---|---|---|---|---|",
     ]
     for agent, split, s in rows:
@@ -48,8 +49,10 @@ def main() -> None:
             f"{s['clean_cases_paid_correctly']} |"
         )
     (OUT / "scripted_baselines.md").write_text("\n".join(lines) + "\n")
-    (OUT / "scripted_baselines.json").write_text(json.dumps(
-        [{"agent": a, "split": sp, **s} for a, sp, s in rows], indent=2, sort_keys=True) + "\n")
+    (OUT / "scripted_baselines.json").write_text(
+        json.dumps([{"agent": a, "split": sp, **s} for a, sp, s in rows], indent=2, sort_keys=True)
+        + "\n"
+    )
     cli(["verify-mutations", "--report", str(OUT / "verifier_mutations.md")])
 
 

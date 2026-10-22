@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 
 from invoiceops.tasks.model import PrivateTask, PublicTask, TaskBundle
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_TASK_ROOT = REPO_ROOT / "tasks"
+DEFAULT_TASK_ROOT = Path(os.environ.get("INVOICEOPS_TASK_ROOT", REPO_ROOT / "tasks"))
 
 
 def _task_dir(task_id: str, root: Path) -> Path:

@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install
-        run: uv sync --frozen --extra openenv
+        run: uv sync --frozen --extra openenv --group modal
       - name: Lint
         run: uv run ruff check .
       - name: Format
