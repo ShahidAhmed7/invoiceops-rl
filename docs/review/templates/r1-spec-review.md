@@ -1,7 +1,7 @@
 # R1 Scenario Spec Review
 
 - **Task ID:**
-- **Spec revision reviewed:** (commit or revision noted in `spec.md`)
+- **Spec revision reviewed:** (content hash shown by `invoiceops show-task`)
 - **Reviewer initials:**
 - **Role:** Domain reviewer / Independent solver
 - **Date:**

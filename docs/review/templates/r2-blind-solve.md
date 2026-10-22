@@ -1,9 +1,9 @@
 # R2 Blind Solve
 
-Do **not** open the task's `spec.md`, `reference/`, or `verification/` material before you finish this form.
+Do **not** open the task's `private.json`, run `invoiceops show-task --private`, or read the family or verifier code for this task before you finish this form.
 
 - **Task ID:**
-- **Task revision:**
+- **Task revision** (content hash shown by `invoiceops show-task`):
 - **Solver initials:**
 - **Role:** Domain reviewer / Independent solver
 - **Date:**

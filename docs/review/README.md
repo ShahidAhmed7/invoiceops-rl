@@ -15,6 +15,8 @@ If no domain reviewer has signed off, the project is labelled a **fictional poli
 
 ## When reviews happen
 
+All of these reviews happen at the **pre-GPU gate** (BUILD_PLAN.md, Phase 10), except R4, which follows the baseline runs. The step-by-step checklist for that gate is in [`PRE_GPU_REVIEW.md`](PRE_GPU_REVIEW.md).
+
 | Gate | When | What you review | Blocks |
 |---|---|---|---|
 | **R1: Scenario spec review** | Before the first five tasks are implemented, and again for each new task | The written scenario: facts, policy, expected outcome | Implementing that task |
@@ -39,10 +41,11 @@ Task folders separate the two kinds of material:
 
 ```text
 tasks/<split>/<task-id>/
-├── prompt.md            # agent-visible; safe for blind solvers
-├── spec.md              # expected outcome; R1/R3 reviewers only
-└── reviews/             # completed review forms
+├── public.json          # agent-visible; safe for blind solvers
+└── private.json         # expected outcome; R1/R3 reviewers only
 ```
+
+You never need to read the JSON directly. `invoiceops show-task <task-id>` prints the agent-visible part as readable text, and `invoiceops show-task <task-id> --private` adds the expected outcome, the accepted alternatives, and the failing examples. Only use `--private` after any blind solve of that task.
 
 ## How to do each review
 
@@ -50,8 +53,8 @@ tasks/<split>/<task-id>/
 
 Use [`templates/r1-spec-review.md`](templates/r1-spec-review.md).
 
-1. Read `prompt.md` first, the way the agent would.
-2. Read `spec.md`: the company facts, the policy, the expected end state, and the listed failing examples.
+1. Run `invoiceops show-task <task-id>` and read it the way the agent would.
+2. Run `invoiceops show-task <task-id> --private`: the company facts, the policy, the expected end state, and the listed failing examples.
 3. Answer the checklist. The questions that matter most:
    - Can the expected outcome be reached using **only** information the agent can access?
    - Is it the **only** correct outcome? If another response is also reasonable, describe it. The verifier must accept it or the policy must be clarified.
@@ -63,11 +66,11 @@ Use [`templates/r1-spec-review.md`](templates/r1-spec-review.md).
 
 Use [`templates/r2-blind-solve.md`](templates/r2-blind-solve.md).
 
-1. Start a session for the task. The builder provides the exact command. It is expected to look like `invoiceops demo --task <task-id> --human`.
-2. Use only the tools listed in the prompt. Do not open the `spec.md`, `reference/`, or `verification/` folders.
+1. Start a session with `invoiceops play --task <task-id>`.
+2. Use only the tools listed in the prompt. Do not open `private.json`, run `show-task --private`, or read the `src/invoiceops/families/` or `src/invoiceops/verification/` code for that task.
 3. Write down each step you take and why, in a few words.
-4. Submit the case. The session saves its log; record the run ID on your form.
-5. Afterwards, the builder runs the verifier and tells you whether it passed. If you believe your solution was correct but it failed (or the reverse), that disagreement is exactly what we are looking for. Note it in the form.
+4. Submit the case with `submit_case`. The session saves its log and prints the run ID; record it on your form.
+5. Afterwards, run `invoiceops grade <run-id>` to see whether the verifier passed it, and why. If you believe your solution was correct but it failed (or the reverse), that disagreement is exactly what we are looking for. Note it in the form.
 
 ### R3: Family review
 
@@ -79,9 +82,9 @@ Use [`templates/r4-trace-labels.md`](templates/r4-trace-labels.md). You receive 
 
 ## Submitting a review
 
-- Copy the template into the task's `reviews/` folder. Name the copy `<gate>-<your-initials>-<YYYY-MM-DD>.md`, for example `r1-sa-2026-11-03.md`.
+- Copy the template into `docs/review/completed/<task-id or family-id>/`. Name the copy `<gate>-<your-initials>-<YYYY-MM-DD>.md`, for example `r1-sa-2026-11-03.md`.
 - Commit it, or send it to the builder to commit. Reviews are kept in the repository as the audit trail.
-- A task's `spec.md` records its current review status. If a reviewed task is changed later, it needs review again. Note which revision you reviewed.
+- `docs/review/status.md` lists every task's review status and the task revision (content hash) that was reviewed. If a reviewed task changes later, its hash changes and it needs review again.
 
 ## What reviewers are not asked to do
 
