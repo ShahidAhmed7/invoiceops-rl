@@ -1,0 +1,9 @@
+{
+  "agent": "oracle",
+  "attempts": 1,
+  "prompt_version": "n/a",
+  "splits": [
+    "dev"
+  ],
+  "tasks": 12
+}

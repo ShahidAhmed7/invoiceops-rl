@@ -1,0 +1,9 @@
+{
+  "agent": "random",
+  "attempts": 1,
+  "prompt_version": "n/a",
+  "splits": [
+    "train"
+  ],
+  "tasks": 36
+}

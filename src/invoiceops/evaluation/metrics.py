@@ -77,7 +77,11 @@ def summarise(records: Iterable[EpisodeRecord], privates: dict[str, PrivateTask]
 
     n_scored = len(scored)
     lo, hi = _ci(task_rates)
+    timing: dict[str, Any] = {}
+    if any(r.usage.get("requests") for r in scored):  # wall-clock only for model runs
+        timing["mean_seconds"] = sum(r.seconds for r in scored) / n_scored
     return {
+        **timing,
         "tasks": len(by_task),
         "attempts_per_task": k,
         "scored_attempts": n_scored,
@@ -100,7 +104,6 @@ def summarise(records: Iterable[EpisodeRecord], privates: dict[str, PrivateTask]
         "exception_cases_not_paid": f"{exc_ok}/{exc_total}",
         "clean_cases_paid_correctly": f"{clean_ok}/{clean_total}",
         "mean_tool_calls": sum(r.steps for r in scored) / n_scored if n_scored else None,
-        "mean_seconds": sum(r.seconds for r in scored) / n_scored if n_scored else None,
         "tokens": {
             "prompt": sum(int(r.usage.get("prompt_tokens", 0)) for r in scored),
             "completion": sum(int(r.usage.get("completion_tokens", 0)) for r in scored),

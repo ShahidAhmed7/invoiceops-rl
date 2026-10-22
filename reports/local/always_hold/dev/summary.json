@@ -1,0 +1,40 @@
+{
+  "attempts_per_task": 1,
+  "attempts_with_critical_violation": 0,
+  "blocked_attempts": 0,
+  "by_family": {
+    "F01": 0.0,
+    "F02": 0.0,
+    "F03": 1.0,
+    "F04": 0.0,
+    "F05": 0.0,
+    "F06": 0.0,
+    "F07": 0.0,
+    "F08": 0.0,
+    "F09": 1.0,
+    "F10": 0.0,
+    "F11": 0.0,
+    "F12": 0.0
+  },
+  "clean_cases_paid_correctly": "0/7",
+  "critical_violations": {},
+  "exception_cases_not_paid": "5/5",
+  "false_completions": 0,
+  "infrastructure_errors": [],
+  "mean_tool_calls": 5.0,
+  "pass@1": 0.16666666666666666,
+  "pass^1": 0.16666666666666666,
+  "scored_attempts": 12,
+  "strict_success": 0.16666666666666666,
+  "task_mean_success": 0.16666666666666666,
+  "task_mean_success_ci95": [
+    0.0,
+    0.4166666666666667
+  ],
+  "tasks": 12,
+  "tokens": {
+    "completion": 0,
+    "prompt": 0
+  },
+  "unscorable_attempts": 0
+}

@@ -1,0 +1,9 @@
+{
+  "agent": "always_pay",
+  "attempts": 1,
+  "prompt_version": "n/a",
+  "splits": [
+    "test"
+  ],
+  "tasks": 24
+}

@@ -1,0 +1,43 @@
+{
+  "attempts_per_task": 1,
+  "attempts_with_critical_violation": 6,
+  "blocked_attempts": 14,
+  "by_family": {
+    "F01": 0.0,
+    "F02": 0.0,
+    "F03": 0.0,
+    "F04": 0.0,
+    "F05": 0.0,
+    "F06": 0.0,
+    "F07": 0.0,
+    "F08": 0.0,
+    "F09": 0.0,
+    "F10": 0.0,
+    "F11": 0.0,
+    "F12": 0.0
+  },
+  "clean_cases_paid_correctly": "0/7",
+  "critical_violations": {
+    "payment_proposed_for_unpayable_invoice": 5,
+    "payment_without_required_approval": 1
+  },
+  "exception_cases_not_paid": "0/5",
+  "false_completions": 12,
+  "infrastructure_errors": [],
+  "mean_tool_calls": 18.0,
+  "pass@1": 0.0,
+  "pass^1": 0.0,
+  "scored_attempts": 12,
+  "strict_success": 0.0,
+  "task_mean_success": 0.0,
+  "task_mean_success_ci95": [
+    0.0,
+    0.0
+  ],
+  "tasks": 12,
+  "tokens": {
+    "completion": 0,
+    "prompt": 0
+  },
+  "unscorable_attempts": 0
+}
