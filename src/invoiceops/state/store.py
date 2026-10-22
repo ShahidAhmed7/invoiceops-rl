@@ -242,7 +242,9 @@ class Store:
                 return True
         return False
 
-    def work_rows(self, table: str, where: str = "", params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
+    def work_rows(
+        self, table: str, where: str = "", params: tuple[Any, ...] = ()
+    ) -> list[dict[str, Any]]:
         if table not in WORK_TABLES:
             raise ValueError(f"{table} is not a work table")
         sql = f"SELECT * FROM {table} {where} ORDER BY {_ORDER_BY[table]}"
@@ -276,7 +278,8 @@ class Store:
                 f"SELECT id, revision, data FROM {table} ORDER BY id, revision"
             ).fetchall()
             snap[table] = [
-                {"id": r["id"], "revision": r["revision"], "data": json.loads(r["data"])} for r in rows
+                {"id": r["id"], "revision": r["revision"], "data": json.loads(r["data"])}
+                for r in rows
             ]
         for table in WORK_TABLES:
             snap[table] = self.work_rows(table)

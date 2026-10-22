@@ -33,14 +33,18 @@ def render_policy(
     currency: str = "USD",
 ) -> str:
     money = lambda amount: format_minor(amount, currency)  # noqa: E731
-    window = f"from {effective_from}" + (f" until {effective_to} (exclusive)" if effective_to else "")
+    window = f"from {effective_from}" + (
+        f" until {effective_to} (exclusive)" if effective_to else ""
+    )
     approvers = sorted((r for r in roles if r.can_approve), key=lambda r: r.approval_limit_minor)
     approver_lines = "\n".join(
         f"   - `{r.id}` ({r.name}): may approve payments up to {money(r.approval_limit_minor)}."
         for r in approvers
     )
     contacts = "\n".join(
-        f"   - `{r.id}`: {r.description}" for r in roles if not r.can_approve and r.id != "ap_assistant"
+        f"   - `{r.id}`: {r.description}"
+        for r in roles
+        if not r.can_approve and r.id != "ap_assistant"
     )
     if params.partial_invoice_rule is PartialInvoiceRule.REQUIRE_CORRECTED_INVOICE:
         partial = (

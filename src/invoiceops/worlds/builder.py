@@ -258,21 +258,31 @@ class ScenarioBuilder:
         return record
 
     def receipt(
-        self, po: PurchaseOrder, quantities: dict[int, int], received_on: str, receipt_id: str | None = None
+        self,
+        po: PurchaseOrder,
+        quantities: dict[int, int],
+        received_on: str,
+        receipt_id: str | None = None,
     ) -> GoodsReceipt:
         record = self.make_receipt(po, quantities, received_on, receipt_id)
         self.receipts.append(record)
         return record
 
     def make_receipt(
-        self, po: PurchaseOrder, quantities: dict[int, int], received_on: str, receipt_id: str | None = None
+        self,
+        po: PurchaseOrder,
+        quantities: dict[int, int],
+        received_on: str,
+        receipt_id: str | None = None,
     ) -> GoodsReceipt:
         return GoodsReceipt(
             id=receipt_id or self.next_id("GRN"),
             po_id=po.id,
             received_on=received_on,
             lines=tuple(
-                ReceiptLine(po_line_no=n, quantity=q) for n, q in sorted(quantities.items()) if q > 0
+                ReceiptLine(po_line_no=n, quantity=q)
+                for n, q in sorted(quantities.items())
+                if q > 0
             ),
         )
 
@@ -321,7 +331,11 @@ class ScenarioBuilder:
         return f"{initials}-{self.rng.randrange(1000, 99999)}"
 
     def pay(
-        self, invoice: Invoice, paid_on: str, amount_minor: int | None = None, credit_note_ids: tuple[str, ...] = ()
+        self,
+        invoice: Invoice,
+        paid_on: str,
+        amount_minor: int | None = None,
+        credit_note_ids: tuple[str, ...] = (),
     ) -> PaymentRecord:
         record = PaymentRecord(
             id=self.next_id("PAY"),
@@ -418,7 +432,10 @@ class ScenarioBuilder:
         return World(
             world_id=world_id,
             company=Company(
-                id=f"CO-{self.spec.id_prefix}", name=self.spec.name, currency="USD", as_of=self.as_of
+                id=f"CO-{self.spec.id_prefix}",
+                name=self.spec.name,
+                currency="USD",
+                as_of=self.as_of,
             ),
             roles=self.roles,
             policies=tuple(self.policies),

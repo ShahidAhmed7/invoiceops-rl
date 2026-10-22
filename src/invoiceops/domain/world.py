@@ -159,7 +159,9 @@ def integrity_problems(world: World) -> list[str]:
             continue
         for rline in receipt.lines:
             if rline.po_line_no not in po_lines[receipt.po_id]:
-                problems.append(f"receipt {receipt.id} references unknown PO line {rline.po_line_no}")
+                problems.append(
+                    f"receipt {receipt.id} references unknown PO line {rline.po_line_no}"
+                )
     for receipt in world.receipts:
         if receipt.received_on > as_of:
             problems.append(f"receipt {receipt.id} dated after as-of date")
@@ -172,7 +174,9 @@ def integrity_problems(world: World) -> list[str]:
         else:
             for iline in inv.lines:
                 if iline.po_line_no not in po_lines[inv.po_id]:
-                    problems.append(f"invoice {inv.id} references unknown PO line {iline.po_line_no}")
+                    problems.append(
+                        f"invoice {inv.id} references unknown PO line {iline.po_line_no}"
+                    )
         if inv.invoice_date > inv.received_on or inv.received_on > as_of:
             problems.append(f"invoice {inv.id} has inconsistent dates")
         for att in inv.attachment_ids:
@@ -184,7 +188,9 @@ def integrity_problems(world: World) -> list[str]:
         if credit.vendor_id not in vendor_ids:
             problems.append(f"credit note {credit.id} references unknown vendor")
         if credit.invoice_id not in invoices:
-            problems.append(f"credit note {credit.id} references unknown invoice {credit.invoice_id}")
+            problems.append(
+                f"credit note {credit.id} references unknown invoice {credit.invoice_id}"
+            )
         if credit.applied_to_payment_id and credit.applied_to_payment_id not in payment_ids:
             problems.append(f"credit note {credit.id} references unknown payment")
     for payment in world.payments:

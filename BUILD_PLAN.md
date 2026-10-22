@@ -33,10 +33,10 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 
 | Phase | Name | Needs GPU | Status |
 |---|---|---|---|
-| 0 | Repository foundations and toolchain | No | Not started |
-| 1 | Domain model and state engine | No | Not started |
-| 2 | Worlds, policies, and the world generator | No | Not started |
-| 3 | Tools, episodes, and scripted events | No | Not started |
+| 0 | Repository foundations and toolchain | No | Done |
+| 1 | Domain model and state engine | No | In progress: records, money, SQLite store with immutability triggers written; tests pending |
+| 2 | Worlds, policies, and the world generator | No | In progress: 12 companies, policy renderer, scenario builder written; tests pending |
+| 3 | Tools, episodes, and scripted events | No | In progress: 15 tools, episode lifecycle, event engine written and smoke-tested; tests and lint cleanup pending |
 | 4 | Verifier, reward, and verifier validation | No | Not started |
 | 5 | First vertical slice (short shipment + clean match) | No | Not started |
 | 6 | Full task suite (12 families, 12 worlds, 72 tasks) | No | Not started |

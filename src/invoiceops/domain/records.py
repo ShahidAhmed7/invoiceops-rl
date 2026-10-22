@@ -31,7 +31,9 @@ def _check_iso_date(value: str) -> str:
 
 
 IsoDate = Annotated[str, AfterValidator(_check_iso_date)]
-RecordId = Annotated[str, Field(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")]
+RecordId = Annotated[
+    str, Field(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+]
 Minor = Annotated[StrictInt, Field(ge=0)]
 PositiveQty = Annotated[StrictInt, Field(gt=0)]
 
