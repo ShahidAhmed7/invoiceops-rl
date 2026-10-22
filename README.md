@@ -618,9 +618,10 @@ Work through gates rather than promising an arbitrary completion date. With one 
 ```text
 invoiceops-rl/
 ├── README.md          # This complete research and implementation plan
-├── .gitignore         # Secrets, runtime state, private tasks, model artifacts
-└── .gitattributes     # Consistent text line endings
+└── docs/review/       # Reviewer guide and review form templates
 ```
+
+Reviewers start with [`docs/review/README.md`](docs/review/README.md), which explains the review gates, their timing, and how to fill in each form.
 
 No executable quick-start command exists yet. All application paths and commands below are planned.
 
