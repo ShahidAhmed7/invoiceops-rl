@@ -415,6 +415,16 @@ def cmd_replay(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_verify_exports(args: argparse.Namespace) -> int:
+    from invoiceops.verification.exports import grade_directory
+
+    results = grade_directory(Path(args.exports), Path(args.out), Path(args.root))
+    for result in results:
+        verdict = "PASS" if result.passed else ("UNSCORABLE" if not result.scorable else "FAIL")
+        _print(f"{result.task_id}: {verdict} reward={result.reward}")
+    return 0
+
+
 def cmd_tools(args: argparse.Namespace) -> int:
     from invoiceops.tools.spec import openai_tools
 
@@ -493,6 +503,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--task")
     p.add_argument("--out")
     p.set_defaults(func=cmd_replay)
+
+    p = sub.add_parser("verify-exports", help="grade episode exports from the OpenEnv server")
+    p.add_argument("--exports", required=True)
+    p.add_argument("--out", required=True)
+    p.set_defaults(func=cmd_verify_exports)
 
     p = sub.add_parser("tools", help="print the tool schemas")
     p.set_defaults(func=cmd_tools)

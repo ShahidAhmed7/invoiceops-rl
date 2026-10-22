@@ -27,7 +27,6 @@ from invoiceops.adapters.tool_methods import TOOL_METHOD_NAMES, ToolMethods
 from invoiceops.episode import Episode
 from invoiceops.tasks.model import PublicTask
 from invoiceops.tasks.store import DEFAULT_TASK_ROOT, load_private, load_public
-from invoiceops.verification.verifier import verify_episode
 
 
 class InvoiceOpsState(State):
@@ -132,6 +131,9 @@ class InvoiceOpsEnvironment(MCPEnvironment):
             path.write_text(json.dumps(export))
         if self._private_root is not None:
             private = load_private(episode.task_id, self._private_root)
+            # Imported here: the agent-facing image ships without the verifier package.
+            from invoiceops.verification.verifier import verify_episode
+
             result = verify_episode(episode, private)
             observation.reward = result.reward
             observation.metadata = {**observation.metadata, "verifier": result.model_dump()}
