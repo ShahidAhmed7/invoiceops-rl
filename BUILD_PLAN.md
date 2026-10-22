@@ -275,6 +275,7 @@ flowchart LR
 
 ```text
 invoiceops-rl/
+├── README.md                     # Project introduction
 ├── BUILD_PLAN.md                 # This document
 ├── pyproject.toml / uv.lock      # Core package; extra: openenv; groups: dev, modal
 ├── openenv.yaml                  # OpenEnv manifest (validated in CI)
