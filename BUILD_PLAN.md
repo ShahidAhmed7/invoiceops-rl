@@ -43,10 +43,10 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 | 8 | Container packaging and isolation tests | No | Not started |
 | 9 | Local evaluation pipeline with scripted policies | No | Not started |
 | 10 | **Gate: pre-GPU human review** | No | Waiting on Phases 1–9 |
-| 11 | Modal setup and compatibility spike | Yes (≈ $2.35) | Blocked by Phase 10 |
-| 12 | Baseline evaluation | Yes (≈ $6.50) | Blocked by Phase 11 |
+| 11 | Modal setup and compatibility spike | Yes (≈ $2.40) | Blocked by Phase 10 |
+| 12 | Baseline evaluation (our tasks + BFCL) | Yes (≈ $7.30) | Blocked by Phase 11 |
 | 13 | GRPO training experiment | Yes (≈ $11.85) | Blocked by Phase 12 |
-| 14 | Final held-out evaluation and report | Yes (≈ $2.45) | Blocked by Phase 13 |
+| 14 | Final held-out evaluation, BFCL re-run, and report | Yes (≈ $3.25) | Blocked by Phase 13 |
 | 15 | Showcase release | No | Blocked by Phase 14 |
 
 Update this table in the same commit that completes a phase.
@@ -129,6 +129,24 @@ Every result records the model ID **and revision SHA**, the prompt version, deco
 - The "improved prompt" baseline (`system_v2.md`) adds general AP working practice (check policy first, compare PO, receipt, and invoice line by line, and cite records). It is written **before** looking at any test-split transcript and frozen in Phase 12.
 - Decoding for evaluation: temperature 0.7, top-p 0.8, a maximum of 40 tool calls per episode, and a 16k-token context. Four attempts per test task. The values are recorded in the run config; they are not tuned on the test split.
 
+### 3.4 External benchmark: before and after training
+
+Our own test split shows whether the model got better at *our* tasks. An external benchmark answers two other questions: does training transfer to general tool use, and does it damage abilities the model already had? We run the same external benchmark on the untrained candidate (Phase 12) and on the trained checkpoint (Phase 14), and on the reference model for context.
+
+**Chosen benchmark: the Berkeley Function Calling Leaderboard (BFCL v4), package `bfcl-eval==2026.3.23`** (Apache 2.0). Verified from the package source on 22 October 2026:
+
+- It has built-in handlers for **`Qwen/Qwen3-4B-Instruct-2507-FC`** (our candidate) and **`Qwen3-30B-A3B-Instruct-2507`** (our reference).
+- `bfcl generate --skip-server-setup` uses an existing endpoint from `LOCAL_SERVER_ENDPOINT`/`LOCAL_SERVER_PORT`, so it can use our own vLLM 0.31 server. Its `oss-eval-vllm` extra pins `vllm==0.8.5`, which we therefore do **not** install.
+- It accepts LoRA modules for the vLLM backend, so the trained adapter can be evaluated without merging weights.
+- Scoring is by AST matching and, for multi-turn, by checking execution state. No LLM judge or paid API is involved.
+- Its core dependencies pin `numpy==1.26.4`, so it runs in its own virtual environment inside the evaluation container, talking to vLLM over HTTP. Phase 11 verifies this setup.
+
+**Categories used** (no web search, no API keys): `simple_python` (400), `multiple` (200), `parallel` (200), `parallel_multiple` (200), `irrelevance` (240), `live_simple` (258), `live_multiple` (1,053), and `multi_turn_base` (200), which is the category closest to our stateful, multi-step setting. Category sizes were counted from the packaged data files.
+
+**How results are reported.** Scores are per category, with the BFCL version and our serving setup recorded. They are compared only with our own runs (before vs. after, same harness, same decoding), not presented as official leaderboard entries. A drop after training of more than the run-to-run noise in any category is reported as a regression, not hidden.
+
+**Considered and not chosen as the default:** τ²-bench (MIT license) is closer in spirit: policy-following customer-service agents graded on final database state. But it needs a second LLM to simulate the user, and version 2.0 uses LLM judges (`gpt-5.4-mini`) for some checks, which needs a paid API key outside the Modal budget. Scores with a substitute user simulator would also not be comparable with its leaderboard. It can be added as an optional extension if extra budget and an API key are provided.
+
 ---
 
 ## 4. Modal setup and budget
@@ -172,9 +190,11 @@ Rates used for planning: H100 $3.95/h, L40S $1.95/h, CPU negligible. These are r
 | 12 | Learnability probe + development baseline, candidate (L40S) | 45 min | $1.50 |
 | 12 | Test baseline, candidate, prompts v1 and v2 (L40S) | 60 min | $2.00 |
 | 12 | Test baseline, reference model (H100) | 45 min | $3.00 |
+| 12 | BFCL external benchmark, untrained candidate (L40S) | 25 min | $0.80 |
 | 13 | GRPO training with LoRA (H100) | 180 min | $11.85 |
 | 14 | Checkpoint selection on development + final test (L40S) | 75 min | $2.45 |
-| | **Reserve** (failures, retries, startup overhead) | | **$6.80** |
+| 14 | BFCL external benchmark, trained checkpoint (L40S) | 25 min | $0.80 |
+| | **Reserve** (failures, retries, startup overhead) | | **$5.20** |
 | | **Total** | | **$30.00** |
 
 ### 4.4 Budget enforcement in code
@@ -474,19 +494,20 @@ Follow [`docs/review/PRE_GPU_REVIEW.md`](docs/review/PRE_GPU_REVIEW.md). The rev
 1. Record the dashboard rates in `modal_app/budget.yaml`; confirm the ledger works with a CPU-only "hello" function.
 2. Commit `modal_app/requirements-train.txt` (the resolved set from §2.1) and `requirements-serve.txt`; build both images.
 3. `inspect_models` (CPU): download each candidate's model card and config; record license, architecture, chat template tool support, and revision SHA in `reports/model_verification.json`.
-4. `smoke_serve`: start vLLM 0.31.0 with each primary model, call two tools on one dev task, and confirm the tool-call format parses.
+4. `smoke_serve`: start vLLM 0.31.0 with each primary model, call two tools on one dev task, and confirm the tool-call format parses. In the same container, install `bfcl-eval==2026.3.23` in a separate virtual environment and run 5 entries of `simple_python` and 2 of `multi_turn_base` against the server with `--skip-server-setup`.
 5. `smoke_train`: three GRPO steps with LoRA on two dev tasks via `environment_factory`; confirm rewards flow, tool tokens are masked, and a checkpoint saves.
 6. Apply the decision rule (§3.2) and record the chosen models and revisions.
 
 **Exit gate:** `reports/compatibility.md` lists exact versions and revisions and the spend so far.
 
-### Phase 12: Baseline evaluation (cap ≈ $6.50)
+### Phase 12: Baseline evaluation (cap ≈ $7.30)
 
 1. Learnability probe: 8 attempts on each training task with the untrained candidate. If almost every task always fails, or always succeeds, stop and adjust the curriculum before training.
 2. Development baseline (prompt v1), used for harness debugging only.
 3. Freeze prompt v2, then test the candidate with prompts v1 and v2: 24 tasks × 4 attempts each.
 4. Test the reference model: 24 × 4.
-5. Write `reports/baseline.md` with real numbers, confidence intervals, a per-family breakdown, and failure examples.
+5. BFCL external benchmark on the untrained candidate (categories in §3.4), saved to `reports/bfcl/before/`. The reference model's BFCL run is optional and only done if the reserve allows.
+6. Write `reports/baseline.md` with real numbers, confidence intervals, a per-family breakdown, and failure examples.
 
 **Exit gate:** baseline report committed; spend reconciled with the dashboard.
 
@@ -499,11 +520,12 @@ Follow [`docs/review/PRE_GPU_REVIEW.md`](docs/review/PRE_GPU_REVIEW.md). The rev
 
 **Exit gate:** checkpoints and logs saved; the run config and spend are recorded.
 
-### Phase 14: Final evaluation and report (cap ≈ $2.45)
+### Phase 14: Final evaluation and report (cap ≈ $3.25)
 
 1. Select the checkpoint on the **development** split only; freeze it.
 2. Run the test split once: 24 × 4 attempts, same harness, prompt, and decoding as the "before" run.
-3. Write `reports/final.md`: before vs. after with paired, task-clustered confidence intervals, critical violations, the per-family breakdown, any change in always-hold behaviour, and null or negative results stated plainly.
+3. BFCL external benchmark on the frozen checkpoint (LoRA adapter served by vLLM), same categories and decoding as Phase 12, saved to `reports/bfcl/after/`.
+4. Write `reports/final.md`: before vs. after on our test split **and** on each BFCL category with paired, task-clustered confidence intervals, critical violations, the per-family breakdown, any change in always-hold behaviour, and null or negative results stated plainly.
 
 **Exit gate:** the report makes no claim unsupported by held-out results.
 
@@ -532,7 +554,8 @@ Follow [`docs/review/PRE_GPU_REVIEW.md`](docs/review/PRE_GPU_REVIEW.md). The rev
 | Risk | Mitigation |
 |---|---|
 | Training stack incompatibility on Modal | Versions resolved before building (§2.1); smoke tests in Phase 11 cost under $2.40 before training. |
-| Budget overrun | Budget guard refuses launches over the cap; retries disabled; timeouts on every function; 23% reserve. |
+| Budget overrun | Budget guard refuses launches over the cap; retries disabled; timeouts on every function; 17% reserve. |
+| Training improves our tasks but hurts general tool use | BFCL before/after (§3.4); regressions reported in the final report. |
 | Tasks too hard or too easy for a 4B model | Learnability probe before training; curriculum adjusted on train/dev only. |
 | Verifier exploitable | Mutation harness on every task; adversarial family F10; reviewer inspection in Phase 10. |
 | Tool-call format differs between evaluation and training | Same vLLM version; Phase 11 step 11.4 confirms the parsed format matches TRL's. |

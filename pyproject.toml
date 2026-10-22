@@ -1,0 +1,52 @@
+[project]
+name = "invoiceops"
+version = "0.1.0"
+description = "A verifiable accounts-payable environment for training and evaluating tool-using agents."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic==2.14.1",
+]
+
+[project.optional-dependencies]
+openenv = [
+    "openenv==0.10.0",
+    "uvicorn>=0.24.0",
+]
+
+[project.scripts]
+invoiceops = "invoiceops.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "hypothesis==6.170.6",
+    "ruff==0.17.2",
+    "mypy==2.4.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/invoiceops"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+packages = ["invoiceops"]
+mypy_path = "src"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers -q"
+filterwarnings = ["error"]
