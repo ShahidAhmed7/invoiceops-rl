@@ -14,6 +14,7 @@ retryable, step_limit_reached, episode_finished.
 from __future__ import annotations
 
 import json
+import threading
 import uuid
 from typing import Any
 
@@ -65,6 +66,7 @@ class Episode:
         self.done = False
         self.end_reason: str | None = None
         self.log: list[ActionEvent] = []
+        self._lock = threading.RLock()
         self._inbox_seen = 0
         self._propose_calls = 0
         self._id_counter = 0
@@ -80,7 +82,10 @@ class Episode:
     # -- public API --------------------------------------------------------------------------
 
     def step(self, tool: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
-        arguments = dict(arguments or {})
+        with self._lock:
+            return self._step(tool, dict(arguments or {}))
+
+    def _step(self, tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
         before = self.store.state_hash()
         observation: dict[str, Any]
         if self.done:

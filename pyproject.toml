@@ -22,6 +22,7 @@ dev = [
     "hypothesis==6.170.6",
     "ruff==0.17.2",
     "mypy==2.4.0",
+    "transformers==5.17.0",
 ]
 
 [build-system]
@@ -51,3 +52,15 @@ strict = true
 testpaths = ["tests"]
 addopts = "--strict-markers -q"
 filterwarnings = ["error"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tool docstrings are parsed into tool descriptions; keep each argument on one line.
+"src/invoiceops/adapters/tool_methods.py" = ["E501"]
+
+[[tool.mypy.overrides]]
+module = ["openenv.*", "fastmcp.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["invoiceops.adapters.openenv_env"]
+disallow_subclassing_any = false

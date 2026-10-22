@@ -166,7 +166,9 @@ class Store:
     """One episode's database."""
 
     def __init__(self) -> None:
-        self.conn = sqlite3.connect(":memory:", isolation_level=None)
+        # One episode is driven by one session at a time, but servers may call it from
+        # different worker threads; ``Episode`` serialises access with a lock.
+        self.conn = sqlite3.connect(":memory:", isolation_level=None, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
         for name in SOURCE_TABLES:
