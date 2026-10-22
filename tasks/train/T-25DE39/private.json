@@ -1,0 +1,45 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-58982",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-58982"
+              ],
+              [
+                "PO-7781"
+              ]
+            ],
+            "recipient_roles": [
+              "procurement"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-58982"
+          ]
+        ],
+        "label": "hold",
+        "payment": null,
+        "reason_codes": [
+          "price_variance"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F02",
+  "family_name": "Price discrepancy",
+  "oracle_hint": "",
+  "rationale": "Variance USD 36.55 exceeds the tolerance limit USD 24.45.",
+  "split": "train",
+  "task_id": "T-25DE39",
+  "variant": 1,
+  "world_id": "w04-quillfeather"
+}

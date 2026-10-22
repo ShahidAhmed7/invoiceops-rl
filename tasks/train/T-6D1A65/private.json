@@ -1,0 +1,34 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-77785",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [],
+        "evidence": [
+          [
+            "INV-77785"
+          ]
+        ],
+        "label": "pay",
+        "payment": {
+          "amount_minor": 500500,
+          "credit_note_ids": []
+        },
+        "reason_codes": [
+          "matched"
+        ],
+        "status": "ready_for_payment"
+      }
+    ]
+  },
+  "family": "F05",
+  "family_name": "Credit note",
+  "oracle_hint": "",
+  "rationale": "An open credit note exists for the supplier but references a different invoice.",
+  "split": "train",
+  "task_id": "T-6D1A65",
+  "variant": 2,
+  "world_id": "w05-redfern"
+}

@@ -1,0 +1,35 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-55885",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [],
+        "evidence": [
+          [
+            "INV-55885"
+          ]
+        ],
+        "label": "pay",
+        "payment": {
+          "amount_minor": 287070,
+          "credit_note_ids": []
+        },
+        "reason_codes": [
+          "matched_within_tolerance",
+          "matched"
+        ],
+        "status": "ready_for_payment"
+      }
+    ]
+  },
+  "family": "F02",
+  "family_name": "Price discrepancy",
+  "oracle_hint": "",
+  "rationale": "Variance USD 28.20 is within the tolerance limit USD 56.85.",
+  "split": "test",
+  "task_id": "T-B2A72C",
+  "variant": 0,
+  "world_id": "w12-marrowind"
+}

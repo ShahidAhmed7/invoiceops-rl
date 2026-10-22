@@ -1,0 +1,48 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-24991",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-24991"
+              ],
+              [
+                "PO-1348"
+              ]
+            ],
+            "recipient_roles": [
+              "receiving"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-24991"
+          ]
+        ],
+        "label": "pay",
+        "payment": {
+          "amount_minor": 492120,
+          "credit_note_ids": []
+        },
+        "reason_codes": [
+          "matched"
+        ],
+        "status": "ready_for_payment"
+      }
+    ]
+  },
+  "family": "F08",
+  "family_name": "Missing receipt and clarification",
+  "oracle_hint": "",
+  "rationale": "No receipt at first; receiving posts a full receipt once asked.",
+  "split": "test",
+  "task_id": "T-6C23E6",
+  "variant": 0,
+  "world_id": "w12-marrowind"
+}

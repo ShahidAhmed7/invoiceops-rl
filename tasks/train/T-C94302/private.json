@@ -1,0 +1,46 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-8807",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-8807"
+              ],
+              [
+                "GRN-31",
+                "PO-1042"
+              ]
+            ],
+            "recipient_roles": [
+              "supplier"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-8807"
+          ]
+        ],
+        "label": "hold for corrected invoice",
+        "payment": null,
+        "reason_codes": [
+          "short_receipt"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F03",
+  "family_name": "Short receipt",
+  "oracle_hint": "",
+  "rationale": "Invoice bills more than was received; company rule is require_corrected_invoice.",
+  "split": "train",
+  "task_id": "T-C94302",
+  "variant": 0,
+  "world_id": "w01-northstar"
+}

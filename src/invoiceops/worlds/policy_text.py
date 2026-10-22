@@ -32,7 +32,10 @@ def render_policy(
     roles: Sequence[Role],
     currency: str = "USD",
 ) -> str:
-    money = lambda amount: format_minor(amount, currency)  # noqa: E731
+
+    def money(amount: int) -> str:
+        return format_minor(amount, currency)
+
     window = f"from {effective_from}" + (
         f" until {effective_to} (exclusive)" if effective_to else ""
     )

@@ -1,0 +1,47 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-64709",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-64709"
+              ],
+              [
+                "INV-64709",
+                "VEN-NSC42",
+                "MSG-735"
+              ]
+            ],
+            "recipient_roles": [
+              "vendor_master"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-64709"
+          ]
+        ],
+        "label": "hold",
+        "payment": null,
+        "reason_codes": [
+          "vendor_verification"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F07",
+  "family_name": "Vendor-detail conflict",
+  "oracle_hint": "",
+  "rationale": "Invoice asks for payment to a bank account that differs from the supplier master.",
+  "split": "train",
+  "task_id": "T-4F837F",
+  "variant": 0,
+  "world_id": "w01-northstar"
+}

@@ -1,0 +1,47 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-23316",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-23316"
+              ],
+              [
+                "INV-23316",
+                "VEN-PPC92",
+                "MSG-111"
+              ]
+            ],
+            "recipient_roles": [
+              "vendor_master"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-23316"
+          ]
+        ],
+        "label": "hold",
+        "payment": null,
+        "reason_codes": [
+          "vendor_verification"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F07",
+  "family_name": "Vendor-detail conflict",
+  "oracle_hint": "",
+  "rationale": "Invoice asks for payment to a bank account that differs from the supplier master.",
+  "split": "test",
+  "task_id": "T-F91D2D",
+  "variant": 0,
+  "world_id": "w11-pellucid"
+}

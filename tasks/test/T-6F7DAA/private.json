@@ -1,0 +1,36 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-17386",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [],
+        "evidence": [
+          [
+            "INV-17386"
+          ]
+        ],
+        "label": "pay",
+        "payment": {
+          "amount_minor": 310040,
+          "credit_note_ids": [
+            "CN-519"
+          ]
+        },
+        "reason_codes": [
+          "matched_with_credit"
+        ],
+        "status": "ready_for_payment"
+      }
+    ]
+  },
+  "family": "F05",
+  "family_name": "Credit note",
+  "oracle_hint": "",
+  "rationale": "Open credit note CN-519 (USD 442.00) references this invoice.",
+  "split": "test",
+  "task_id": "T-6F7DAA",
+  "variant": 0,
+  "world_id": "w11-pellucid"
+}

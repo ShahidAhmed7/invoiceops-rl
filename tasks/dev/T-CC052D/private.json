@@ -1,0 +1,49 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-56621",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-56621"
+              ],
+              [
+                "GRN-912",
+                "GRN-915",
+                "INV-56615",
+                "PO-7929"
+              ]
+            ],
+            "recipient_roles": [
+              "supplier"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-56621"
+          ]
+        ],
+        "label": "hold for corrected invoice",
+        "payment": null,
+        "reason_codes": [
+          "quantity_exceeds_receipt",
+          "short_receipt"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F09",
+  "family_name": "Shared purchase-order capacity",
+  "oracle_hint": "",
+  "rationale": "63 received, 54 already billed on INV-56615; this invoice bills 36 but only 9 remain.",
+  "split": "dev",
+  "task_id": "T-CC052D",
+  "variant": 2,
+  "world_id": "w07-velloran"
+}

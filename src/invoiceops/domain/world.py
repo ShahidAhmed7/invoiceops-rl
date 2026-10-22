@@ -25,7 +25,7 @@ AGENT_ROLE_ID = "ap_assistant"
 
 
 class ClarificationTrigger(Record):
-    """Fires once a clarification about ``invoice_id`` has been sent to one of ``recipient_roles``."""
+    """Fires once a clarification about ``invoice_id`` was sent to one of ``recipient_roles``."""
 
     kind: Literal["clarification"] = "clarification"
     invoice_id: RecordId

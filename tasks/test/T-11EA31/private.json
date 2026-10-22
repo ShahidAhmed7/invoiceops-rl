@@ -1,0 +1,46 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-23154",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-23154"
+              ],
+              [
+                "GRN-407",
+                "PO-4395"
+              ]
+            ],
+            "recipient_roles": [
+              "supplier"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-23154"
+          ]
+        ],
+        "label": "hold for corrected invoice",
+        "payment": null,
+        "reason_codes": [
+          "short_receipt"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F12",
+  "family_name": "Stale policy and amended records",
+  "oracle_hint": "",
+  "rationale": "Short receipt; the current policy's rule (require_corrected_invoice) applies, not the superseded one.",
+  "split": "test",
+  "task_id": "T-11EA31",
+  "variant": 1,
+  "world_id": "w10-juniperfold"
+}

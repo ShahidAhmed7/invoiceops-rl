@@ -1,0 +1,45 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-57912",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-57912"
+              ],
+              [
+                "PO-4547"
+              ]
+            ],
+            "recipient_roles": [
+              "receiving"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-57912"
+          ]
+        ],
+        "label": "hold",
+        "payment": null,
+        "reason_codes": [
+          "missing_receipt"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F08",
+  "family_name": "Missing receipt and clarification",
+  "oracle_hint": "",
+  "rationale": "No receipt, and receiving confirms nothing has arrived: stay on hold.",
+  "split": "dev",
+  "task_id": "T-71E1D2",
+  "variant": 2,
+  "world_id": "w08-hearthmoor"
+}

@@ -1,0 +1,362 @@
+[
+  {
+    "task_id": "T-D2DA12",
+    "split": "train",
+    "world_id": "w01-northstar"
+  },
+  {
+    "task_id": "T-C94302",
+    "split": "train",
+    "world_id": "w01-northstar"
+  },
+  {
+    "task_id": "T-A50BE6",
+    "split": "train",
+    "world_id": "w01-northstar"
+  },
+  {
+    "task_id": "T-4F837F",
+    "split": "train",
+    "world_id": "w01-northstar"
+  },
+  {
+    "task_id": "T-5E46C3",
+    "split": "train",
+    "world_id": "w01-northstar"
+  },
+  {
+    "task_id": "T-E4FDD8",
+    "split": "train",
+    "world_id": "w01-northstar"
+  },
+  {
+    "task_id": "T-B97FAB",
+    "split": "train",
+    "world_id": "w02-bramblewood"
+  },
+  {
+    "task_id": "T-5E2670",
+    "split": "train",
+    "world_id": "w02-bramblewood"
+  },
+  {
+    "task_id": "T-8979C8",
+    "split": "train",
+    "world_id": "w02-bramblewood"
+  },
+  {
+    "task_id": "T-80BC88",
+    "split": "train",
+    "world_id": "w02-bramblewood"
+  },
+  {
+    "task_id": "T-201937",
+    "split": "train",
+    "world_id": "w02-bramblewood"
+  },
+  {
+    "task_id": "T-02FF9D",
+    "split": "train",
+    "world_id": "w02-bramblewood"
+  },
+  {
+    "task_id": "T-BE5CAB",
+    "split": "train",
+    "world_id": "w03-calderline"
+  },
+  {
+    "task_id": "T-8B3FCC",
+    "split": "train",
+    "world_id": "w03-calderline"
+  },
+  {
+    "task_id": "T-1D6F14",
+    "split": "train",
+    "world_id": "w03-calderline"
+  },
+  {
+    "task_id": "T-EFC9FB",
+    "split": "train",
+    "world_id": "w03-calderline"
+  },
+  {
+    "task_id": "T-F3AD7D",
+    "split": "train",
+    "world_id": "w03-calderline"
+  },
+  {
+    "task_id": "T-CFE072",
+    "split": "train",
+    "world_id": "w03-calderline"
+  },
+  {
+    "task_id": "T-25DE39",
+    "split": "train",
+    "world_id": "w04-quillfeather"
+  },
+  {
+    "task_id": "T-FBECFF",
+    "split": "train",
+    "world_id": "w04-quillfeather"
+  },
+  {
+    "task_id": "T-2D6100",
+    "split": "train",
+    "world_id": "w04-quillfeather"
+  },
+  {
+    "task_id": "T-1F835F",
+    "split": "train",
+    "world_id": "w04-quillfeather"
+  },
+  {
+    "task_id": "T-02EC43",
+    "split": "train",
+    "world_id": "w04-quillfeather"
+  },
+  {
+    "task_id": "T-852F31",
+    "split": "train",
+    "world_id": "w04-quillfeather"
+  },
+  {
+    "task_id": "T-C4C410",
+    "split": "train",
+    "world_id": "w05-redfern"
+  },
+  {
+    "task_id": "T-46FBCC",
+    "split": "train",
+    "world_id": "w05-redfern"
+  },
+  {
+    "task_id": "T-6D1A65",
+    "split": "train",
+    "world_id": "w05-redfern"
+  },
+  {
+    "task_id": "T-0717A6",
+    "split": "train",
+    "world_id": "w05-redfern"
+  },
+  {
+    "task_id": "T-A40DCC",
+    "split": "train",
+    "world_id": "w05-redfern"
+  },
+  {
+    "task_id": "T-5B4B11",
+    "split": "train",
+    "world_id": "w05-redfern"
+  },
+  {
+    "task_id": "T-6698FA",
+    "split": "train",
+    "world_id": "w06-tamsin"
+  },
+  {
+    "task_id": "T-A42411",
+    "split": "train",
+    "world_id": "w06-tamsin"
+  },
+  {
+    "task_id": "T-8E32C6",
+    "split": "train",
+    "world_id": "w06-tamsin"
+  },
+  {
+    "task_id": "T-D27F95",
+    "split": "train",
+    "world_id": "w06-tamsin"
+  },
+  {
+    "task_id": "T-FA96B2",
+    "split": "train",
+    "world_id": "w06-tamsin"
+  },
+  {
+    "task_id": "T-FA734A",
+    "split": "train",
+    "world_id": "w06-tamsin"
+  },
+  {
+    "task_id": "T-8F0E1E",
+    "split": "dev",
+    "world_id": "w07-velloran"
+  },
+  {
+    "task_id": "T-0222C3",
+    "split": "dev",
+    "world_id": "w07-velloran"
+  },
+  {
+    "task_id": "T-9362E5",
+    "split": "dev",
+    "world_id": "w07-velloran"
+  },
+  {
+    "task_id": "T-A680BE",
+    "split": "dev",
+    "world_id": "w07-velloran"
+  },
+  {
+    "task_id": "T-CC052D",
+    "split": "dev",
+    "world_id": "w07-velloran"
+  },
+  {
+    "task_id": "T-C45901",
+    "split": "dev",
+    "world_id": "w07-velloran"
+  },
+  {
+    "task_id": "T-D30567",
+    "split": "dev",
+    "world_id": "w08-hearthmoor"
+  },
+  {
+    "task_id": "T-84D47B",
+    "split": "dev",
+    "world_id": "w08-hearthmoor"
+  },
+  {
+    "task_id": "T-DC7A6B",
+    "split": "dev",
+    "world_id": "w08-hearthmoor"
+  },
+  {
+    "task_id": "T-71E1D2",
+    "split": "dev",
+    "world_id": "w08-hearthmoor"
+  },
+  {
+    "task_id": "T-E72409",
+    "split": "dev",
+    "world_id": "w08-hearthmoor"
+  },
+  {
+    "task_id": "T-F88990",
+    "split": "dev",
+    "world_id": "w08-hearthmoor"
+  },
+  {
+    "task_id": "T-E673B5",
+    "split": "test",
+    "world_id": "w09-glimmerdale"
+  },
+  {
+    "task_id": "T-202621",
+    "split": "test",
+    "world_id": "w09-glimmerdale"
+  },
+  {
+    "task_id": "T-1A3136",
+    "split": "test",
+    "world_id": "w09-glimmerdale"
+  },
+  {
+    "task_id": "T-CB94BF",
+    "split": "test",
+    "world_id": "w09-glimmerdale"
+  },
+  {
+    "task_id": "T-C07FE6",
+    "split": "test",
+    "world_id": "w09-glimmerdale"
+  },
+  {
+    "task_id": "T-5B8D32",
+    "split": "test",
+    "world_id": "w09-glimmerdale"
+  },
+  {
+    "task_id": "T-89B109",
+    "split": "test",
+    "world_id": "w10-juniperfold"
+  },
+  {
+    "task_id": "T-739D69",
+    "split": "test",
+    "world_id": "w10-juniperfold"
+  },
+  {
+    "task_id": "T-0A802E",
+    "split": "test",
+    "world_id": "w10-juniperfold"
+  },
+  {
+    "task_id": "T-7E294F",
+    "split": "test",
+    "world_id": "w10-juniperfold"
+  },
+  {
+    "task_id": "T-107867",
+    "split": "test",
+    "world_id": "w10-juniperfold"
+  },
+  {
+    "task_id": "T-11EA31",
+    "split": "test",
+    "world_id": "w10-juniperfold"
+  },
+  {
+    "task_id": "T-CF549E",
+    "split": "test",
+    "world_id": "w11-pellucid"
+  },
+  {
+    "task_id": "T-175EBC",
+    "split": "test",
+    "world_id": "w11-pellucid"
+  },
+  {
+    "task_id": "T-6F7DAA",
+    "split": "test",
+    "world_id": "w11-pellucid"
+  },
+  {
+    "task_id": "T-F91D2D",
+    "split": "test",
+    "world_id": "w11-pellucid"
+  },
+  {
+    "task_id": "T-6BAF87",
+    "split": "test",
+    "world_id": "w11-pellucid"
+  },
+  {
+    "task_id": "T-5C4594",
+    "split": "test",
+    "world_id": "w11-pellucid"
+  },
+  {
+    "task_id": "T-B2A72C",
+    "split": "test",
+    "world_id": "w12-marrowind"
+  },
+  {
+    "task_id": "T-BBE12C",
+    "split": "test",
+    "world_id": "w12-marrowind"
+  },
+  {
+    "task_id": "T-0A0D10",
+    "split": "test",
+    "world_id": "w12-marrowind"
+  },
+  {
+    "task_id": "T-6C23E6",
+    "split": "test",
+    "world_id": "w12-marrowind"
+  },
+  {
+    "task_id": "T-0B0633",
+    "split": "test",
+    "world_id": "w12-marrowind"
+  },
+  {
+    "task_id": "T-FB1EDA",
+    "split": "test",
+    "world_id": "w12-marrowind"
+  }
+]

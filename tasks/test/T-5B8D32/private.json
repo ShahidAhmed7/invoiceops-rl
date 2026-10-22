@@ -1,0 +1,36 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-60418",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [],
+        "evidence": [
+          [
+            "INV-60418"
+          ]
+        ],
+        "label": "pay",
+        "payment": {
+          "amount_minor": 231200,
+          "credit_note_ids": [
+            "CN-875"
+          ]
+        },
+        "reason_codes": [
+          "matched_with_credit"
+        ],
+        "status": "ready_for_payment"
+      }
+    ]
+  },
+  "family": "F11",
+  "family_name": "Transient tool failure",
+  "oracle_hint": "",
+  "rationale": "The first propose_payment response is lost; the retry must reuse the key.",
+  "split": "test",
+  "task_id": "T-5B8D32",
+  "variant": 1,
+  "world_id": "w09-glimmerdale"
+}

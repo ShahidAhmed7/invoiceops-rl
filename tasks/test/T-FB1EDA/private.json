@@ -1,0 +1,45 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-26427",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-26427"
+              ],
+              [
+                "PO-1511"
+              ]
+            ],
+            "recipient_roles": [
+              "procurement"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-26427"
+          ]
+        ],
+        "label": "hold",
+        "payment": null,
+        "reason_codes": [
+          "price_variance"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F12",
+  "family_name": "Stale policy and amended records",
+  "oracle_hint": "",
+  "rationale": "Variance USD 128.86 is within the old policy's tolerance (USD 193.29) but over the current one (USD 64.43).",
+  "split": "test",
+  "task_id": "T-FB1EDA",
+  "variant": 0,
+  "world_id": "w12-marrowind"
+}

@@ -1,0 +1,46 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-41871",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-41871"
+              ],
+              [
+                "INV-41871",
+                "VEN-CLC31"
+              ]
+            ],
+            "recipient_roles": [
+              "vendor_master"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-41871"
+          ]
+        ],
+        "label": "hold",
+        "payment": null,
+        "reason_codes": [
+          "vendor_verification"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F07",
+  "family_name": "Vendor-detail conflict",
+  "oracle_hint": "",
+  "rationale": "The supplier is not yet verified in the supplier master.",
+  "split": "train",
+  "task_id": "T-EFC9FB",
+  "variant": 1,
+  "world_id": "w03-calderline"
+}

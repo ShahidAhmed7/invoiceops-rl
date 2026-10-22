@@ -1,0 +1,34 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-54662",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [],
+        "evidence": [
+          [
+            "INV-54662"
+          ]
+        ],
+        "label": "pay",
+        "payment": {
+          "amount_minor": 175920,
+          "credit_note_ids": []
+        },
+        "reason_codes": [
+          "matched"
+        ],
+        "status": "ready_for_payment"
+      }
+    ]
+  },
+  "family": "F09",
+  "family_name": "Shared purchase-order capacity",
+  "oracle_hint": "",
+  "rationale": "20 received, 12 already billed; this invoice's 8 fits the remaining 8.",
+  "split": "train",
+  "task_id": "T-5E46C3",
+  "variant": 0,
+  "world_id": "w01-northstar"
+}

@@ -1,0 +1,59 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-20524",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-20524"
+              ],
+              [
+                "PO-6676"
+              ]
+            ],
+            "recipient_roles": [
+              "receiving"
+            ]
+          },
+          {
+            "cite": [
+              [
+                "INV-20524"
+              ],
+              [
+                "GRN-242",
+                "PO-6676"
+              ]
+            ],
+            "recipient_roles": [
+              "supplier"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-20524"
+          ]
+        ],
+        "label": "hold for corrected invoice",
+        "payment": null,
+        "reason_codes": [
+          "short_receipt"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F08",
+  "family_name": "Missing receipt and clarification",
+  "oracle_hint": "",
+  "rationale": "No receipt at first; receiving then posts a partial receipt, so the short-receipt rule (require_corrected_invoice) applies.",
+  "split": "test",
+  "task_id": "T-7E294F",
+  "variant": 1,
+  "world_id": "w10-juniperfold"
+}

@@ -1,0 +1,36 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-21541",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [],
+        "evidence": [
+          [
+            "INV-21541"
+          ]
+        ],
+        "label": "pay",
+        "payment": {
+          "amount_minor": 462000,
+          "credit_note_ids": [
+            "CN-573"
+          ]
+        },
+        "reason_codes": [
+          "matched_with_credit"
+        ],
+        "status": "ready_for_payment"
+      }
+    ]
+  },
+  "family": "F05",
+  "family_name": "Credit note",
+  "oracle_hint": "",
+  "rationale": "Open credit note CN-573 (USD 660.00) references this invoice.",
+  "split": "train",
+  "task_id": "T-A50BE6",
+  "variant": 0,
+  "world_id": "w01-northstar"
+}

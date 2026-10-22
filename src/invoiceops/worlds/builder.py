@@ -134,7 +134,8 @@ class ScenarioBuilder:
                 name="Procurement",
                 kind="internal",
                 can_approve=False,
-                description="Owns purchase orders and agreed prices; contact about price variances.",
+                description="Owns purchase orders and agreed prices; contact about price "
+                "variances.",
             ),
             Role(
                 id="receiving",

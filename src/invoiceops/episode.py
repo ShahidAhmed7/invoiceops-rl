@@ -82,9 +82,10 @@ class Episode:
     def step(self, tool: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         arguments = dict(arguments or {})
         before = self.store.state_hash()
+        observation: dict[str, Any]
         if self.done:
             observation = _error("episode_finished", f"The episode has ended ({self.end_reason}).")
-            self._record(tool, arguments, observation, before, before, count=False)
+            self._record(tool, arguments, observation, before, before)
             return observation
         self.step_count += 1
         try:
@@ -97,7 +98,7 @@ class Episode:
                 raise ToolError("invalid_arguments", _validation_message(exc)) from exc
             handler = getattr(self, f"_tool_{tool}")
             result = handler(args)
-            observation: dict[str, Any] = {"ok": True, "result": result}
+            observation = {"ok": True, "result": result}
         except ToolError as exc:
             observation = _error(exc.code, exc.message)
         if not self.done and self.step_count >= self.max_steps:
@@ -123,12 +124,11 @@ class Episode:
         observation: dict[str, Any],
         before: str,
         after: str,
-        count: bool = True,
     ) -> None:
         code = "ok" if observation.get("ok") else str(observation["error"]["code"])
         self.log.append(
             ActionEvent(
-                step=self.step_count if count else self.step_count,
+                step=self.step_count,
                 tool=tool,
                 arguments=json.loads(canonical_json(arguments)) if _jsonable(arguments) else {},
                 result_code=code,
@@ -335,7 +335,8 @@ class Episode:
         if args.expected_version != case["version"]:
             raise ToolError(
                 "stale_version",
-                f"Case version is {case['version']}, not {args.expected_version}. Re-read and retry.",
+                f"Case version is {case['version']}, not {args.expected_version}. "
+                "Re-read the case and retry.",
             )
         version = case["version"] + 1
         with self.store.transaction() as conn:
@@ -513,7 +514,8 @@ class Episode:
             raise ToolError("invalid_arguments", f"Proposal {args.proposal_id} is not active.")
         with self.store.transaction() as conn:
             conn.execute(
-                "UPDATE proposals SET status='withdrawn', withdrawn_step=?, withdraw_reason=? WHERE id=?",
+                "UPDATE proposals SET status='withdrawn', withdrawn_step=?, withdraw_reason=? "
+                "WHERE id=?",
                 (self.step_count, args.reason, args.proposal_id),
             )
         return {"proposal_id": args.proposal_id, "status": "withdrawn"}

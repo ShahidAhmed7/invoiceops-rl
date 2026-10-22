@@ -1,0 +1,31 @@
+{
+  "difficulty_hypothesis": "intermediate",
+  "expectation": {
+    "invoice_id": "INV-61470",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [],
+        "evidence": [
+          [
+            "INV-61469"
+          ]
+        ],
+        "label": "reject duplicate",
+        "payment": null,
+        "reason_codes": [
+          "duplicate_invoice"
+        ],
+        "status": "rejected"
+      }
+    ]
+  },
+  "family": "F04",
+  "family_name": "Duplicate invoice",
+  "oracle_hint": "",
+  "rationale": "Resubmission with the same supplier invoice number as an invoice already paid.",
+  "split": "train",
+  "task_id": "T-5E2670",
+  "variant": 0,
+  "world_id": "w02-bramblewood"
+}

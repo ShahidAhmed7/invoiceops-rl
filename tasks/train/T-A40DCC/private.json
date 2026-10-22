@@ -1,0 +1,49 @@
+{
+  "difficulty_hypothesis": "advanced",
+  "expectation": {
+    "invoice_id": "INV-10402",
+    "outcomes": [
+      {
+        "approval_required": false,
+        "clarifications": [
+          {
+            "cite": [
+              [
+                "INV-10402"
+              ],
+              [
+                "GRN-274",
+                "GRN-282",
+                "INV-10395",
+                "PO-2507"
+              ]
+            ],
+            "recipient_roles": [
+              "supplier"
+            ]
+          }
+        ],
+        "evidence": [
+          [
+            "INV-10402"
+          ]
+        ],
+        "label": "hold for corrected invoice",
+        "payment": null,
+        "reason_codes": [
+          "quantity_exceeds_receipt",
+          "short_receipt"
+        ],
+        "status": "on_hold"
+      }
+    ]
+  },
+  "family": "F09",
+  "family_name": "Shared purchase-order capacity",
+  "oracle_hint": "",
+  "rationale": "14 received, 12 already billed on INV-10395; this invoice bills 8 but only 2 remain.",
+  "split": "train",
+  "task_id": "T-A40DCC",
+  "variant": 2,
+  "world_id": "w05-redfern"
+}
