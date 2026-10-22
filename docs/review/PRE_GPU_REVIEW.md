@@ -1,6 +1,6 @@
 # Pre-GPU Review Checklist
 
-This is the review that must be completed **before any Modal GPU job runs** (BUILD_PLAN.md, Phase 10). GPU time is limited to USD 30, and every baseline and training run depends on the tasks and the verifier being right. A wrong task found after training means paying for training again.
+This is the review that must be completed **before any Modal GPU job runs** (BUILD_PLAN.md, Phase 10). GPU time is limited to USD 50 of Modal credit, and every baseline and training run depends on the tasks and the verifier being right. A wrong task found after training means paying for training again.
 
 The general reviewer guide is [`README.md`](README.md), which covers roles, the blind-solve rule, and how to submit forms. This document is the step-by-step checklist for this one gate.
 
