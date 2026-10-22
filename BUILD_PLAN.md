@@ -33,22 +33,22 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 
 | Phase | Name | Needs GPU | Status |
 |---|---|---|---|
-| 0 | Repository foundations and toolchain | No | Done |
-| 1 | Domain model and state engine | No | In progress: records, money, SQLite store with immutability triggers written; tests pending |
-| 2 | Worlds, policies, and the world generator | No | In progress: 12 companies, policy renderer, scenario builder written; tests pending |
-| 3 | Tools, episodes, and scripted events | No | In progress: 15 tools, episode lifecycle, event engine written and smoke-tested; tests and lint cleanup pending |
-| 4 | Verifier, reward, and verifier validation | No | Not started |
-| 5 | First vertical slice (short shipment + clean match) | No | Not started |
-| 6 | Full task suite (12 families, 12 worlds, 72 tasks) | No | Not started |
-| 7 | Agent interfaces (OpenEnv server, TRL adapter, runners, play CLI, replay) | No | Not started |
-| 8 | Container packaging and isolation tests | No | Not started |
-| 9 | Local evaluation pipeline with scripted policies | No | Not started |
-| 11A | Modal setup, serving checks, and external-benchmark baselines (τ²-bench, BFCL) | Yes (≈ $9.95) | Blocked only by Modal access |
-| 10 | **Gate: pre-GPU human review** (for runs that use our tasks) | No | Waiting on Phases 1–9 |
-| 11B | GRPO compatibility smoke test on our tasks | Yes (≈ $0.85) | Blocked by Phase 10 |
-| 12 | Baseline evaluation on our tasks | Yes (≈ $6.50) | Blocked by Phase 11B |
-| 13 | GRPO training experiment | Yes (≈ $15.80) | Blocked by Phase 12 |
-| 14 | Final held-out evaluation, τ²-bench and BFCL re-runs, report | Yes (≈ $6.55) | Blocked by Phase 13 |
+| 0 | Repository foundations and toolchain | No | **Done**: uv lock, Ruff, mypy (strict), pytest, GitHub Actions |
+| 1 | Domain model and state engine | No | **Done**: integer-cent money, strict records, SQLite store with immutability triggers |
+| 2 | Worlds, policies, and the world generator | No | **Done**: 12 fictional companies, policy text rendered from parameters, deterministic builder |
+| 3 | Tools, episodes, and scripted events | No | **Done**: 15 tools, idempotency, optimistic versions, fault injection, event engine |
+| 4 | Verifier, reward, and verifier validation | No | **Done**: 844 mutation and alternative cases, 0 unexpected (`reports/local/verifier_mutations.md`) |
+| 5 | First vertical slice (short shipment + clean match) | No | **Done**: Northstar INV-8807 / PO-1042 / GRN-31 task and paired clean match |
+| 6 | Full task suite (12 families, 12 worlds, 72 tasks) | No | **Done**: 72 tasks, oracle 72/72, leakage check clean |
+| 7 | Agent interfaces (OpenEnv server, TRL adapter, runners, play CLI, replay) | No | **Done**: `openenv validate` passes static and runtime levels; three adapters give identical results |
+| 8 | Container packaging and isolation tests | No | **Done**: agent and verifier images; `scripts/container_check.py` passes |
+| 9 | Local evaluation pipeline with scripted policies | No | **Done**: `reports/local/scripted_baselines.md` |
+| 11A | Modal setup, serving checks, and external-benchmark baselines (τ²-bench, BFCL) | Yes (≈ $9.95) | Code ready, not yet run; blocked only by Modal access ([runbook](docs/MODAL_RUNBOOK.md)) |
+| 10 | **Gate: pre-GPU human review** (for runs that use our tasks) | No | **Ready for the reviewer** ([checklist](docs/review/PRE_GPU_REVIEW.md)) |
+| 11B | GRPO compatibility smoke test on our tasks | Yes (≈ $0.85) | Code ready; blocked by Phase 10 |
+| 12 | Baseline evaluation on our tasks | Yes (≈ $6.50) | Code ready; blocked by Phase 11B |
+| 13 | GRPO training experiment | Yes (≈ $15.80) | Code ready; blocked by Phase 12 |
+| 14 | Final held-out evaluation, τ²-bench and BFCL re-runs, report | Yes (≈ $6.55) | Code ready; blocked by Phase 13 |
 | 15 | Showcase release | No | Blocked by Phase 14 |
 
 Update this table in the same commit that completes a phase.
@@ -181,7 +181,7 @@ Per benchmark (and per BFCL category): before vs. after, with the benchmark vers
 
 1. **Modal account.** Create or confirm an account at modal.com, and in the dashboard set a workspace spending limit if one is offered for your plan. Record the H100 and L40S per-second prices shown on the pricing page in `modal_app/budget.yaml` (Phase 11A step 1).
 2. **API token.** Create a token in the Modal dashboard (Settings → API Tokens). Add it to this project's Claude Code cloud environment as environment secrets named **`MODAL_TOKEN_ID`** and **`MODAL_TOKEN_SECRET`** (the cloud environment menu in the session's title bar → Edit → Network secrets, or Environment variables if that section is not offered). Never paste tokens into chat or commit them.
-3. **Network access.** In the same environment settings, allow **`api.modal.com`** under Allowed domains (keep "Allow package managers" ticked). If a later Modal call is denied, the error names the host to add.
+3. **Network access.** In the same environment settings, allow **`api.modal.com`** and **`api.modal2.com`** under Allowed domains (the Modal client verifies tokens against both) (keep "Allow package managers" ticked). If a later Modal call is denied, the error names the host to add.
 4. **Hugging Face token (optional).** Only needed if a chosen model is gated. If so, create a read-only token and store it as a Modal secret named `huggingface` with key `HF_TOKEN` (`modal secret create huggingface HF_TOKEN=...` from your own terminal).
 
 ### 4.2 Modal resources the project creates
@@ -193,16 +193,21 @@ Per benchmark (and per BFCL category): before vs. after, with the benchmark vers
 | Volume | `invoiceops-runs` | Checkpoints, evaluation transcripts, training logs. |
 | Secret (optional) | `huggingface` | `HF_TOKEN`, only if needed. |
 
-| Function | Hardware | Timeout | Concurrency | Retries |
+| Function (`modal_app/app.py`) | Hardware | Timeout | Concurrency | Retries |
 |---|---|---|---|---|
 | `inspect_models` | CPU | 10 min | 1 | 0 |
-| `smoke_serve` | 1 × L40S | 25 min | 1 | 0 |
-| `smoke_train` | 1 × H100 | 30 min | 1 | 0 |
-| `evaluate` (4B models) | 1 × L40S | 60 min | 1 | 0 |
-| `evaluate_reference` | 1 × H100 | 50 min | 1 | 0 |
-| `evaluate_tau2` (agent + simulated customer, two vLLM servers) | 1 × H100 | 60 min | 1 | 0 |
-| `evaluate_bfcl` | 1 × L40S | 35 min | 1 | 0 |
+| `smoke_serve_candidate` (vLLM tool round-trip + BFCL smoke) | 1 × L40S | 20 min | 1 | 0 |
+| `smoke_serve_reference` | 1 × H100 | 20 min | 1 | 0 |
+| `smoke_tau2` (2 tasks × 1 trial) | 1 × H100 | 25 min | 1 | 0 |
+| `tau2_eval` (agent + simulated customer, two vLLM servers) | 1 × H100 | 60 min | 1 | 0 |
+| `bfcl_eval` | 1 × L40S | 35 min | 1 | 0 |
+| `invoiceops_eval_l40s` (4B models on our tasks) | 1 × L40S | 65 min | 1 | 0 |
+| `invoiceops_eval_h100` (reference model on our tasks) | 1 × H100 | 50 min | 1 | 0 |
 | `train_grpo` | 1 × H100 | 250 min | 1 | 0 |
+| `select_checkpoint` (development split only) | 1 × L40S | 60 min | 1 | 0 |
+| `merge_checkpoint` (LoRA merge for the external benchmarks) | 1 × L40S | 20 min | 1 | 0 |
+
+Jobs are launched only through `python -m modal_app.launch <job>`; the job list, caps, and timeouts live in `modal_app/budget.yaml`.
 
 Retries are 0 so that a failure never silently re-spends money. Every function writes results to the `invoiceops-runs` volume before it returns.
 
@@ -266,38 +271,40 @@ flowchart LR
 
 **Trust boundary.** An agent can only issue tool calls. The private task spec, the verifier, and the reference solutions are never reachable through a tool. In-process training is safe because the model has no code execution; the container separation in Phase 8 is for agents that do have code execution, such as a harness with a shell.
 
-### 5.1 Repository layout (target)
+### 5.1 Repository layout
 
 ```text
 invoiceops-rl/
 ├── BUILD_PLAN.md                 # This document
-├── pyproject.toml / uv.lock      # Core package; extras: openenv, dev
+├── pyproject.toml / uv.lock      # Core package; extra: openenv; groups: dev, modal
+├── openenv.yaml                  # OpenEnv manifest (validated in CI)
 ├── src/invoiceops/
-│   ├── domain/                   # Money, records, policy parameters, enums
-│   ├── state/                    # SQLite schema (with immutability triggers), store, snapshot, hashing
-│   ├── worlds/                   # Fictional companies and deterministic world generator
-│   ├── families/                 # One module per task family: builds scenario + expected outcome
-│   ├── tasks/                    # Task spec models, loader, split manifest, leakage checks
-│   ├── tools/                    # Tool definitions, argument models, handlers, error codes
-│   ├── events.py                 # Scripted event engine (approvals, supplier replies, receipts)
-│   ├── episode.py                # Episode lifecycle: reset, step, limits, logging, snapshot
-│   ├── verification/             # Checks, verifier, reward, diagnostic report
-│   ├── agents/                   # Scripted policies, oracle, OpenAI-compatible runner, prompts
-│   ├── adapters/                 # TRL environment class; OpenEnv server package
-│   ├── evaluation/               # Metrics (pass@k, pass^k, bootstrap CIs), report writer
-│   ├── replay/                   # Static HTML replay viewer
+│   ├── domain/                   # Money, strict records, world model and integrity checks
+│   ├── state/                    # Per-episode SQLite store with immutability triggers, snapshots
+│   ├── worlds/                   # 12 fictional companies, policy renderer, scenario builder
+│   ├── families/                 # The 12 task families and their expected outcomes
+│   ├── tasks/                    # Task models, suite builder, loader, leakage and balance checks
+│   ├── tools/                    # Tool argument models, descriptions, JSON schemas
+│   ├── events.py                 # Scripted approvals and replies
+│   ├── episode.py                # Episode lifecycle and all tool handlers
+│   ├── verification/             # Verifier, mutation harness, export grading
+│   ├── agents/                   # Oracle, scripted policies, OpenAI-compatible runner, prompts
+│   ├── adapters/                 # TRL environment class, OpenEnv MCP environment and app
+│   ├── evaluation/               # Metrics, evaluation runner, HTML replay
+│   ├── runs.py                   # Saved episode records
 │   └── cli.py                    # `invoiceops` command
-├── tasks/{train,dev,test}/<task_id>/{public.json,private.json}
-├── tests/                        # unit, property, verifier-mutation, isolation, adversarial
-├── modal_app/                    # Modal functions, image specs, budget guard, locked requirements
-├── containers/                   # Dockerfiles for env server and verifier
-├── docs/                         # Review guides, environment card, task card
-└── reports/                      # Only real measured results and the Modal ledger
+├── tasks/{train,dev,test}/<task_id>/{public.json,private.json}  # generated, checked in CI
+├── tests/                        # 214 tests: unit, property, adapters, verifier mutations
+├── scripts/                      # local_baselines.py, container_check.py
+├── containers/                   # Agent-facing env image and offline verifier image
+├── modal_app/                    # Modal app, budget guard, drivers, training job, locked requirements
+├── docs/                         # Review guides, Modal runbook, environment and task cards
+└── reports/                      # Measured results only: local baselines, mutation report, Modal ledger
 ```
 
 ### 5.2 Toolchain (pinned in `uv.lock`)
 
-Python 3.12; Pydantic 2.14.1; pytest 9.1.1; Hypothesis (property tests); Ruff (lint and format); mypy (strict on `domain/`, `state/`, `verification/`); `openenv==0.10.0` only in the `openenv` extra. GitHub Actions runs lint, type checks, and tests on every push.
+Python 3.12; Pydantic 2.14.1; pytest 9.1.1; Hypothesis 6.170.6 (property tests); Ruff 0.17.2 (lint and format); mypy 2.4.0 (strict on the whole package); transformers 5.17.0 (dev only, to check that TRL sees the same tool schemas); `openenv==0.10.0` only in the `openenv` extra; `modal==1.6.2` only in the `modal` group. GitHub Actions runs lint, format, type checks, tests, the task-file freshness check, `openenv validate`, and (in a second job) the container build and isolation check on every push.
 
 ---
 
@@ -366,11 +373,11 @@ Where two codes are equally defensible for one situation, the task's expected ou
 | `get_vendor(vendor_id)` | Master data and verification status. |
 | `get_document(document_id)` | Policy, message, or attachment, with source and version. |
 | `get_history(vendor_id, po_id)` | Prior invoices, payments, credit notes, matched quantities. |
-| `set_disposition(invoice_id, status, reason_code, evidence_ids, expected_version)` | Updates the case; optimistic concurrency. |
+| `set_disposition(invoice_id, status, reason_code, evidence_ids, expected_version, note)` | Updates the case; optimistic concurrency. |
 | `create_clarification(invoice_id, recipient_role, question, evidence_ids, idempotency_key)` | Records a simulated request. |
 | `request_approval(invoice_id, approver_role, amount_minor, evidence_ids, idempotency_key)` | Routes an approval request; cannot create the decision. |
 | `check_inbox()` | Releases scripted responses whose trigger conditions are met. Deterministic. Never creates a favourable fact without a valid prior request. |
-| `propose_payment(invoice_id, amount_minor, credit_note_ids, evidence_ids, expected_version, idempotency_key)` | Records a simulated proposal. Moves no money. |
+| `propose_payment(invoice_id, amount_minor, credit_note_ids, evidence_ids, idempotency_key)` | Records a simulated proposal. Moves no money. Duplicates are prevented by the idempotency key, not a version. |
 | `withdraw_payment_proposal(proposal_id, reason)` | Withdraws a proposal; the history keeps it. |
 | `submit_case(invoice_id, status, reason_code, amount_proposed_minor, evidence_ids, summary)` | Ends the episode. |
 
@@ -541,13 +548,13 @@ Needs only Modal access (§4.1). It does **not** need the pre-GPU review or our 
 Requires Phase 10 sign-off.
 
 1. Build the training image from `modal_app/requirements-train.txt`.
-2. `smoke_train`: three GRPO steps with LoRA on two dev tasks via `environment_factory`; confirm rewards flow, tool tokens are masked, and a checkpoint saves. Confirm the candidate's tool calls on one dev task parse identically under vLLM serving and under TRL.
+2. `smoke_train`: three GRPO steps with LoRA on training-split tasks via `environment_factory`; confirm rewards flow, tool tokens are masked, and a checkpoint saves. Confirm the candidate's tool calls on one dev task parse identically under vLLM serving and under TRL.
 
 **Exit gate:** `reports/compatibility.md` updated with the training stack result.
 
 ### Phase 12: Baseline evaluation on our tasks (cap ≈ $6.50)
 
-1. Learnability probe: 8 attempts on each training task with the untrained candidate. If almost every task always fails, or always succeeds, stop and adjust the curriculum before training.
+1. Learnability probe: 4 attempts on each training task with the untrained candidate (fits the $1.50 cap together with a 2-attempt development run). If almost every task always fails, or always succeeds, stop and adjust the curriculum before training.
 2. Development baseline (prompt v1), used for harness debugging only.
 3. Freeze prompt v2, then test the candidate with prompts v1 and v2: 24 tasks × 4 attempts each.
 4. Test the reference model: 24 × 4.
@@ -568,7 +575,7 @@ Requires Phase 10 sign-off.
 
 1. Select the checkpoint on the **development** split only; freeze it.
 2. Run the test split once: 24 × 4 attempts, same harness, prompt, and decoding as the "before" run.
-3. τ²-bench retail test split with the frozen checkpoint (LoRA adapter served by vLLM) as agent, same simulated customer, decoding, seed, and trials as Phase 12, saved to `reports/tau2/after/`.
+3. τ²-bench retail test split with the frozen checkpoint (LoRA merged into the weights by `merge_checkpoint` and served under the base model's name, which BFCL's handler requires) as agent, same simulated customer, decoding, seed, and trials as Phase 12, saved to `reports/tau2/after/`.
 4. BFCL on the frozen checkpoint, same categories and decoding as Phase 12, saved to `reports/bfcl/after/`.
 5. Write `reports/final.md`: before vs. after on our test split, on τ²-bench retail, **and** on each BFCL category with paired, task-clustered confidence intervals, critical violations, the per-family breakdown, any change in always-hold behaviour, and null or negative results stated plainly.
 
@@ -584,6 +591,42 @@ Requires Phase 10 sign-off.
 **Exit gate:** a fresh clone reproduces the local evaluation with one command.
 
 ---
+
+## 7A. Running what is built (no GPU needed)
+
+```bash
+uv sync --frozen --extra openenv --group modal       # or plain `uv sync --frozen` for the core only
+uv run pytest                                        # 214 tests, about 20 seconds
+uv run invoiceops build-tasks --check                # task files match the generator
+uv run invoiceops show-task T-C94302                 # Northstar short-shipment task (add --private for the answer)
+uv run invoiceops play --task T-C94302               # solve it yourself through the agent tools
+uv run invoiceops evaluate --agent all-scripted --split dev --split test
+uv run invoiceops replay <run-id>                    # HTML replay of every episode in a run
+uv run python scripts/local_baselines.py             # regenerate reports/local/
+uv run uvicorn invoiceops.adapters.openenv_app:app   # OpenEnv server (MCP tools over /ws)
+```
+
+Containers (requires Docker): `docker build -f containers/env.Dockerfile -t invoiceops-env .`, `docker build -f containers/verifier.Dockerfile -t invoiceops-verifier .`, then `uv run python scripts/container_check.py`.
+
+GPU phases: follow [`docs/MODAL_RUNBOOK.md`](docs/MODAL_RUNBOOK.md).
+
+## 7B. Implementation notes: decisions made while building
+
+Each of these was forced by a measurement or a failing check, not chosen in advance.
+
+| What changed | Why |
+|---|---|
+| Clean-match variant 2 needs approval (its total exceeds the self-approval limit) and the variant order became `[0, 1, 2, 2, 1, 0]`. | With the first ordering, an always-pay policy could reach 50% on the test split. After the change it scores 29% (test) and 42% (dev); always-hold scores at most 17%. |
+| Injected-instruction documents (F10) name their supplier and PO. | The leakage check found identical attachment texts in train and test; a model could have memorised them. |
+| SQLite connections allow cross-thread use, with a per-episode lock. | OpenEnv runs `reset` and tool calls on different worker threads; the first WebSocket test failed with SQLite's same-thread check. |
+| The OpenEnv server reports rewards only when private specs are mounted; otherwise it writes an export that the offline verifier container grades. | Keeps the verifier and answers out of the agent-facing image (checked by `scripts/container_check.py`). |
+| OpenEnv's plain HTTP `/reset` and `/step` are stateless (new environment per request); persistent episodes use the `/ws` session. | Read from `openenv/core/env_server/http_server.py`. |
+| `propose_payment` has no `expected_version`. | Duplicate payments are prevented by the idempotency key; a version lock on proposals added nothing the verifier relies on. |
+| TRL's `GRPOConfig` in 1.16 has no `max_prompt_length`. The training job validates every config key against the installed `GRPOConfig` before loading weights. | Verified against the TRL 1.16.0 source; prevents paying for a GPU start-up that fails on a typo. |
+| External benchmarks evaluate the trained model with the LoRA merged into the weights. | BFCL's handler sends the base model's name, so a separately named LoRA adapter would silently evaluate the untrained model. |
+| The learnability probe uses 4 attempts per training task, not 8. | 8 attempts on 36 tasks would not fit the $1.50 line. |
+| The policy text states the order of checks (bank details, duplicates, missing receipts, quantity, price, then credits and approval). | Without it, a task with two issues could have two defensible answers. |
+| The scripted policies' wall-clock time is left out of committed reports. | Reports must regenerate byte-for-byte; time is recorded only for model runs. |
 
 ## 8. Quality rules for every phase
 
