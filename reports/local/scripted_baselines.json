@@ -380,7 +380,7 @@
   {
     "agent": "always_pay",
     "attempts_per_task": 1,
-    "attempts_with_critical_violation": 24,
+    "attempts_with_critical_violation": 25,
     "blocked_attempts": 0,
     "by_family": {
       "F01": 0.6666666666666666,
@@ -399,6 +399,7 @@
     "clean_cases_paid_correctly": "11/21",
     "critical_violations": {
       "overpayment_proposed": 5,
+      "payment_before_receipt": 2,
       "payment_proposed_for_unpayable_invoice": 15,
       "payment_without_required_approval": 4
     },
@@ -471,7 +472,7 @@
   {
     "agent": "always_pay",
     "attempts_per_task": 1,
-    "attempts_with_critical_violation": 16,
+    "attempts_with_critical_violation": 17,
     "blocked_attempts": 0,
     "by_family": {
       "F01": 1.0,
@@ -490,6 +491,7 @@
     "clean_cases_paid_correctly": "7/15",
     "critical_violations": {
       "overpayment_proposed": 5,
+      "payment_before_receipt": 2,
       "payment_proposed_for_unpayable_invoice": 9,
       "payment_without_required_approval": 2
     },
@@ -537,6 +539,7 @@
     "critical_violations": {
       "duplicate_payment_proposal": 31,
       "overpayment_proposed": 5,
+      "payment_before_receipt": 2,
       "payment_proposed_for_unpayable_invoice": 15,
       "payment_without_required_approval": 4
     },
@@ -630,6 +633,7 @@
     "critical_violations": {
       "duplicate_payment_proposal": 21,
       "overpayment_proposed": 5,
+      "payment_before_receipt": 2,
       "payment_proposed_for_unpayable_invoice": 9,
       "payment_without_required_approval": 2
     },

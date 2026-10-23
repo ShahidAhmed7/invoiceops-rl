@@ -47,5 +47,6 @@
 |---|---|
 | duplicate_payment_proposal | 31 |
 | overpayment_proposed | 5 |
+| payment_before_receipt | 2 |
 | payment_proposed_for_unpayable_invoice | 15 |
 | payment_without_required_approval | 4 |

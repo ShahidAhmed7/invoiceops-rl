@@ -37,7 +37,7 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 | 1 | Domain model and state engine | No | **Done**: integer-cent money, strict records, SQLite store with immutability triggers |
 | 2 | Worlds, policies, and the world generator | No | **Done**: 12 fictional companies, policy text rendered from parameters, deterministic builder |
 | 3 | Tools, episodes, and scripted events | No | **Done**: 15 tools, idempotency, optimistic versions, fault injection, event engine |
-| 4 | Verifier, reward, and verifier validation | No | **Done**: 975 mutation and alternative cases, 0 unexpected (`reports/local/verifier_mutations.md`) |
+| 4 | Verifier, reward, and verifier validation | No | **Done**: 979 mutation and alternative cases, 0 unexpected (`reports/local/verifier_mutations.md`) |
 | 5 | First vertical slice (short shipment + clean match) | No | **Done**: Northstar INV-8807 / PO-1042 / GRN-31 task and paired clean match |
 | 6 | Full task suite (12 families, 12 worlds, 72 tasks) | No | **Done**: 72 tasks, oracle 72/72, leakage check clean |
 | 7 | Agent interfaces (OpenEnv server, TRL adapter, runners, play CLI, replay) | No | **Done**: `openenv validate` passes static and runtime levels; three adapters give identical results |
@@ -295,7 +295,7 @@ invoiceops-rl/
 │   ├── runs.py                   # Saved episode records
 │   └── cli.py                    # `invoiceops` command
 ├── tasks/{train,dev,test}/<task_id>/{public.json,private.json}  # generated, checked in CI
-├── tests/                        # 245 tests: unit, property, adapters, verifier mutations, review regressions
+├── tests/                        # 247 tests: unit, property, adapters, verifier mutations, review regressions
 ├── scripts/                      # local_baselines.py, container_check.py
 ├── containers/                   # Agent-facing env image and offline verifier image
 ├── modal_app/                    # Modal app, budget guard, drivers, training job, locked requirements
@@ -597,7 +597,7 @@ Requires Phase 10 sign-off.
 
 ```bash
 uv sync --frozen --extra openenv --group modal       # or plain `uv sync --frozen` for the core only
-uv run pytest                                        # 245 tests, about 20 seconds
+uv run pytest                                        # 247 tests, about 20 seconds
 uv run invoiceops build-tasks --check                # task files match the generator
 uv run invoiceops show-task T-C94302                 # Northstar short-shipment task (add --private for the answer)
 uv run invoiceops play --task T-C94302               # solve it yourself through the agent tools

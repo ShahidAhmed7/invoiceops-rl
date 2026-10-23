@@ -15,9 +15,9 @@ solvability; it is not an agent baseline.
 | always_hold | train | 36 | 13.9% | 0 | 15/15 | 0/21 |
 | always_hold | dev | 12 | 16.7% | 0 | 6/6 | 0/6 |
 | always_hold | test | 24 | 8.3% | 0 | 9/9 | 0/15 |
-| always_pay | train | 36 | 30.6% | 24 | 0/15 | 11/21 |
+| always_pay | train | 36 | 30.6% | 25 | 0/15 | 11/21 |
 | always_pay | dev | 12 | 33.3% | 8 | 0/6 | 4/6 |
-| always_pay | test | 24 | 29.2% | 16 | 0/9 | 7/15 |
+| always_pay | test | 24 | 29.2% | 17 | 0/9 | 7/15 |
 | random | train | 36 | 0.0% | 34 | 0/15 | 0/21 |
 | random | dev | 12 | 0.0% | 11 | 0/6 | 0/6 |
 | random | test | 24 | 0.0% | 23 | 0/9 | 0/15 |

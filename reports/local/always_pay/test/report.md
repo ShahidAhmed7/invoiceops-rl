@@ -17,7 +17,7 @@
 | Task-mean success (95% task-bootstrap CI) | 29.2% (12.5% to 45.8%) |
 | pass@1 | 29.2% |
 | pass^1 | 29.2% |
-| Attempts with a critical violation | 16 |
+| Attempts with a critical violation | 17 |
 | False completions | 0 |
 | Exception cases not paid | 0/9 |
 | Clean cases paid correctly | 7/15 |
@@ -46,5 +46,6 @@
 | Violation | Attempts |
 |---|---|
 | overpayment_proposed | 5 |
+| payment_before_receipt | 2 |
 | payment_proposed_for_unpayable_invoice | 9 |
 | payment_without_required_approval | 2 |

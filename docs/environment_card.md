@@ -41,6 +41,7 @@ The reward is strict 0/1. It is 1 only if all of the following hold:
 - no source record changed;
 - no other invoice was touched;
 - at most one payment proposal was ever created for the invoice (withdrawing one does not undo it);
+- if the agent asked for a missing receipt, the receipt was received through `check_inbox` before the case was decided or paid;
 - the submission matches the system state;
 - at least one accepted outcome is fully met: status and reason, payment amount and credits (or no proposal ever), required clarifications with citations, approval before payment, and disposition evidence.
 
@@ -48,7 +49,7 @@ If the verifier itself fails, the result is *unscorable*, with no reward, and it
 
 ## Verifier validation
 
-- On every task, the oracle's solution passes, every accepted alternative passes (reordered reads, alternative reason codes), and every mutation fails. There are 975 cases with 0 unexpected results; see `reports/local/verifier_mutations.md`. The mutations include the escapes found in the first pre-GPU review (withdrawing a wrong proposal, proposing before approval, the wrong approval level, the wrong request type), and the review's own attack scripts are replayed as regression tests.
+- On every task, the oracle's solution passes, every accepted alternative passes (reordered reads, alternative reason codes), and every mutation fails. There are 979 cases with 0 unexpected results; see `reports/local/verifier_mutations.md`. The mutations include the escapes found in the first pre-GPU review (withdrawing a wrong proposal, proposing before approval, the wrong approval level, the wrong request type, deciding before a requested receipt arrives), and the review's own attack scripts are replayed as regression tests.
 - Scripted policies score as intended. The oracle scores 100% on every split. No-op and random score 0%. Always-hold scores at most 17% and always-pay at most 33%, each on any split. See `reports/local/scripted_baselines.md`.
 
 ## Isolation

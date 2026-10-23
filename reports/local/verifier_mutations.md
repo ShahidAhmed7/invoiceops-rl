@@ -1,6 +1,6 @@
 # Verifier mutation report
 
-975 cases on 72 tasks; 0 unexpected results.
+979 cases on 72 tasks; 0 unexpected results.
 
 | Task | Kind | Case | Expected | Result | Verifier reason |
 |---|---|---|---|---|---|
@@ -129,13 +129,14 @@
 | T-80BC88 | alternative | reads_reordered | accepted | **accepted** | accepted |
 | T-80BC88 | mutation | noop_false_completion | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/matched/428400 but state is open/None/0); disposition (case is open/None; expected ready_for_ |
 | T-80BC88 | mutation | false_completion_reads_only | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/matched/428400 but state is open/None/0); disposition (case is open/None; expected ready_for_ |
-| T-80BC88 | mutation | missing_followups | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving) |
+| T-80BC88 | mutation | missing_followups | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
 | T-80BC88 | mutation | amount_off_by_one_cent | rejected | **rejected** | rejected: payment_amount (proposed 428401 with credits []; expected 428400 with credits []) |
 | T-80BC88 | mutation | duplicate_proposal | rejected | **rejected** | rejected: at_most_one_proposal_ever (2 payment proposal(s) created (2 active, 0 withdrawn); policy allows one per invoice, and withdrawing does not undo a propo |
 | T-80BC88 | mutation | paid_but_marked_on_hold | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/matched/428400 but state is on_hold/price_variance/428400); disposition (case is on_hold/pric |
 | T-80BC88 | mutation | wrong_proposal_withdrawn_then_corrected | rejected | **rejected** | rejected: at_most_one_proposal_ever (2 payment proposal(s) created (1 active, 1 withdrawn); policy allows one per invoice, and withdrawing does not undo a propo |
 | T-80BC88 | mutation | only_proposal_withdrawn | rejected | **rejected** | rejected: payment_amount (1 proposal(s) ever, 0 active; expected exactly one proposal, still active) |
-| T-80BC88 | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving) |
+| T-80BC88 | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
+| T-80BC88 | mutation | decided_without_reading_reply | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox) |
 | T-80BC88 | mutation | evidence_not_cited | rejected | **rejected** | rejected: disposition_evidence (missing citation of: INV-46822) |
 | T-80BC88 | mutation | submission_contradicts_state | rejected | **rejected** | rejected: submission_consistent (submission says rejected/duplicate_invoice/428400 but state is ready_for_payment/matched/428400) |
 | T-80BC88 | mutation | source_record_tampered | rejected | **rejected** | rejected: source_records_intact (changed: invoices:INV-46822) |
@@ -291,13 +292,14 @@
 | T-1F835F | alternative | reads_reordered | accepted | **accepted** | accepted |
 | T-1F835F | mutation | noop_false_completion | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/partial_receipt_paid/282720 but state is open/None/0); disposition (case is open/None; expect |
 | T-1F835F | mutation | false_completion_reads_only | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/partial_receipt_paid/282720 but state is open/None/0); disposition (case is open/None; expect |
-| T-1F835F | mutation | missing_followups | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving) |
+| T-1F835F | mutation | missing_followups | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
 | T-1F835F | mutation | amount_off_by_one_cent | rejected | **rejected** | rejected: payment_amount (proposed 282721 with credits []; expected 282720 with credits []) |
 | T-1F835F | mutation | duplicate_proposal | rejected | **rejected** | rejected: at_most_one_proposal_ever (2 payment proposal(s) created (2 active, 0 withdrawn); policy allows one per invoice, and withdrawing does not undo a propo |
 | T-1F835F | mutation | paid_but_marked_on_hold | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/partial_receipt_paid/282720 but state is on_hold/price_variance/282720); disposition (case is |
 | T-1F835F | mutation | wrong_proposal_withdrawn_then_corrected | rejected | **rejected** | rejected: at_most_one_proposal_ever (2 payment proposal(s) created (1 active, 1 withdrawn); policy allows one per invoice, and withdrawing does not undo a propo |
 | T-1F835F | mutation | only_proposal_withdrawn | rejected | **rejected** | rejected: payment_amount (1 proposal(s) ever, 0 active; expected exactly one proposal, still active) |
-| T-1F835F | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving) |
+| T-1F835F | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
+| T-1F835F | mutation | decided_without_reading_reply | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox) |
 | T-1F835F | mutation | evidence_not_cited | rejected | **rejected** | rejected: disposition_evidence (missing citation of: INV-11431) |
 | T-1F835F | mutation | submission_contradicts_state | rejected | **rejected** | rejected: submission_consistent (submission says rejected/duplicate_invoice/282720 but state is ready_for_payment/partial_receipt_paid/282720) |
 | T-1F835F | mutation | source_record_tampered | rejected | **rejected** | rejected: source_records_intact (changed: invoices:INV-11431) |
@@ -782,11 +784,12 @@
 | T-7E294F | alternative | reads_reordered | accepted | **accepted** | accepted |
 | T-7E294F | mutation | noop_false_completion | rejected | **rejected** | rejected: submission_consistent (submission says on_hold/short_receipt/0 but state is open/None/0); disposition (case is open/None; expected on_hold/short_recei |
 | T-7E294F | mutation | false_completion_reads_only | rejected | **rejected** | rejected: submission_consistent (submission says on_hold/short_receipt/0 but state is open/None/0); disposition (case is open/None; expected on_hold/short_recei |
-| T-7E294F | mutation | missing_followups | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving); clarification_to_supplier (no corrected_invoice request sent to suppli |
+| T-7E294F | mutation | missing_followups | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
 | T-7E294F | mutation | forbidden_payment | rejected | **rejected** | rejected: submission_consistent (submission says on_hold/short_receipt/0 but state is on_hold/short_receipt/331100); no_payment_proposed (1 payment proposal(s)  |
 | T-7E294F | mutation | forbidden_payment_withdrawn | rejected | **rejected** | rejected: no_payment_proposed (1 payment proposal(s) were created (withdrawn ones count)) |
 | T-7E294F | mutation | hold_flipped_to_ready | rejected | **rejected** | rejected: disposition (case is ready_for_payment/matched; expected on_hold/short_receipt) |
-| T-7E294F | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving); clarification_to_supplier (no corrected_invoice request sent to suppli |
+| T-7E294F | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
+| T-7E294F | mutation | decided_without_reading_reply | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_suppli |
 | T-7E294F | mutation | evidence_not_cited | rejected | **rejected** | rejected: disposition_evidence (missing citation of: INV-20524) |
 | T-7E294F | mutation | submission_contradicts_state | rejected | **rejected** | rejected: submission_consistent (submission says rejected/duplicate_invoice/0 but state is on_hold/short_receipt/0) |
 | T-7E294F | mutation | source_record_tampered | rejected | **rejected** | rejected: source_records_intact (changed: invoices:INV-20524) |
@@ -942,13 +945,14 @@
 | T-6C23E6 | alternative | reads_reordered | accepted | **accepted** | accepted |
 | T-6C23E6 | mutation | noop_false_completion | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/matched/492120 but state is open/None/0); disposition (case is open/None; expected ready_for_ |
 | T-6C23E6 | mutation | false_completion_reads_only | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/matched/492120 but state is open/None/0); disposition (case is open/None; expected ready_for_ |
-| T-6C23E6 | mutation | missing_followups | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving) |
+| T-6C23E6 | mutation | missing_followups | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
 | T-6C23E6 | mutation | amount_off_by_one_cent | rejected | **rejected** | rejected: payment_amount (proposed 492121 with credits []; expected 492120 with credits []) |
 | T-6C23E6 | mutation | duplicate_proposal | rejected | **rejected** | rejected: at_most_one_proposal_ever (2 payment proposal(s) created (2 active, 0 withdrawn); policy allows one per invoice, and withdrawing does not undo a propo |
 | T-6C23E6 | mutation | paid_but_marked_on_hold | rejected | **rejected** | rejected: submission_consistent (submission says ready_for_payment/matched/492120 but state is on_hold/price_variance/492120); disposition (case is on_hold/pric |
 | T-6C23E6 | mutation | wrong_proposal_withdrawn_then_corrected | rejected | **rejected** | rejected: at_most_one_proposal_ever (2 payment proposal(s) created (1 active, 1 withdrawn); policy allows one per invoice, and withdrawing does not undo a propo |
 | T-6C23E6 | mutation | only_proposal_withdrawn | rejected | **rejected** | rejected: payment_amount (1 proposal(s) ever, 0 active; expected exactly one proposal, still active) |
-| T-6C23E6 | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: clarification_to_receiving (no receipt_confirmation request sent to receiving) |
+| T-6C23E6 | mutation | clarification_wrong_request_type | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox); clarification_to_receiv |
+| T-6C23E6 | mutation | decided_without_reading_reply | rejected | **rejected** | rejected: receipt_recorded_before_decision (the case was decided or paid before the requested receipt was received through check_inbox) |
 | T-6C23E6 | mutation | evidence_not_cited | rejected | **rejected** | rejected: disposition_evidence (missing citation of: INV-24991) |
 | T-6C23E6 | mutation | submission_contradicts_state | rejected | **rejected** | rejected: submission_consistent (submission says rejected/duplicate_invoice/492120 but state is ready_for_payment/matched/492120) |
 | T-6C23E6 | mutation | source_record_tampered | rejected | **rejected** | rejected: source_records_intact (changed: invoices:INV-24991) |

@@ -58,3 +58,17 @@ Attacks 08, adv-05 and adv-09 depended on free text. They are closed by construc
   3. Re-read the R1 specs of the four sampled tasks whose required clarification now names a request type: `T-89B109`, `T-0222C3`, `T-6C23E6`, and `T-11EA31`.
   4. Blind-solve two tasks again to check the changed tools work end to end: one with a clarification (e.g. `T-6C23E6`) and one with approval (e.g. `T-0A0D10`).
   5. Update the sign-off.
+
+## After the re-check: receipt must arrive before the decision
+
+The re-check ([sign-off](signoff/pre-gpu.md), re-check section) was approved. It recorded one non-blocking observation: run `recheck-new-12-skip-inbox` on `T-6C23E6` asked receiving for the receipt, never called `check_inbox`, paid in full, and passed. The receipt was never recorded in the system, so the agent paid without a goods receipt and without knowing the goods had arrived. Policy §5 says to finish the case only once the receipt arrives, so the builder treats this as a verifier gap and has closed it before any GPU run.
+
+| Change | Detail |
+|---|---|
+| New global check `receipt_recorded_before_decision` | On tasks where a requested receipt arrives as a reply (the four F08 tasks `T-80BC88`, `T-1F835F`, `T-7E294F`, `T-6C23E6`), the reply must be received through `check_inbox` before any payment proposal and before the final disposition. Paying early is also reported as the critical violation `payment_before_receipt`. |
+| New mutation `decided_without_reading_reply` | The oracle's solution with `check_inbox` removed. Rejected on all four tasks. |
+| Regression tests | `tests/test_review_regressions.py` replays the re-check run (fails) and the same run with `check_inbox` (passes). |
+| Mutation report | **979 cases** (830 mutations, 149 alternatives), 0 unexpected. |
+| Scripted baselines | Success rates unchanged; always-pay and random now also show `payment_before_receipt` among their critical violations. |
+
+No task file, policy text, or tool changed, so every task revision is the same as the one re-checked. Under the review guide, a verifier-only change is re-checked with the mutation report and needs no new blind solve.

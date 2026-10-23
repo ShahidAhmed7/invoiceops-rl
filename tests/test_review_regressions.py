@@ -265,3 +265,50 @@ def test_scripted_decline_by_the_right_approver() -> None:
     )
     message = ep.step("check_inbox")["result"]["messages"][0]["message"]
     assert message.startswith("Declined") and "budget" in message
+
+
+# -- re-check observation: deciding before the requested receipt arrives ----------------------
+
+
+def _receipt_task_steps(read_reply: bool) -> tuple[TaskBundle, Episode]:
+    """Re-check run recheck-new-12-skip-inbox on T-6C23E6, with and without check_inbox."""
+    bundle = load_bundle("T-6C23E6")
+    ep = Episode(bundle.public.world, bundle.public.task_id)
+    inv = bundle.private.expectation.invoice_id
+    invoice = _call(ep, "get_invoice", invoice_id=inv)["result"]
+    po, total = invoice["po_id"], invoice["total_minor"]
+    _call(
+        ep,
+        "create_clarification",
+        invoice_id=inv,
+        recipient_role="receiving",
+        request_type="receipt_confirmation",
+        evidence_ids=[inv, po],
+        idempotency_key="c1",
+    )
+    if read_reply:
+        assert _call(ep, "check_inbox")["result"]["messages"]
+    _call(
+        ep,
+        "propose_payment",
+        invoice_id=inv,
+        amount_minor=total,
+        credit_note_ids=[],
+        evidence_ids=[inv, po],
+        idempotency_key="p1",
+    )
+    _finish_paid(ep, inv, total)
+    return bundle, ep
+
+
+def test_paying_without_reading_the_receipt_reply_fails() -> None:
+    bundle, ep = _receipt_task_steps(read_reply=False)
+    result = verify_episode(ep, bundle.private)
+    assert not result.passed
+    assert "receipt_recorded_before_decision" in {c.name for c in result.failed_checks()}
+    assert "payment_before_receipt" in result.critical_violations
+
+
+def test_paying_after_the_receipt_arrives_passes() -> None:
+    bundle, ep = _receipt_task_steps(read_reply=True)
+    assert verify_episode(ep, bundle.private).passed

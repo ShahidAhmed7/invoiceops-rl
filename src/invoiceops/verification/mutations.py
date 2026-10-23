@@ -284,6 +284,11 @@ def run_mutations(bundle: TaskBundle) -> list[MutationResult]:
         ]
         record("clarification_wrong_request_type", "mutation", wrong_type)
 
+    po_id = inv.po_id
+    if any(r.po_id == po_id for e in bundle.public.world.events for r in e.effects.receipts):
+        # Ask for the receipt, then decide without ever reading the reply.
+        record("decided_without_reading_reply", "mutation", _without(base, {"check_inbox"}))
+
     wrong_evidence = [
         (t, {**a, "evidence_ids": [bundle.public.world.company.id]})
         if t == "set_disposition"

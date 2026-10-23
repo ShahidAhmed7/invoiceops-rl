@@ -1,6 +1,6 @@
 {
   "attempts_per_task": 1,
-  "attempts_with_critical_violation": 24,
+  "attempts_with_critical_violation": 25,
   "blocked_attempts": 0,
   "by_family": {
     "F01": 0.6666666666666666,
@@ -19,6 +19,7 @@
   "clean_cases_paid_correctly": "11/21",
   "critical_violations": {
     "overpayment_proposed": 5,
+    "payment_before_receipt": 2,
     "payment_proposed_for_unpayable_invoice": 15,
     "payment_without_required_approval": 4
   },

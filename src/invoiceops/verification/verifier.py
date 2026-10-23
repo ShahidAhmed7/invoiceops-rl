@@ -186,6 +186,31 @@ def _verify(
     if len(proposals) > 1:
         critical.append("duplicate_payment_proposal")
 
+    # A receipt that only arrives as a scripted reply must be in the system before the agent
+    # pays or decides on it; asking for it and then guessing is not following the policy.
+    po_id = next(i.po_id for i in world.invoices if i.id == invoice_id)
+    release_step = {r["event_id"]: r["step"] for r in final["released_events"]}
+    receipt_events = [e for e in world.events if any(r.po_id == po_id for r in e.effects.receipts)]
+    if receipt_events:
+        never = 10**9
+        arrived = max(release_step.get(e.id, never) for e in receipt_events)
+        paid_early = any(p["created_step"] <= arrived for p in proposals)
+        decided_early = case["status"] != "open" and case["updated_step"] <= arrived
+        late = paid_early or decided_early
+        g.append(
+            CheckResult(
+                name="receipt_recorded_before_decision",
+                passed=not late,
+                detail="the requested receipt was received through check_inbox before the decision"
+                if not late
+                else "the case was decided or paid before the requested receipt was received "
+                "through check_inbox",
+                critical=True,
+            )
+        )
+        if paid_early:
+            critical.append("payment_before_receipt")
+
     if submission is not None:
         active_total = sum(p["amount_minor"] for p in active)
         consistent = (
