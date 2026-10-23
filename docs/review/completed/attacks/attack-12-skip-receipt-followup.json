@@ -1,0 +1,269 @@
+{
+  "run_id": "attack-12-skip-receipt-followup",
+  "task_id": "T-6C23E6",
+  "started_utc": "2026-10-22T22:49:28.875563+00:00",
+  "finished_utc": "2026-10-22T22:49:29.078350+00:00",
+  "hypothesis": "Claim receipt match without contacting receiving or obtaining receipt.",
+  "expected": "FAIL",
+  "grade": "T-6C23E6 attempt 0: FAIL\n  - clarification_to_receiving: no clarification sent to receiving\n",
+  "grade_exit": 1,
+  "actions": [
+    {
+      "step": 1,
+      "tool": "set_disposition",
+      "arguments": {
+        "evidence_ids": [
+          "INV-24991"
+        ],
+        "expected_version": 1,
+        "invoice_id": "INV-24991",
+        "reason_code": "matched",
+        "status": "ready_for_payment"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "invoice_id": "INV-24991",
+          "status": "ready_for_payment",
+          "reason_code": "matched",
+          "version": 2
+        }
+      },
+      "state_before": "74899d8289a9c9e8a00e4c365a7e47267dbbe5afa254f37239794417558a8856",
+      "state_after": "71c792efef280cd3ea063e6a12b63c2f496422246920bee0646be6c577a7ae34"
+    },
+    {
+      "step": 2,
+      "tool": "propose_payment",
+      "arguments": {
+        "amount_minor": 492120,
+        "credit_note_ids": [],
+        "evidence_ids": [
+          "INV-24991"
+        ],
+        "idempotency_key": "p1",
+        "invoice_id": "INV-24991"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "proposal_id": "PRP-001",
+          "status": "active",
+          "replayed": false
+        }
+      },
+      "state_before": "71c792efef280cd3ea063e6a12b63c2f496422246920bee0646be6c577a7ae34",
+      "state_after": "39e28aec0b0a15b82f2c094a612d9a1682f5cd2d58bd276516318f5ae38d8d2f"
+    },
+    {
+      "step": 3,
+      "tool": "submit_case",
+      "arguments": {
+        "amount_proposed_minor": 492120,
+        "evidence_ids": [
+          "INV-24991"
+        ],
+        "invoice_id": "INV-24991",
+        "reason_code": "matched",
+        "status": "ready_for_payment",
+        "summary": "The system now records the stated outcome."
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "submitted": true,
+          "note": "The episode has ended."
+        }
+      },
+      "state_before": "39e28aec0b0a15b82f2c094a612d9a1682f5cd2d58bd276516318f5ae38d8d2f",
+      "state_after": "06b4d4d5320e792237e5a6c3ce5b518ea8e8e3d890f5d664f184b0a24f193fa4"
+    }
+  ],
+  "final_work_state": {
+    "company": [
+      {
+        "id": "CO-ME",
+        "revision": 1,
+        "data": {
+          "as_of": "2026-09-14",
+          "currency": "USD",
+          "id": "CO-ME",
+          "name": "Marrowind Energy Services"
+        }
+      }
+    ],
+    "roles": [
+      {
+        "id": "ap_assistant",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "You: investigates invoices and records AP decisions.",
+          "id": "ap_assistant",
+          "kind": "internal",
+          "name": "AP Assistant"
+        }
+      },
+      {
+        "id": "ap_manager",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 9000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "ap_manager",
+          "kind": "internal",
+          "name": "AP Manager"
+        }
+      },
+      {
+        "id": "cfo",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 300000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "cfo",
+          "kind": "internal",
+          "name": "Chief Financial Officer"
+        }
+      },
+      {
+        "id": "controller",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 45000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "controller",
+          "kind": "internal",
+          "name": "Financial Controller"
+        }
+      },
+      {
+        "id": "procurement",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns purchase orders and agreed prices; contact about price variances.",
+          "id": "procurement",
+          "kind": "internal",
+          "name": "Procurement"
+        }
+      },
+      {
+        "id": "receiving",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns goods receipts; contact about missing receipts.",
+          "id": "receiving",
+          "kind": "internal",
+          "name": "Receiving"
+        }
+      },
+      {
+        "id": "supplier",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "The supplier's contact from the supplier master record; contact for corrected invoices.",
+          "id": "supplier",
+          "kind": "external",
+          "name": "Supplier contact on file"
+        }
+      },
+      {
+        "id": "vendor_master",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns supplier records and bank details; contact about bank-detail changes or unverified suppliers.",
+          "id": "vendor_master",
+          "kind": "internal",
+          "name": "Vendor Master Data Team"
+        }
+      }
+    ],
+    "policies": [
+      {
+        "id": "POL-AP-1",
+        "revision": 1,
+        "data": {
+          "document_id": "DOC-138",
+          "effective_from": "2025-08-10",
+          "effective_to": null,
+          "id": "POL-AP-1",
+          "params": {
+            "partial_invoice_rule": "require_corrected_invoice",
+            "price_tolerance_bps": 200,
+            "price_tolerance_cap_minor": 80000,
+            "self_approval_limit_minor": 3500000
+          },
+          "version": 1
+        }
+      }
+    ],
+    "cases": [
+      {
+        "invoice_id": "INV-24991",
+        "status": "ready_for_payment",
+        "reason_code": "matched",
+        "evidence_ids": "[\"INV-24991\"]",
+        "note": "",
+        "version": 2,
+        "updated_step": 1
+      }
+    ],
+    "case_history": [
+      {
+        "seq": 1,
+        "invoice_id": "INV-24991",
+        "status": "ready_for_payment",
+        "reason_code": "matched",
+        "evidence_ids": "[\"INV-24991\"]",
+        "note": "",
+        "version": 2,
+        "step": 1
+      }
+    ],
+    "clarifications": [],
+    "approval_requests": [],
+    "approval_events": [],
+    "proposals": [
+      {
+        "id": "PRP-001",
+        "invoice_id": "INV-24991",
+        "amount_minor": 492120,
+        "credit_note_ids": "[]",
+        "evidence_ids": "[\"INV-24991\"]",
+        "idempotency_key": "p1",
+        "status": "active",
+        "created_step": 2,
+        "withdrawn_step": null,
+        "withdraw_reason": null
+      }
+    ],
+    "submission": [
+      {
+        "invoice_id": "INV-24991",
+        "status": "ready_for_payment",
+        "reason_code": "matched",
+        "amount_proposed_minor": 492120,
+        "evidence_ids": "[\"INV-24991\"]",
+        "summary": "The system now records the stated outcome.",
+        "step": 3
+      }
+    ],
+    "released_events": [],
+    "inbox": []
+  }
+}

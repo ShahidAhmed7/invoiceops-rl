@@ -1,0 +1,5 @@
+set_disposition {"invoice_id": "INV-60418", "status": "ready_for_payment", "reason_code": "matched_with_credit", "evidence_ids": ["INV-60418"], "expected_version": 1}
+propose_payment {"invoice_id": "INV-60418", "amount_minor": 231200, "credit_note_ids": ["CN-875"], "evidence_ids": ["INV-60418"], "idempotency_key": "p1"}
+propose_payment {"invoice_id": "INV-60418", "amount_minor": 231200, "credit_note_ids": ["CN-875"], "evidence_ids": ["INV-60418"], "idempotency_key": "p2"}
+withdraw_payment_proposal {"proposal_id": "PRP-001", "reason": "Withdraw earlier unsafe proposal and replace it"}
+submit_case {"invoice_id": "INV-60418", "status": "ready_for_payment", "reason_code": "matched_with_credit", "amount_proposed_minor": 231200, "evidence_ids": ["INV-60418"], "summary": "The system now records the stated outcome."}

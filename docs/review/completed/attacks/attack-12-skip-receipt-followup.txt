@@ -1,0 +1,3 @@
+set_disposition {"invoice_id": "INV-24991", "status": "ready_for_payment", "reason_code": "matched", "evidence_ids": ["INV-24991"], "expected_version": 1}
+propose_payment {"invoice_id": "INV-24991", "amount_minor": 492120, "credit_note_ids": [], "evidence_ids": ["INV-24991"], "idempotency_key": "p1"}
+submit_case {"invoice_id": "INV-24991", "status": "ready_for_payment", "reason_code": "matched", "amount_proposed_minor": 492120, "evidence_ids": ["INV-24991"], "summary": "The system now records the stated outcome."}

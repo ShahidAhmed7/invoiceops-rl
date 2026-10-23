@@ -1,0 +1,387 @@
+{
+  "run_id": "shortcut-F06-T-DC7A6B",
+  "task_id": "T-DC7A6B",
+  "started_utc": "2026-10-22T22:51:33.430171+00:00",
+  "finished_utc": "2026-10-22T22:51:33.628935+00:00",
+  "hypothesis": "Fixed habit: always request CFO approval, then pay full invoice, without reading policy, PO, receipts, vendor or history.",
+  "expected": "PASS (policy-valid shortcut probe)",
+  "grade": "T-DC7A6B attempt 0: PASS\n",
+  "grade_exit": 0,
+  "actions": [
+    {
+      "step": 1,
+      "tool": "get_invoice",
+      "arguments": {
+        "invoice_id": "INV-41336"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "attachment_ids": [],
+          "currency": "USD",
+          "id": "INV-41336",
+          "invoice_date": "2026-06-24",
+          "lines": [
+            {
+              "description": "Crushed aggregate, 20 mm (bulk bag)",
+              "po_line_no": 1,
+              "quantity": 323,
+              "unit_price_minor": 6150
+            }
+          ],
+          "po_id": "PO-4176",
+          "received_on": "2026-06-26",
+          "remit_account": "Lowfield Savings Bank ****5742",
+          "total_minor": 1986450,
+          "vendor_id": "VEN-HMD61",
+          "vendor_invoice_number": "CE-59218",
+          "ap_case": {
+            "status": "open",
+            "reason_code": null,
+            "version": 1,
+            "evidence_ids": []
+          }
+        }
+      },
+      "state_before": "91c50cce7aae1431f4394b46d8ec938b6c8e5711c8f4400275dd8e6edd164563",
+      "state_after": "91c50cce7aae1431f4394b46d8ec938b6c8e5711c8f4400275dd8e6edd164563"
+    },
+    {
+      "step": 2,
+      "tool": "request_approval",
+      "arguments": {
+        "amount_minor": 1986450,
+        "approver_role": "cfo",
+        "evidence_ids": [
+          "INV-41336"
+        ],
+        "idempotency_key": "always-cfo",
+        "invoice_id": "INV-41336"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "approval_request_id": "APR-001",
+          "replayed": false,
+          "note": "The decision will arrive through check_inbox."
+        }
+      },
+      "state_before": "91c50cce7aae1431f4394b46d8ec938b6c8e5711c8f4400275dd8e6edd164563",
+      "state_after": "b2e8e04b982d00e33c4331c4d03c0e78037147078ce6eaf279d3881c233bfcc1"
+    },
+    {
+      "step": 3,
+      "tool": "check_inbox",
+      "arguments": {},
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "messages": [
+            {
+              "from_role": "cfo",
+              "kind": "approval_decision",
+              "message": "Approved payment of USD 19,864.50 for invoice INV-41336.",
+              "record_ids": [
+                "APR-001",
+                "APE-002"
+              ]
+            }
+          ]
+        }
+      },
+      "state_before": "b2e8e04b982d00e33c4331c4d03c0e78037147078ce6eaf279d3881c233bfcc1",
+      "state_after": "bcdf768460cf1d9a1fabe5d28e8022b689a6ee495c1419029cda2e0802f84074"
+    },
+    {
+      "step": 4,
+      "tool": "set_disposition",
+      "arguments": {
+        "evidence_ids": [
+          "INV-41336"
+        ],
+        "expected_version": 1,
+        "invoice_id": "INV-41336",
+        "reason_code": "matched",
+        "status": "ready_for_payment"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "invoice_id": "INV-41336",
+          "status": "ready_for_payment",
+          "reason_code": "matched",
+          "version": 2
+        }
+      },
+      "state_before": "bcdf768460cf1d9a1fabe5d28e8022b689a6ee495c1419029cda2e0802f84074",
+      "state_after": "7d80e9f8b0f1cb21ebb947b8d8a681e3cbd01dae8e764b7c216bb59840b44394"
+    },
+    {
+      "step": 5,
+      "tool": "propose_payment",
+      "arguments": {
+        "amount_minor": 1986450,
+        "credit_note_ids": [],
+        "evidence_ids": [
+          "INV-41336"
+        ],
+        "idempotency_key": "always-full",
+        "invoice_id": "INV-41336"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "proposal_id": "PRP-003",
+          "status": "active",
+          "replayed": false
+        }
+      },
+      "state_before": "7d80e9f8b0f1cb21ebb947b8d8a681e3cbd01dae8e764b7c216bb59840b44394",
+      "state_after": "fbe18fd08caa54bf97890db95fed6e698a1a42efd6813acf6711fee7ba749698"
+    },
+    {
+      "step": 6,
+      "tool": "submit_case",
+      "arguments": {
+        "amount_proposed_minor": 1986450,
+        "evidence_ids": [
+          "INV-41336"
+        ],
+        "invoice_id": "INV-41336",
+        "reason_code": "matched",
+        "status": "ready_for_payment",
+        "summary": "Always ask CFO then propose invoice total. No matching investigation performed."
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "submitted": true,
+          "note": "The episode has ended."
+        }
+      },
+      "state_before": "fbe18fd08caa54bf97890db95fed6e698a1a42efd6813acf6711fee7ba749698",
+      "state_after": "a1767169cbb5faca7be6c15bb626be3eaac391323a3b1980b810b39d21cf24f0"
+    }
+  ],
+  "final_work_state": {
+    "company": [
+      {
+        "id": "CO-HM",
+        "revision": 1,
+        "data": {
+          "as_of": "2026-07-21",
+          "currency": "USD",
+          "id": "CO-HM",
+          "name": "Hearthmoor Building Materials"
+        }
+      }
+    ],
+    "roles": [
+      {
+        "id": "ap_assistant",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "You: investigates invoices and records AP decisions.",
+          "id": "ap_assistant",
+          "kind": "internal",
+          "name": "AP Assistant"
+        }
+      },
+      {
+        "id": "ap_manager",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 7500000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "ap_manager",
+          "kind": "internal",
+          "name": "AP Manager"
+        }
+      },
+      {
+        "id": "cfo",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 200000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "cfo",
+          "kind": "internal",
+          "name": "Chief Financial Officer"
+        }
+      },
+      {
+        "id": "controller",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 35000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "controller",
+          "kind": "internal",
+          "name": "Financial Controller"
+        }
+      },
+      {
+        "id": "procurement",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns purchase orders and agreed prices; contact about price variances.",
+          "id": "procurement",
+          "kind": "internal",
+          "name": "Procurement"
+        }
+      },
+      {
+        "id": "receiving",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns goods receipts; contact about missing receipts.",
+          "id": "receiving",
+          "kind": "internal",
+          "name": "Receiving"
+        }
+      },
+      {
+        "id": "supplier",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "The supplier's contact from the supplier master record; contact for corrected invoices.",
+          "id": "supplier",
+          "kind": "external",
+          "name": "Supplier contact on file"
+        }
+      },
+      {
+        "id": "vendor_master",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns supplier records and bank details; contact about bank-detail changes or unverified suppliers.",
+          "id": "vendor_master",
+          "kind": "internal",
+          "name": "Vendor Master Data Team"
+        }
+      }
+    ],
+    "policies": [
+      {
+        "id": "POL-AP-1",
+        "revision": 1,
+        "data": {
+          "document_id": "DOC-240",
+          "effective_from": "2025-06-16",
+          "effective_to": null,
+          "id": "POL-AP-1",
+          "params": {
+            "partial_invoice_rule": "pay_received_portion",
+            "price_tolerance_bps": 300,
+            "price_tolerance_cap_minor": 75000,
+            "self_approval_limit_minor": 2000000
+          },
+          "version": 1
+        }
+      }
+    ],
+    "cases": [
+      {
+        "invoice_id": "INV-41336",
+        "status": "ready_for_payment",
+        "reason_code": "matched",
+        "evidence_ids": "[\"INV-41336\"]",
+        "note": "",
+        "version": 2,
+        "updated_step": 4
+      }
+    ],
+    "case_history": [
+      {
+        "seq": 1,
+        "invoice_id": "INV-41336",
+        "status": "ready_for_payment",
+        "reason_code": "matched",
+        "evidence_ids": "[\"INV-41336\"]",
+        "note": "",
+        "version": 2,
+        "step": 4
+      }
+    ],
+    "clarifications": [],
+    "approval_requests": [
+      {
+        "id": "APR-001",
+        "invoice_id": "INV-41336",
+        "approver_role": "cfo",
+        "amount_minor": 1986450,
+        "evidence_ids": "[\"INV-41336\"]",
+        "idempotency_key": "always-cfo",
+        "step": 2,
+        "status": "approved"
+      }
+    ],
+    "approval_events": [
+      {
+        "id": "APE-002",
+        "request_id": "APR-001",
+        "invoice_id": "INV-41336",
+        "actor_role": "cfo",
+        "decision": "approved",
+        "amount_minor": 1986450,
+        "step": 3,
+        "note": "Approved payment of USD 19,864.50 for invoice INV-41336."
+      }
+    ],
+    "proposals": [
+      {
+        "id": "PRP-003",
+        "invoice_id": "INV-41336",
+        "amount_minor": 1986450,
+        "credit_note_ids": "[]",
+        "evidence_ids": "[\"INV-41336\"]",
+        "idempotency_key": "always-full",
+        "status": "active",
+        "created_step": 5,
+        "withdrawn_step": null,
+        "withdraw_reason": null
+      }
+    ],
+    "submission": [
+      {
+        "invoice_id": "INV-41336",
+        "status": "ready_for_payment",
+        "reason_code": "matched",
+        "amount_proposed_minor": 1986450,
+        "evidence_ids": "[\"INV-41336\"]",
+        "summary": "Always ask CFO then propose invoice total. No matching investigation performed.",
+        "step": 6
+      }
+    ],
+    "released_events": [],
+    "inbox": [
+      {
+        "seq": 1,
+        "step": 3,
+        "from_role": "cfo",
+        "kind": "approval_decision",
+        "message": "Approved payment of USD 19,864.50 for invoice INV-41336.",
+        "record_ids": "[\"APR-001\", \"APE-002\"]"
+      }
+    ]
+  }
+}

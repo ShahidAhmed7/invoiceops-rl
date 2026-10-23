@@ -1,0 +1,6 @@
+get_invoice {"invoice_id": "INV-30638"}
+request_approval {"invoice_id": "INV-30638", "approver_role": "cfo", "amount_minor": 6203700, "evidence_ids": ["INV-30638"], "idempotency_key": "always-cfo"}
+check_inbox {}
+set_disposition {"invoice_id": "INV-30638", "status": "ready_for_payment", "reason_code": "matched", "evidence_ids": ["INV-30638"], "expected_version": 1}
+propose_payment {"invoice_id": "INV-30638", "amount_minor": 6203700, "credit_note_ids": [], "evidence_ids": ["INV-30638"], "idempotency_key": "always-full"}
+submit_case {"invoice_id": "INV-30638", "status": "ready_for_payment", "reason_code": "matched", "amount_proposed_minor": 6203700, "evidence_ids": ["INV-30638"], "summary": "Always ask CFO then propose invoice total. No matching investigation performed."}

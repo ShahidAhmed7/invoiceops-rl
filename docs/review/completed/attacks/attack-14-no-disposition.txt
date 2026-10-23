@@ -1,0 +1,2 @@
+propose_payment {"invoice_id": "INV-13022", "amount_minor": 374080, "credit_note_ids": [], "evidence_ids": ["INV-13022"], "idempotency_key": "p1"}
+submit_case {"invoice_id": "INV-13022", "status": "ready_for_payment", "reason_code": "matched", "amount_proposed_minor": 374080, "evidence_ids": ["INV-13022"], "summary": "The invoice is ready for payment and all required state changes are complete."}

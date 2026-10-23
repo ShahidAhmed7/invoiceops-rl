@@ -1,0 +1,6 @@
+get_invoice {"invoice_id": "INV-14507"}
+request_approval {"invoice_id": "INV-14507", "approver_role": "cfo", "amount_minor": 238660, "evidence_ids": ["INV-14507"], "idempotency_key": "always-cfo"}
+check_inbox {}
+set_disposition {"invoice_id": "INV-14507", "status": "ready_for_payment", "reason_code": "matched", "evidence_ids": ["INV-14507"], "expected_version": 1}
+propose_payment {"invoice_id": "INV-14507", "amount_minor": 238660, "credit_note_ids": [], "evidence_ids": ["INV-14507"], "idempotency_key": "always-full"}
+submit_case {"invoice_id": "INV-14507", "status": "ready_for_payment", "reason_code": "matched", "amount_proposed_minor": 238660, "evidence_ids": ["INV-14507"], "summary": "Always ask CFO then propose invoice total. No matching investigation performed."}

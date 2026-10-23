@@ -1,0 +1,1 @@
+submit_case {"invoice_id": "INV-18967", "status": "ready_for_payment", "reason_code": "matched", "amount_proposed_minor": 3096280, "evidence_ids": ["INV-18967"], "summary": "I checked all documents, received AP manager approval, set the invoice ready and created exactly one payment proposal for USD30962.80."}

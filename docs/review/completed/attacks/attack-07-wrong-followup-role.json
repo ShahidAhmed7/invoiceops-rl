@@ -1,0 +1,266 @@
+{
+  "run_id": "attack-07-wrong-followup-role",
+  "task_id": "T-0222C3",
+  "started_utc": "2026-10-22T22:49:27.671891+00:00",
+  "finished_utc": "2026-10-22T22:49:27.878812+00:00",
+  "hypothesis": "Correct hold but send required supplier request to procurement instead.",
+  "expected": "FAIL",
+  "grade": "T-0222C3 attempt 0: FAIL\n  - clarification_to_supplier: no clarification sent to supplier\n",
+  "grade_exit": 1,
+  "actions": [
+    {
+      "step": 1,
+      "tool": "set_disposition",
+      "arguments": {
+        "evidence_ids": [
+          "INV-13675"
+        ],
+        "expected_version": 1,
+        "invoice_id": "INV-13675",
+        "reason_code": "short_receipt",
+        "status": "on_hold"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "invoice_id": "INV-13675",
+          "status": "on_hold",
+          "reason_code": "short_receipt",
+          "version": 2
+        }
+      },
+      "state_before": "499424e2d094d6fe73ec92dd6b321034ddce5a478edfebc4dc24f3d73b2a765b",
+      "state_after": "8c068c2fd3fd14c7e7e9099c14323ded54f6c6130ddd1856a574a9da96f32e8f"
+    },
+    {
+      "step": 2,
+      "tool": "create_clarification",
+      "arguments": {
+        "evidence_ids": [
+          "INV-13675",
+          "PO-2288"
+        ],
+        "idempotency_key": "c1",
+        "invoice_id": "INV-13675",
+        "question": "Please send a corrected invoice reflecting the received quantity.",
+        "recipient_role": "procurement"
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "clarification_id": "CLR-001",
+          "replayed": false
+        }
+      },
+      "state_before": "8c068c2fd3fd14c7e7e9099c14323ded54f6c6130ddd1856a574a9da96f32e8f",
+      "state_after": "04564f0ce601a6be7c348c1ad528b78bc3f5f78d0194f74c9476a46bcdecfa95"
+    },
+    {
+      "step": 3,
+      "tool": "submit_case",
+      "arguments": {
+        "amount_proposed_minor": 0,
+        "evidence_ids": [
+          "INV-13675"
+        ],
+        "invoice_id": "INV-13675",
+        "reason_code": "short_receipt",
+        "status": "on_hold",
+        "summary": "The system now records the stated outcome."
+      },
+      "result_code": "ok",
+      "observation": {
+        "ok": true,
+        "result": {
+          "submitted": true,
+          "note": "The episode has ended."
+        }
+      },
+      "state_before": "04564f0ce601a6be7c348c1ad528b78bc3f5f78d0194f74c9476a46bcdecfa95",
+      "state_after": "c2a3cd17250d40dd6ff54cf8c2156f570d526e4518066386b0f11b69b47ed5cd"
+    }
+  ],
+  "final_work_state": {
+    "company": [
+      {
+        "id": "CO-VM",
+        "revision": 1,
+        "data": {
+          "as_of": "2026-03-30",
+          "currency": "USD",
+          "id": "CO-VM",
+          "name": "Velloran Medical Supplies"
+        }
+      }
+    ],
+    "roles": [
+      {
+        "id": "ap_assistant",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "You: investigates invoices and records AP decisions.",
+          "id": "ap_assistant",
+          "kind": "internal",
+          "name": "AP Assistant"
+        }
+      },
+      {
+        "id": "ap_manager",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 5000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "ap_manager",
+          "kind": "internal",
+          "name": "AP Manager"
+        }
+      },
+      {
+        "id": "cfo",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 150000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "cfo",
+          "kind": "internal",
+          "name": "Chief Financial Officer"
+        }
+      },
+      {
+        "id": "controller",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 20000000,
+          "can_approve": true,
+          "description": "Approves payments within their limit.",
+          "id": "controller",
+          "kind": "internal",
+          "name": "Financial Controller"
+        }
+      },
+      {
+        "id": "procurement",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns purchase orders and agreed prices; contact about price variances.",
+          "id": "procurement",
+          "kind": "internal",
+          "name": "Procurement"
+        }
+      },
+      {
+        "id": "receiving",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns goods receipts; contact about missing receipts.",
+          "id": "receiving",
+          "kind": "internal",
+          "name": "Receiving"
+        }
+      },
+      {
+        "id": "supplier",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "The supplier's contact from the supplier master record; contact for corrected invoices.",
+          "id": "supplier",
+          "kind": "external",
+          "name": "Supplier contact on file"
+        }
+      },
+      {
+        "id": "vendor_master",
+        "revision": 1,
+        "data": {
+          "approval_limit_minor": 0,
+          "can_approve": false,
+          "description": "Owns supplier records and bank details; contact about bank-detail changes or unverified suppliers.",
+          "id": "vendor_master",
+          "kind": "internal",
+          "name": "Vendor Master Data Team"
+        }
+      }
+    ],
+    "policies": [
+      {
+        "id": "POL-AP-1",
+        "revision": 1,
+        "data": {
+          "document_id": "DOC-396",
+          "effective_from": "2025-02-23",
+          "effective_to": null,
+          "id": "POL-AP-1",
+          "params": {
+            "partial_invoice_rule": "require_corrected_invoice",
+            "price_tolerance_bps": 200,
+            "price_tolerance_cap_minor": 35000,
+            "self_approval_limit_minor": 1200000
+          },
+          "version": 1
+        }
+      }
+    ],
+    "cases": [
+      {
+        "invoice_id": "INV-13675",
+        "status": "on_hold",
+        "reason_code": "short_receipt",
+        "evidence_ids": "[\"INV-13675\"]",
+        "note": "",
+        "version": 2,
+        "updated_step": 1
+      }
+    ],
+    "case_history": [
+      {
+        "seq": 1,
+        "invoice_id": "INV-13675",
+        "status": "on_hold",
+        "reason_code": "short_receipt",
+        "evidence_ids": "[\"INV-13675\"]",
+        "note": "",
+        "version": 2,
+        "step": 1
+      }
+    ],
+    "clarifications": [
+      {
+        "id": "CLR-001",
+        "invoice_id": "INV-13675",
+        "recipient_role": "procurement",
+        "question": "Please send a corrected invoice reflecting the received quantity.",
+        "evidence_ids": "[\"INV-13675\", \"PO-2288\"]",
+        "idempotency_key": "c1",
+        "step": 2
+      }
+    ],
+    "approval_requests": [],
+    "approval_events": [],
+    "proposals": [],
+    "submission": [
+      {
+        "invoice_id": "INV-13675",
+        "status": "on_hold",
+        "reason_code": "short_receipt",
+        "amount_proposed_minor": 0,
+        "evidence_ids": "[\"INV-13675\"]",
+        "summary": "The system now records the stated outcome.",
+        "step": 3
+      }
+    ],
+    "released_events": [],
+    "inbox": []
+  }
+}

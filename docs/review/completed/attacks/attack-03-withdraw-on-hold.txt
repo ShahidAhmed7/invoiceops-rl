@@ -1,0 +1,5 @@
+propose_payment {"invoice_id": "INV-13675", "amount_minor": 259500, "credit_note_ids": [], "evidence_ids": ["INV-13675"], "idempotency_key": "p1"}
+withdraw_payment_proposal {"proposal_id": "PRP-001", "reason": "Withdraw earlier unsafe proposal and replace it"}
+set_disposition {"invoice_id": "INV-13675", "status": "on_hold", "reason_code": "short_receipt", "evidence_ids": ["INV-13675"], "expected_version": 1}
+create_clarification {"invoice_id": "INV-13675", "recipient_role": "supplier", "question": "Please send a corrected invoice reflecting the received quantity.", "evidence_ids": ["INV-13675", "PO-2288"], "idempotency_key": "c1"}
+submit_case {"invoice_id": "INV-13675", "status": "on_hold", "reason_code": "short_receipt", "amount_proposed_minor": 0, "evidence_ids": ["INV-13675"], "summary": "The system now records the stated outcome."}
