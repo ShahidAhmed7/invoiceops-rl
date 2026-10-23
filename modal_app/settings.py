@@ -15,11 +15,11 @@ REFERENCE_FALLBACK = "Qwen/Qwen3-8B"
 # Filled in from reports/model_verification.json after Phase 11A step 3. ``None`` means
 # "not yet verified": evaluation jobs refuse to run with an unpinned revision.
 REVISIONS: dict[str, str | None] = {
-    CANDIDATE_MODEL: None,
-    CANDIDATE_FALLBACK: None,
-    REFERENCE_MODEL: None,
-    REFERENCE_FP8: None,
-    REFERENCE_FALLBACK: None,
+    CANDIDATE_MODEL: "cdbee75f17c01a7cc42f958dc650907174af0554",
+    CANDIDATE_FALLBACK: "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+    REFERENCE_MODEL: "0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe",
+    REFERENCE_FP8: "5a5a776300a41aaa681dd7ff0106608ef2bc90db",
+    REFERENCE_FALLBACK: "b968826d9c46dd6066d109eabc6255188de91218",
 }
 
 TAU2_REPO = "https://github.com/sierra-research/tau2-bench"

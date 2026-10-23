@@ -1,0 +1,83 @@
+{
+  "Qwen/Qwen3-30B-A3B-Instruct-2507": {
+    "architectures": [
+      "Qwen3MoeForCausalLM"
+    ],
+    "chat_template_mentions_tools": true,
+    "exists": true,
+    "gated": false,
+    "kv_cache_bytes_per_token": 98304,
+    "license": "apache-2.0",
+    "max_position_embeddings": 262144,
+    "model_type": "qwen3_moe",
+    "pipeline_tag": "text-generation",
+    "revision": "0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe"
+  },
+  "Qwen/Qwen3-30B-A3B-Instruct-2507-FP8": {
+    "architectures": [
+      "Qwen3MoeForCausalLM"
+    ],
+    "chat_template_mentions_tools": true,
+    "exists": true,
+    "gated": false,
+    "kv_cache_bytes_per_token": 98304,
+    "license": "apache-2.0",
+    "max_position_embeddings": 262144,
+    "model_type": "qwen3_moe",
+    "pipeline_tag": "text-generation",
+    "revision": "5a5a776300a41aaa681dd7ff0106608ef2bc90db"
+  },
+  "Qwen/Qwen3-4B-Instruct-2507": {
+    "architectures": [
+      "Qwen3ForCausalLM"
+    ],
+    "chat_template_mentions_tools": true,
+    "exists": true,
+    "gated": false,
+    "kv_cache_bytes_per_token": 147456,
+    "license": "apache-2.0",
+    "max_position_embeddings": 262144,
+    "model_type": "qwen3",
+    "pipeline_tag": "text-generation",
+    "revision": "cdbee75f17c01a7cc42f958dc650907174af0554"
+  },
+  "Qwen/Qwen3-8B": {
+    "architectures": [
+      "Qwen3ForCausalLM"
+    ],
+    "chat_template_mentions_tools": true,
+    "exists": true,
+    "gated": false,
+    "kv_cache_bytes_per_token": 147456,
+    "license": "apache-2.0",
+    "max_position_embeddings": 40960,
+    "model_type": "qwen3",
+    "pipeline_tag": "text-generation",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218"
+  },
+  "Qwen/Qwen3.5-4B": {
+    "architectures": [
+      "Qwen3_5ForConditionalGeneration"
+    ],
+    "chat_template_mentions_tools": true,
+    "exists": true,
+    "gated": false,
+    "license": "apache-2.0",
+    "max_position_embeddings": null,
+    "model_type": "qwen3_5",
+    "pipeline_tag": "image-text-to-text",
+    "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+  },
+  "checked_at": "2026-10-23T20:47:50Z",
+  "token_counts": {
+    "agent_max_tokens": 16384,
+    "longest_document_observation": 1683,
+    "longest_oracle_observation": 547,
+    "max_model_len": 131072,
+    "model": "Qwen/Qwen3-4B-Instruct-2507",
+    "oracle_completion_max": 1985,
+    "system_v1": 110,
+    "system_v2": 260,
+    "tool_schemas": 2675
+  }
+}

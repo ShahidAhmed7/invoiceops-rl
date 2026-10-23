@@ -45,6 +45,8 @@ DEFAULTS: dict[str, Any] = {
         "vllm_mode": "colocate",
         "vllm_gpu_memory_utilization": 0.35,
         "bf16": True,
+        # TRL loads a model given by name in float32 unless told otherwise.
+        "model_init_kwargs": {"dtype": "bfloat16"},
         "gradient_checkpointing": True,
         "logging_steps": 1,
         "save_steps": 25,
@@ -115,12 +117,18 @@ def run_training(config: dict[str, Any], output_root: Path) -> dict[str, Any]:
     from trl import GRPOConfig, GRPOTrainer
 
     from invoiceops.adapters.trl_env import InvoiceOpsToolEnv
+    from modal_app.settings import REVISIONS
 
     config = merge(DEFAULTS, config)
     out = output_root / config["run_name"]
     out.mkdir(parents=True, exist_ok=True)
+    # Train on the exact weights the evaluations name; TRL also loads the tokenizer at it.
+    init = {
+        "revision": REVISIONS.get(config["model"]),
+        **config["grpo"].get("model_init_kwargs", {}),
+    }
+    config["grpo"] = {**config["grpo"], "model_init_kwargs": init}
     (out / "config.json").write_text(json.dumps(config, indent=2, sort_keys=True))
-
     known = {f.name for f in dataclasses.fields(GRPOConfig)}
     unknown = sorted(set(config["grpo"]) - known)
     if unknown:  # fail before loading any weights

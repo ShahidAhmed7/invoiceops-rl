@@ -40,7 +40,8 @@ ENV = {
 def _with_sources(image: modal.Image) -> modal.Image:
     return (
         image.env(ENV)
-        .add_local_python_source("invoiceops", "modal_app")
+        # The default ignore keeps only .py files, which would drop the system prompts (.md).
+        .add_local_python_source("invoiceops", "modal_app", ignore=["**/__pycache__", "**/*.pyc"])
         .add_local_dir(REPO / "tasks", "/root/tasks")
     )
 
