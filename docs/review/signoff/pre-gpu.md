@@ -70,8 +70,36 @@
 
 ## Decision
 
-- [ ] Approved: GPU phases may start.
-- [x] Not approved: fix the blocking findings and repeat the affected steps.
+- [x] Approved: GPU phases may start.
+- [ ] Not approved: fix the blocking findings and repeat the affected steps.
 
-GPU phases are **not approved**. No GPU jobs, model baselines, or training runs
-were launched during this review.
+GPU phases were **not approved** at the first review (2026-10-23). No GPU jobs,
+model baselines, or training runs were launched during the review or re-check.
+The re-check below approved the build after the fixes; see the Decision above.
+
+## Re-check (2026-10-23)
+
+- Reviewer: Shahid Ahmed
+- Repository commit re-checked: `f1c8f365cc27c9d77bb2aa43b6dc89c2a16bfae1` (includes fix commit `75270f4`)
+- Blind solve T-DC7A6B: PASS, solver agrees yes
+- Manual attacks re-run: 14 / 14 rows; escapes still passing: 0 (B1 and B2 both closed)
+- New attacks tried: 18; passing while violating policy: 0 (passes were correct or documented-benign flows)
+- F06 family re-review: approved
+- R1 T-DC7A6B: approve   R1 T-0A0D10: approve
+- Spec re-read (T-89B109, T-0222C3, T-6C23E6, T-11EA31): all correct yes
+- Walkthrough T-6C23E6: tool clear yes
+- Cross-check script updated (approval levels, declines, request types): 72/72 match
+- Mutation report 975 / 0 unexpected: yes
+- Scripted baselines within limits: yes (oracle 100%; noop 0%; random 0%; always-hold 11.1%; always-pay 30.6%)
+- Visibility clean for T-DC7A6B: yes (budget-decline note only in the reviewer comparison footer, not agent-visible)
+
+Re-check artifacts: `docs/review/completed/recheck-2026-10-23/` —
+`attack-log.md`, `T-DC7A6B/` (R2+R1), `T-0A0D10/r1-*.md`,
+`families/r3-F06-*.md`, `spec-recheck.md`, `walkthrough-T-6C23E6.md`,
+`mutations.md`, `spec-crosscheck.py` + `spec-crosscheck.md`,
+`visibility-T-DC7A6B.txt`.
+
+### Blocking findings
+
+none — see `attack-log.md` for the two recorded non-blocking observations
+(skip-inbox observability on receipt events; per-task sequential proposal ids).
