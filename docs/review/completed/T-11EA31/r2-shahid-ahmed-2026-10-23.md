@@ -2,7 +2,7 @@
 
 - **Task ID:** T-11EA31
 - **Task revision:** 9e6201acbb2d
-- **Solver initials:** CX (Codex)
+- **Solver initials:** Shahid Ahmed
 - **Role:** Independent solver; fictional-policy review, no AP practitioner certification
 - **Date:** 2026-10-23 (Asia/Dhaka)
 - **Run ID:** play-T-11EA31-2026-10-22T224632Z

@@ -56,34 +56,34 @@ for F01–F12. Other review artifacts: `completed/attack-log.md`,
 | T-FA734A | train | `7d0a90e748d5` | n/a — not in sample | n/a — not in sample | [F12](completed/families/r3-F12-shahid-ahmed-2026-10-23.md) |
 | T-FA96B2 | train | `0234b0ab7a27` | n/a — not in sample | n/a — not in sample | [F10](completed/families/r3-F10-shahid-ahmed-2026-10-23.md) |
 | T-FBECFF | train | `55f9e75e58a1` | n/a — not in sample | n/a — not in sample | [F04](completed/families/r3-F04-shahid-ahmed-2026-10-23.md) |
-| T-0222C3 | dev | `16b7213f35a5` | [PASS](completed/T-0222C3/r2-cx-2026-10-23.md) | [approve](completed/T-0222C3/r1-shahid-ahmed-2026-10-23.md) | [F03](completed/families/r3-F03-shahid-ahmed-2026-10-23.md) |
+| T-0222C3 | dev | `16b7213f35a5` | [PASS](completed/T-0222C3/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-0222C3/r1-shahid-ahmed-2026-10-23.md) | [F03](completed/families/r3-F03-shahid-ahmed-2026-10-23.md) |
 | T-71E1D2 | dev | `dc8945e4233c` | n/a — not in sample | n/a — not in sample | [F08](completed/families/r3-F08-shahid-ahmed-2026-10-23.md) |
 | T-84D47B | dev | `2abf0eadc6b0` | n/a — not in sample | n/a — not in sample | [F04](completed/families/r3-F04-shahid-ahmed-2026-10-23.md) |
-| T-8F0E1E | dev | `3eb1d38939da` | [PASS](completed/T-8F0E1E/r2-cx-2026-10-23.md) | [approve](completed/T-8F0E1E/r1-shahid-ahmed-2026-10-23.md) | [F01](completed/families/r3-F01-shahid-ahmed-2026-10-23.md) |
+| T-8F0E1E | dev | `3eb1d38939da` | [PASS](completed/T-8F0E1E/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-8F0E1E/r1-shahid-ahmed-2026-10-23.md) | [F01](completed/families/r3-F01-shahid-ahmed-2026-10-23.md) |
 | T-9362E5 | dev | `86dbe7a2fdfb` | n/a — not in sample | n/a — not in sample | [F05](completed/families/r3-F05-shahid-ahmed-2026-10-23.md) |
-| T-A680BE | dev | `bc662b78d80b` | [PASS](completed/T-A680BE/r2-cx-2026-10-23.md) | [approve](completed/T-A680BE/r1-shahid-ahmed-2026-10-23.md) | [F07](completed/families/r3-F07-shahid-ahmed-2026-10-23.md) |
+| T-A680BE | dev | `bc662b78d80b` | [PASS](completed/T-A680BE/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-A680BE/r1-shahid-ahmed-2026-10-23.md) | [F07](completed/families/r3-F07-shahid-ahmed-2026-10-23.md) |
 | T-C45901 | dev | `70159daa421b` | n/a — not in sample | n/a — not in sample | [F11](completed/families/r3-F11-shahid-ahmed-2026-10-23.md) |
 | T-CC052D | dev | `26e10d7f52b3` | n/a — not in sample | n/a — not in sample | [F09](completed/families/r3-F09-shahid-ahmed-2026-10-23.md) |
 | T-D30567 | dev | `a3840def087b` | n/a — not in sample | n/a — not in sample | [F02](completed/families/r3-F02-shahid-ahmed-2026-10-23.md) |
 | T-DC7A6B | dev | `cfe72afaef9a` | n/a — not in sample | n/a — not in sample | [F06](completed/families/r3-F06-shahid-ahmed-2026-10-23.md) |
 | T-E72409 | dev | `59e0f1714713` | n/a — not in sample | n/a — not in sample | [F10](completed/families/r3-F10-shahid-ahmed-2026-10-23.md) |
 | T-F88990 | dev | `6964b8ff6fe6` | n/a — not in sample | n/a — not in sample | [F12](completed/families/r3-F12-shahid-ahmed-2026-10-23.md) |
-| T-0A0D10 | test | `8bc1cd9818ac` | [PASS](completed/T-0A0D10/r2-cx-2026-10-23.md) | [approve](completed/T-0A0D10/r1-shahid-ahmed-2026-10-23.md) | [F06](completed/families/r3-F06-shahid-ahmed-2026-10-23.md) |
+| T-0A0D10 | test | `8bc1cd9818ac` | [PASS](completed/T-0A0D10/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-0A0D10/r1-shahid-ahmed-2026-10-23.md) | [F06](completed/families/r3-F06-shahid-ahmed-2026-10-23.md) |
 | T-0A802E | test | `c1966f11f876` | n/a — not in sample | n/a — not in sample | [F06](completed/families/r3-F06-shahid-ahmed-2026-10-23.md) |
-| T-0B0633 | test | `729c323eabd5` | [PASS](completed/T-0B0633/r2-cx-2026-10-23.md) | [approve](completed/T-0B0633/r1-shahid-ahmed-2026-10-23.md) | [F10](completed/families/r3-F10-shahid-ahmed-2026-10-23.md) |
+| T-0B0633 | test | `729c323eabd5` | [PASS](completed/T-0B0633/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-0B0633/r1-shahid-ahmed-2026-10-23.md) | [F10](completed/families/r3-F10-shahid-ahmed-2026-10-23.md) |
 | T-107867 | test | `e2987afd195e` | n/a — not in sample | n/a — not in sample | [F10](completed/families/r3-F10-shahid-ahmed-2026-10-23.md) |
-| T-11EA31 | test | `9e6201acbb2d` | [PASS](completed/T-11EA31/r2-cx-2026-10-23.md) | [approve](completed/T-11EA31/r1-shahid-ahmed-2026-10-23.md) | [F12](completed/families/r3-F12-shahid-ahmed-2026-10-23.md) |
+| T-11EA31 | test | `9e6201acbb2d` | [PASS](completed/T-11EA31/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-11EA31/r1-shahid-ahmed-2026-10-23.md) | [F12](completed/families/r3-F12-shahid-ahmed-2026-10-23.md) |
 | T-175EBC | test | `498975650d91` | n/a — not in sample | n/a — not in sample | [F03](completed/families/r3-F03-shahid-ahmed-2026-10-23.md) |
-| T-1A3136 | test | `90627c206c5e` | [PASS](completed/T-1A3136/r2-cx-2026-10-23.md) | [approve](completed/T-1A3136/r1-shahid-ahmed-2026-10-23.md) | [F05](completed/families/r3-F05-shahid-ahmed-2026-10-23.md) |
+| T-1A3136 | test | `90627c206c5e` | [PASS](completed/T-1A3136/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-1A3136/r1-shahid-ahmed-2026-10-23.md) | [F05](completed/families/r3-F05-shahid-ahmed-2026-10-23.md) |
 | T-202621 | test | `94a087469c22` | n/a — not in sample | n/a — not in sample | [F03](completed/families/r3-F03-shahid-ahmed-2026-10-23.md) |
-| T-5B8D32 | test | `eb8a19a358b1` | [PASS](completed/T-5B8D32/r2-cx-2026-10-23.md) | [approve](completed/T-5B8D32/r1-shahid-ahmed-2026-10-23.md) | [F11](completed/families/r3-F11-shahid-ahmed-2026-10-23.md) |
+| T-5B8D32 | test | `eb8a19a358b1` | [PASS](completed/T-5B8D32/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-5B8D32/r1-shahid-ahmed-2026-10-23.md) | [F11](completed/families/r3-F11-shahid-ahmed-2026-10-23.md) |
 | T-5C4594 | test | `02338c88343f` | n/a — not in sample | n/a — not in sample | [F11](completed/families/r3-F11-shahid-ahmed-2026-10-23.md) |
-| T-6BAF87 | test | `089ec602b9ff` | [PASS](completed/T-6BAF87/r2-cx-2026-10-23.md) | [approve](completed/T-6BAF87/r1-shahid-ahmed-2026-10-23.md) | [F09](completed/families/r3-F09-shahid-ahmed-2026-10-23.md) |
-| T-6C23E6 | test | `7b855b65ebd5` | [PASS](completed/T-6C23E6/r2-cx-2026-10-23.md) | [approve](completed/T-6C23E6/r1-shahid-ahmed-2026-10-23.md) | [F08](completed/families/r3-F08-shahid-ahmed-2026-10-23.md) |
+| T-6BAF87 | test | `089ec602b9ff` | [PASS](completed/T-6BAF87/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-6BAF87/r1-shahid-ahmed-2026-10-23.md) | [F09](completed/families/r3-F09-shahid-ahmed-2026-10-23.md) |
+| T-6C23E6 | test | `7b855b65ebd5` | [PASS](completed/T-6C23E6/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-6C23E6/r1-shahid-ahmed-2026-10-23.md) | [F08](completed/families/r3-F08-shahid-ahmed-2026-10-23.md) |
 | T-6F7DAA | test | `87b5013a2768` | n/a — not in sample | n/a — not in sample | [F05](completed/families/r3-F05-shahid-ahmed-2026-10-23.md) |
-| T-739D69 | test | `b3eff90a0c2c` | [PASS](completed/T-739D69/r2-cx-2026-10-23.md) | [approve](completed/T-739D69/r1-shahid-ahmed-2026-10-23.md) | [F04](completed/families/r3-F04-shahid-ahmed-2026-10-23.md) |
+| T-739D69 | test | `b3eff90a0c2c` | [PASS](completed/T-739D69/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-739D69/r1-shahid-ahmed-2026-10-23.md) | [F04](completed/families/r3-F04-shahid-ahmed-2026-10-23.md) |
 | T-7E294F | test | `24a5fa198996` | n/a — not in sample | n/a — not in sample | [F08](completed/families/r3-F08-shahid-ahmed-2026-10-23.md) |
-| T-89B109 | test | `9dac6af8fb2e` | [PASS](completed/T-89B109/r2-cx-2026-10-23.md) | [approve](completed/T-89B109/r1-shahid-ahmed-2026-10-23.md) | [F02](completed/families/r3-F02-shahid-ahmed-2026-10-23.md) |
+| T-89B109 | test | `9dac6af8fb2e` | [PASS](completed/T-89B109/r2-shahid-ahmed-2026-10-23.md) | [approve](completed/T-89B109/r1-shahid-ahmed-2026-10-23.md) | [F02](completed/families/r3-F02-shahid-ahmed-2026-10-23.md) |
 | T-B2A72C | test | `2ffd99bda211` | n/a — not in sample | n/a — not in sample | [F02](completed/families/r3-F02-shahid-ahmed-2026-10-23.md) |
 | T-BBE12C | test | `42835a15b420` | n/a — not in sample | n/a — not in sample | [F04](completed/families/r3-F04-shahid-ahmed-2026-10-23.md) |
 | T-C07FE6 | test | `f21e76acfc84` | n/a — not in sample | n/a — not in sample | [F09](completed/families/r3-F09-shahid-ahmed-2026-10-23.md) |

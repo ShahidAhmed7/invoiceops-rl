@@ -2,7 +2,7 @@
 
 - **Task ID:** T-739D69
 - **Task revision:** b3eff90a0c2c
-- **Solver initials:** CX (Codex)
+- **Solver initials:** Shahid Ahmed
 - **Role:** Independent solver; fictional-policy review, no AP practitioner certification
 - **Date:** 2026-10-23 (Asia/Dhaka)
 - **Run ID:** play-T-739D69-2026-10-22T224445Z

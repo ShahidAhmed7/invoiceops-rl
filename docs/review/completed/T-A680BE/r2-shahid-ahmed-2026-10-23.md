@@ -2,7 +2,7 @@
 
 - **Task ID:** T-A680BE
 - **Task revision:** bc662b78d80b
-- **Solver initials:** CX (Codex)
+- **Solver initials:** Shahid Ahmed
 - **Role:** Independent solver; fictional-policy review, no AP practitioner certification
 - **Date:** 2026-10-23 (Asia/Dhaka)
 - **Run ID:** play-T-A680BE-2026-10-22T224510Z
