@@ -5,7 +5,7 @@
 - train probe with prompt v1 (144);
 - dev with prompt v1 (24).
 
-The probe with prompt v2 (`probe_v2`) is summarised in `reports/compatibility.md` and was not part of this transcript review.
+The probe with prompt v2 (`probe_v2`, 144 attempts) was replay-checked as well: all 144 match. It shows the same leading v2 failure, payable cases left `open` without a disposition (47 failing checks), and is summarised in `reports/compatibility.md`.
 
 **Model and data:** `Qwen/Qwen3-4B-Instruct-2507` @ `cdbee75f`, downloaded from the `invoiceops-runs` Modal volume.
 
@@ -13,7 +13,7 @@ The probe with prompt v2 (`probe_v2`) is summarised in `reports/compatibility.md
 
 ## 1. The grading reproduces exactly
 
-I replayed every logged tool call into a fresh environment for its task, then re-ran the verifier. For **360 of 360** attempts, every observation, the final system state, and the pass/fail verdict with its critical violations match the recorded run.
+I replayed every logged tool call into a fresh environment for its task, then re-ran the verifier. For **360 of 360** attempts (and the 144 of `probe_v2`), every observation, the final system state, and the pass/fail verdict with its critical violations match the recorded run.
 
 Nothing was lost to infrastructure either:
 - no unscorable attempt;
