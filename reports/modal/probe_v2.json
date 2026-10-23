@@ -1,0 +1,49 @@
+{
+  "attempts_per_task": 4,
+  "attempts_with_critical_violation": 27,
+  "blocked_attempts": 4,
+  "by_family": {
+    "F01": 0.5833333333333334,
+    "F02": 0.75,
+    "F03": 0.16666666666666666,
+    "F04": 0.3333333333333333,
+    "F05": 0.16666666666666666,
+    "F06": 0.25,
+    "F07": 0.75,
+    "F08": 0.5,
+    "F09": 0.25,
+    "F10": 0.0,
+    "F11": 0.75,
+    "F12": 0.75
+  },
+  "clean_cases_paid_correctly": "31/84",
+  "critical_violations": {
+    "overpayment_proposed": 8,
+    "payment_before_receipt": 2,
+    "payment_proposed_for_unpayable_invoice": 13,
+    "payment_without_required_approval": 6
+  },
+  "exception_cases_not_paid": "47/60",
+  "false_completions": 49,
+  "infrastructure_errors": [],
+  "mean_seconds": 23.062073745159722,
+  "mean_tool_calls": 12.159722222222221,
+  "pass@4": 0.75,
+  "pass^4": 0.2222222222222222,
+  "scored_attempts": 144,
+  "strict_success": 0.4375,
+  "task_mean_success": 0.4375,
+  "task_mean_success_ci95": [
+    0.3125,
+    0.5625
+  ],
+  "tasks": 36,
+  "tokens": {
+    "completion": 141676,
+    "context_limit_stops": 0,
+    "max_context": 8155,
+    "prompt": 8908674,
+    "truncated_turns": 0
+  },
+  "unscorable_attempts": 0
+}
