@@ -553,10 +553,10 @@ def invoiceops_eval_h100(
     image=train_image, gpu="H100", volumes=VOLUMES, timeout=250 * 60, max_containers=1, retries=0
 )
 def train_grpo(config_json: str) -> dict[str, Any]:
-    from modal_app.train_grpo import run_training
+    from modal_app.train_grpo import DEFAULTS, run_training
 
     config = json.loads(config_json)
-    config.setdefault("revision", _revision(config["model"]))
+    _revision(config.get("model", DEFAULTS["model"]))  # refuse an unpinned model before loading
     result = run_training(config, output_root=Path("/runs/train"))
     runs.commit()
     return result
