@@ -37,7 +37,9 @@ No language model has been evaluated or trained on this environment yet, so this
 
 ## Measured so far
 
-These numbers come from committed reports that regenerate deterministically (`uv run python scripts/local_baselines.py`).
+The oracle and scripted rows come from committed reports that regenerate deterministically (`uv run python scripts/local_baselines.py`).
+
+The model rows come from GPU runs on Modal: test with 4 attempts per task, train with 4, dev with 2. See [`reports/baseline.md`](reports/baseline.md) and [`reports/compatibility.md`](reports/compatibility.md).
 
 | Agent | Train (36) | Dev (12) | Test (24) |
 |---|---|---|---|
@@ -46,6 +48,8 @@ These numbers come from committed reports that regenerate deterministically (`uv
 | Always hold and ask the supplier | 13.9% | 16.7% | 8.3% |
 | Do nothing and claim success | 0% | 0% | 0% |
 | Random tool calls | 0% | 0% | 0% |
+| Untrained Qwen3-4B-Instruct-2507, prompt v1 (Modal) | 13.9% | 8.3% | 7.3% (95% CI 1.0–15.6%) |
+| Untrained Qwen3-4B-Instruct-2507, prompt v2 (Modal) | not run | not run | 41.7% (95% CI 28.1–55.2%) |
 
 - **Verifier validation:** across all 72 tasks, every one of 830 deliberately wrong end states is rejected, and every one of 149 accepted alternative solutions passes. The wrong states include proposing and then withdrawing, proposing before approval, asking the wrong approval level, sending the wrong kind of request, and paying before a requested receipt has arrived. Details are in [`reports/local/verifier_mutations.md`](reports/local/verifier_mutations.md).
 - **Two independent derivations agree:** the oracle re-derives every task's answer through the tools and matches the hand-written expected outcome on 72 of 72 tasks.
