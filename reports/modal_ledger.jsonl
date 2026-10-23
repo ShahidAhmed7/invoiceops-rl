@@ -14,3 +14,4 @@
 {"cost_usd": 0.3022, "error": null, "gpu": "L40S", "job": "probe_v2", "phase": "12", "rate_usd_per_hour": 2.45, "seconds": 444.1, "started": "2026-10-23T22:30:18Z", "status": "succeeded"}
 {"cost_usd": 1.1559, "error": null, "gpu": "H100", "job": "tau2_before", "phase": "11A", "rate_usd_per_hour": 4.45, "seconds": 935.1, "started": "2026-10-23T22:35:44Z", "status": "succeeded"}
 {"cost_usd": 0.3497, "error": null, "gpu": "H100", "job": "test_reference", "phase": "12", "rate_usd_per_hour": 4.45, "seconds": 282.9, "started": "2026-10-23T22:53:02Z", "status": "succeeded"}
+{"cost_usd": 0.8547, "error": null, "gpu": "H100", "job": "tau2_reference", "phase": "11A", "rate_usd_per_hour": 4.45, "seconds": 691.5, "started": "2026-10-23T22:58:17Z", "status": "succeeded"}

@@ -1,4 +1,4 @@
-# Baseline (partial)
+# Baseline
 
 The untrained candidate on the 24 held-out test tasks: two tasks per family, 4 attempts each, temperature 0.7, top-p 0.8, at most 40 tool calls per attempt.
 - **Model:** `Qwen/Qwen3-4B-Instruct-2507` at revision `cdbee75f17c01a7cc42f958dc650907174af0554`, served by vLLM 0.31.0 on an L40S.
@@ -13,7 +13,8 @@ Success is strict: an attempt passes only if every verifier check passes. Task-m
 |---|---|---|---|---|---|
 | Untrained candidate (4B) | v1 | 7.3% | 1.0%–15.6% | 16.7% | 0.0% |
 | Untrained candidate (4B) | v2 | 41.7% | 28.1%–55.2% | 70.8% | 12.5% |
-| Reference model (30B-A3B) | v1 | not run yet | | | |
+| Reference model (30B-A3B FP8) | v1 | not run | | | |
+| Reference model (30B-A3B FP8) | v2 | 61.5% | 43.8%–78.1% | 70.8% | 50.0% |
 
 | | v1 | v2 |
 |---|---|---|
@@ -57,5 +58,6 @@ Success is strict: an attempt passes only if every verifier check passes. Task-m
 - **v2 is the stronger baseline: 41.7% against 7.3% for v1.** The confidence intervals do not overlap. v2 is the frozen prompt that adds general AP working practice, with no task-family hints.
 - **v1 rarely completes a case correctly.** It has 43 false completions (a submission whose status or amount the system does not show), and pays only 7/60 clean cases correctly. Overpayment is its most frequent critical violation.
 - **Scripted agents on the same test split:** always-pay scores 29.2%, always-hold 8.3%, and doing nothing 0% (`README.md`). Untrained v1 scores below always-pay; v2 is above it.
+- **The reference model (`Qwen/Qwen3-30B-A3B-Instruct-2507-FP8` @ `5a5a776`, H100, prompt v2) scores 61.5%.** It has 0 false completions and 23 / 96 attempts with a critical violation (overpayment_proposed 4, payment_proposed_for_unpayable_invoice 11, payment_without_required_approval 8). It never asks for approval, and scores 0% on approval routing (F06) and short receipts (F03); see `reports/transcript_audit.md` §8. Source: `reports/modal/test_reference.json`.
 - **With 2 tasks per family, the per-family figures are indicative only.**
 - **This audit does not yet cover transcripts.** The audit so far rests on the committed summaries: counts, consistency between metrics, and lengths. Transcript-level review waits on downloads from the Modal volume, which this session's network policy blocks (`*.modal-storage.com`).

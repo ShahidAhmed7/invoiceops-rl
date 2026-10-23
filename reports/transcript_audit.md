@@ -79,6 +79,15 @@ On `T-7E294F` and `T-11EA31`, **8 of 8** v2 attempts held the invoice with reaso
 
 Only one task scored lower with v2 than with v1 (`T-E673B5`: 3 of 4 against 2 of 4), which is within noise.
 
+## 8. Reference model (Qwen3-30B-A3B FP8, prompt v2): what even the larger model misses
+
+All 96 `test_reference` attempts replay exactly. The model scores 61.5% against the 4B's 41.7% with the same prompt. It never leaves a case open and never misreports its work: 0 false completions. Its failures are policy failures, not omissions:
+
+- **It never asks for approval.** The 30B called `request_approval` 0 times in 96 attempts. On both approval-routing tasks (`T-0A0D10`, `T-0A802E`) it marks the invoice ready for payment and proposes the payment at once: 8 `payment_without_required_approval` violations, and F06 scores 0%. The 4B with v2 does ask (7 calls on test).
+- **It falls back on a generic rule instead of the company's.** On short-receipt tasks where this company pays the received portion (`T-175EBC`, `T-202621`), it reads the receipt correctly (40 of 54 units), then holds the invoice, first as `quantity_exceeds_receipt` and then as `missing_receipt`. F03 scores 0%.
+
+So the hardest families (F06 approval routing, F03 short receipt, F12 stale policy) are hard for the reference too. That fits the suite's design: correct behaviour depends on each company's policy, not on a generic AP habit.
+
 ## What this means for training
 
 - **Train with prompt v2.** On the train split it gives 19 tasks with mixed outcomes, against 7 with v1 (`probe_v2`).

@@ -46,6 +46,7 @@ CALL_MINUTES: dict[str, tuple[int, ...]] = {
     "smoke_train": (20,),
     "probe_and_dev": (30, 20),
     "probe_v2": (25,),
+    "dev_v2": (20,),
     "test_candidate": (32, 32),
     "select_and_test": (40, 10, 30),
 }
@@ -113,6 +114,9 @@ def _jobs() -> dict[str, Callable[[], Any]]:
         "probe_and_dev": probe_and_dev,
         "probe_v2": lambda: _limit(m.invoiceops_eval_l40s, CALL_MINUTES["probe_v2"][0]).remote(
             "probe-train-v2", settings.CANDIDATE_MODEL, splits=["train"], attempts=4, prompt="v2"
+        ),
+        "dev_v2": lambda: _limit(m.invoiceops_eval_l40s, CALL_MINUTES["dev_v2"][0]).remote(
+            "dev-v2", settings.CANDIDATE_MODEL, splits=["dev"], attempts=4, prompt="v2"
         ),
         "test_candidate": test_candidate,
         # Prompt v2: the transcript audit shows v1 mostly measures whether a model guesses that a
