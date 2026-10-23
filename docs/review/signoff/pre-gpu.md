@@ -24,8 +24,10 @@
   `completed/mutation-assessment.md` (suite does not cover the confirmed
   escapes: no withdraw-then-submit or content-varying mutations exist)
 - Attack attempts: 24 tried (14 scripted + 10 manual adversarial sessions,
-  ~40 min active), 9 succeeded — all blocking
-  (`docs/review/completed/attack-log.md`)
+  ~40 min active), 10 succeeded — all blocking
+  (`docs/review/completed/attack-log.md`; one further manual run,
+  manual-adv-07, passed but performed the intended same-key retry, so it is
+  a control, not an attack success)
 - Scripted baselines as expected: yes — oracle 100% every family; no-op 0%;
   always-hold 11.1% (only exception-family cases); always-pay 33.3% (every
   pass is a task whose expected outcome is "pay in full"); random 0%
