@@ -168,6 +168,10 @@ def run_training(config: dict[str, Any], output_root: Path) -> dict[str, Any]:
     return {
         "output": str(out),
         "steps": trainer.state.global_step,
+        "checkpoints": sorted(p.name for p in (out / "checkpoints").glob("checkpoint-*")),
+        "final_adapter_files": sorted(p.name for p in final.iterdir()),
+        # Per-step log (reward, completion lengths, ...); the full file stays on the volume.
+        "log_history": trainer.state.log_history[-10:],
         "rows": len(rows),
         "seconds": time.monotonic() - started,
     }
