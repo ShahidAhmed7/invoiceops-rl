@@ -2,6 +2,17 @@
 
 Sections on serving, tool-call parsing, the learnability probe, the training stack and τ²-bench are added as the jobs in `docs/MODAL_HANDOFF.md` run.
 
+## Serving (smoke_serve_candidate)
+
+- **Stack:** vLLM 0.31.0 on an L40S serves `Qwen/Qwen3-4B-Instruct-2507` at revision `cdbee75f17c01a7cc42f958dc650907174af0554`, with `--max-model-len 131072` and `--gpu-memory-utilization 0.85`.
+- **Memory:** vLLM reported 28.66 GiB of KV cache, room for 208,672 tokens. That is 1.59 full-length requests at once; typical episodes are far shorter.
+- **Tool-call parsing:** the Hermes parser (`--tool-call-parser hermes`) parsed both calls of the two-tool round trip, with the right names and arguments (`roundtrip.ok`).
+- **BFCL smoke (5 cases per category; a pipeline check, not a score):** `simple_python` 5/5, `multi_turn_base` 0/5. `bfcl_before` measures the full categories.
+- **Fixes on the way:**
+  - Images now ship the system prompts. Modal's default copies only `.py` files.
+  - `soundfile` is added to the BFCL environment. `qwen_agent` imports it without declaring it.
+- **BFCL request length:** BFCL asks for at most `min(4096, context − prompt)` new tokens per request, using the model's 262,144 `max_position_embeddings` as the context. Requests therefore stay under 4,096 output tokens and fit the 131,072 server. BFCL's own output cap is left as it is, so scores stay comparable.
+
 ## Context and generation lengths
 
 Measured before any GPU run, over all 72 tasks, with a Qwen2/Qwen3 BPE tokenizer rebuilt from llama.cpp's `ggml-vocab-qwen2.gguf`. Qwen3 uses the same vocabulary. `huggingface.co` was not reachable from the build session. `inspect_models` recounts the main figures with the candidate's own `tokenizer.json` (`token_counts` in `reports/model_verification.json`).

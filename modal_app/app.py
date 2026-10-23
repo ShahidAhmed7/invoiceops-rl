@@ -63,7 +63,9 @@ serve_image = _with_sources(
         f"uv pip install --python /opt/tau2/bin/python "
         f"'tau2 @ git+{settings.TAU2_REPO}@{settings.TAU2_COMMIT}'",
         "uv venv /opt/bfcl --python 3.12",
-        f"uv pip install --python /opt/bfcl/bin/python bfcl-eval=={settings.BFCL_VERSION}",
+        # qwen_agent (imported by bfcl-eval) needs soundfile but does not declare it.
+        f"uv pip install --python /opt/bfcl/bin/python bfcl-eval=={settings.BFCL_VERSION} "
+        "soundfile==0.14.0",
     )
 )
 
