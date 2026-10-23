@@ -5,3 +5,4 @@
 {"cost_usd": 0.2269, "error": null, "gpu": "L40S", "job": "smoke_serve_candidate", "phase": "11A", "rate_usd_per_hour": 2.45, "seconds": 333.4, "started": "2026-10-23T21:07:13Z", "status": "succeeded"}
 {"cost_usd": 0.3147, "error": null, "gpu": "L40S", "job": "probe_and_dev", "phase": "12", "rate_usd_per_hour": 2.45, "seconds": 462.4, "started": "2026-10-23T21:13:12Z", "status": "succeeded"}
 {"cost_usd": 0.0424, "error": "KeyError: 'model'", "gpu": "H100", "job": "smoke_train", "phase": "11B", "rate_usd_per_hour": 4.45, "seconds": 34.3, "started": "2026-10-23T21:22:53Z", "status": "failed"}
+{"cost_usd": 0.3169, "error": null, "gpu": "H100", "job": "smoke_train", "phase": "11B", "rate_usd_per_hour": 4.45, "seconds": 256.4, "started": "2026-10-23T21:25:15Z", "status": "succeeded"}
