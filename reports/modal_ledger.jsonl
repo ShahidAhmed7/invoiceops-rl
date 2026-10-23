@@ -1,0 +1,1 @@
+{"cost_usd": 0.0, "error": "ConnectionError: Could not connect to the Modal server.", "gpu": "CPU", "job": "inspect_models", "phase": "11A", "rate_usd_per_hour": 0.0, "seconds": 397.9, "started": "2026-10-23T20:37:20Z", "status": "failed"}
