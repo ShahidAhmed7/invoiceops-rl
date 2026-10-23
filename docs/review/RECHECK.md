@@ -4,7 +4,7 @@
 
 The first pre-GPU review ([`signoff/pre-gpu.md`](signoff/pre-gpu.md)) was **not approved**. It found two ways to cheat the grader (B1, B2) and one weak task family (F06). The builder has fixed all three; [`builder-response.md`](builder-response.md) explains how.
 
-Your job is to confirm, independently, that the fixes work and broke nothing, then update the sign-off. This is a **targeted** re-check, not a full review. It takes about **2½–3 hours**. Give your honest verdict: if anything below still passes when it should fail, the re-check is not approved.
+Your job is to confirm, independently, that the fixes work and broke nothing, then update the sign-off. This is a **targeted** re-check, not a full review. It takes about **3–3½ hours**. Give your honest verdict: if anything below still passes when it should fail, the re-check is not approved.
 
 Don't fix anything yourself. Record what you find, and the builder makes the changes.
 
@@ -142,6 +142,16 @@ uv run invoiceops evaluate --agent all-scripted --split dev --split test
 uv run invoiceops audit-visibility --task T-DC7A6B > docs/review/completed/recheck-$(date +%F)/visibility-T-DC7A6B.txt
 ```
 
+### 6b: Update and re-run your independent cross-check script (30 minutes)
+
+Your first review's `completed/spec-crosscheck.py` recomputed all 72 outcomes from the source records and the written policy. Run as written against today's tasks, it gives **70/72**: it predicts "pay" for the two new F06 tasks (`T-DC7A6B`, `T-8E32C6`), because it doesn't model approval decisions. It also doesn't yet check the new rules. Update it yourself, so the check stays independent of the builder's code:
+
+1. Copy it to `completed/recheck-<date>/spec-crosscheck.py`. Change its output path (`out=...`) to the recheck folder, so running it **doesn't overwrite** your first review's `spec-crosscheck.md`. Also change its `/tmp/...json` path if you want to keep that file.
+2. Add the approval rule from policy section 8. When approval is needed, the expected approver is the one with the **lowest limit that covers the amount**. If that approver declines, the outcome is `on_hold` / `awaiting_approval` with no payment. (The decline is only visible after asking. The script may read the world's `approval_overrides` to know it, the same way it already reads scripted replies from `events`.)
+3. Add request types: compare the required clarification's `request_types` with the type the policy names (the table in Step 4), not only the recipient roles. When the script adds a scripted receipt reply, also require the reply's `trigger.request_types` to include `receipt_confirmation`.
+4. Optional tidy-up: lint flags the closure over `receipt_qty` (B023) and the variable name `l` (E741). The B023 warning is a false positive here, because `add_receipts` is called within the same loop iteration, but renaming makes that obvious.
+5. Run it. **Expected: 72/72 match.** Any mismatch you can't explain is a blocking finding. Write the result in your sign-off.
+
 Confirm, and note in your sign-off:
 
 - [ ] The mutation report says **975 cases, 0 unexpected**: every mutation rejected, every alternative accepted. Open three of the new mutation kinds (`wrong_proposal_withdrawn_then_corrected`, `approval_from_wrong_level`, `clarification_wrong_request_type`) and check that the rejection reasons make sense.
@@ -164,6 +174,7 @@ Edit `docs/review/signoff/pre-gpu.md`. **Keep everything already there**, and ad
 - R1 T-DC7A6B: ___   R1 T-0A0D10: ___
 - Spec re-read (T-89B109, T-0222C3, T-6C23E6, T-11EA31): all correct yes/no
 - Walkthrough T-6C23E6: tool clear yes/no
+- Cross-check script updated (approval levels, declines, request types): __/72 match
 - Mutation report 975 / 0 unexpected: yes/no
 - Scripted baselines within limits: yes/no
 - Visibility clean for T-DC7A6B: yes/no
@@ -183,6 +194,7 @@ Then update the **Decision** at the end of the file:
 - a fixed habit that passes F06;
 - a wrong request type in any of the four specs;
 - a mutation report with unexpected results;
+- the updated cross-check script disagreeing with an expected outcome you can't explain;
 - the decline note being visible before the approval request.
 
 ## Step 8: Commit and push
