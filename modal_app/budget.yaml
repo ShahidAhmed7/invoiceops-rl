@@ -26,6 +26,8 @@ jobs:
   bfcl_before:            {phase: 11A, gpu: L40S, cap_usd: 0.80,  timeout_min: 35,  needs_signoff: false}
   smoke_train:            {phase: 11B, gpu: H100, cap_usd: 0.85,  timeout_min: 20,  needs_signoff: true}
   probe_and_dev:          {phase: 12,  gpu: L40S, cap_usd: 1.50,  timeout_min: 50,  needs_signoff: true}
+  # Learnability probe with prompt v2 (train split, 4 attempts): decides the training prompt.
+  probe_v2:               {phase: 12,  gpu: L40S, cap_usd: 0.75,  timeout_min: 25,  needs_signoff: true}
   test_candidate:         {phase: 12,  gpu: L40S, cap_usd: 2.00,  timeout_min: 65,  needs_signoff: true}
   test_reference:         {phase: 12,  gpu: H100, cap_usd: 3.00,  timeout_min: 50,  needs_signoff: true}
   train_grpo:             {phase: 13,  gpu: H100, cap_usd: 15.80, timeout_min: 250, needs_signoff: true}

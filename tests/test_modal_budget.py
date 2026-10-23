@@ -16,8 +16,8 @@ def test_caps_fit_total_with_reserve() -> None:
     b = load_budget()
     caps = sum(j.cap_usd for j in b.jobs.values())
     assert b.total_usd == 50.0
-    assert caps == pytest.approx(39.65)
-    assert b.total_usd - caps == pytest.approx(10.35)
+    assert caps == pytest.approx(40.40)
+    assert b.total_usd - caps == pytest.approx(9.60)
 
 
 def test_unconfirmed_rates_refuse_everything() -> None:
