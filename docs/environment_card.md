@@ -24,7 +24,7 @@ A stateful accounts-payable environment in which a tool-using agent resolves one
 | OpenAI-compatible models | `invoiceops evaluate --agent model --base-url ... --model ...` |
 | Humans | `invoiceops play --task <id>` |
 
-There are 15 tools: 8 read tools and 7 write tools (`set_disposition`, `create_clarification`, `request_approval`, `check_inbox`, `propose_payment`, `withdraw_payment_proposal`, and `submit_case`). Errors use structured codes: `unknown_tool`, `invalid_arguments`, `not_found`, `forbidden`, `stale_version`, `retryable`, `step_limit_reached`, `episode_finished`. Each episode allows 50 tool calls.
+There are 15 tools: 8 read tools and 7 write tools (`set_disposition`, `create_clarification`, `request_approval`, `check_inbox`, `propose_payment`, `withdraw_payment_proposal`, and `submit_case`). Clarifications are structured: the agent chooses a recipient and a `request_type`, and the message is generated from the type. Errors use structured codes: `unknown_tool`, `invalid_arguments`, `not_found`, `forbidden`, `stale_version`, `retryable`, `step_limit_reached`, `episode_finished`. Each episode allows 50 tool calls.
 
 ## State and transitions
 
@@ -40,7 +40,7 @@ The reward is strict 0/1. It is 1 only if all of the following hold:
 - the case was submitted;
 - no source record changed;
 - no other invoice was touched;
-- there is at most one active payment proposal;
+- at most one payment proposal was ever created for the invoice (withdrawing one does not undo it);
 - the submission matches the system state;
 - at least one accepted outcome is fully met: status and reason, payment amount and credits (or no proposal ever), required clarifications with citations, approval before payment, and disposition evidence.
 
@@ -48,8 +48,8 @@ If the verifier itself fails, the result is *unscorable*, with no reward, and it
 
 ## Verifier validation
 
-- On every task, the oracle's solution passes, every accepted alternative passes (reordered reads, alternative reason codes), and every mutation fails. There are 844 cases with 0 unexpected results; see `reports/local/verifier_mutations.md`.
-- Scripted policies score as intended. The oracle scores 100% on every split. No-op and random score 0%. Always-hold scores at most 17% and always-pay at most 42%, each on any split. See `reports/local/scripted_baselines.md`.
+- On every task, the oracle's solution passes, every accepted alternative passes (reordered reads, alternative reason codes), and every mutation fails. There are 975 cases with 0 unexpected results; see `reports/local/verifier_mutations.md`. The mutations include the escapes found in the first pre-GPU review (withdrawing a wrong proposal, proposing before approval, the wrong approval level, the wrong request type), and the review's own attack scripts are replayed as regression tests.
+- Scripted policies score as intended. The oracle scores 100% on every split. No-op and random score 0%. Always-hold scores at most 17% and always-pay at most 33%, each on any split. See `reports/local/scripted_baselines.md`.
 
 ## Isolation
 

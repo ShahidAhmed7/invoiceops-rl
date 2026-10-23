@@ -95,13 +95,21 @@ class DispositionArgs(Args):
     note: str = Field(default="", max_length=1000, description="Optional short note.")
 
 
+RequestTypeArg = Literal[
+    "corrected_invoice", "price_confirmation", "receipt_confirmation", "bank_detail_verification"
+]
+
+
 class ClarificationArgs(Args):
-    invoice_id: str = Field(description="Invoice the question is about.")
+    invoice_id: str = Field(description="Invoice the request is about.")
     recipient_role: str = Field(
-        description="Role id to ask, e.g. supplier, procurement, receiving."
+        description="Role id to ask, e.g. supplier, procurement, receiving, vendor_master."
     )
-    question: str = Field(
-        min_length=1, max_length=2000, description="What you need them to do or confirm."
+    request_type: RequestTypeArg = Field(
+        description="What you are asking for: corrected_invoice (supplier issues a corrected "
+        "invoice), price_confirmation (procurement confirms the price or amends the PO), "
+        "receipt_confirmation (receiving confirms and records the goods receipt), "
+        "bank_detail_verification (vendor master verifies the supplier's bank details)."
     )
     evidence_ids: IdList = Field(
         min_length=1, description="The invoice and the records showing the problem."
@@ -231,8 +239,9 @@ TOOLS: tuple[ToolSpec, ...] = (
     ),
     ToolSpec(
         name="create_clarification",
-        description="Send a question to a role (supplier, procurement, receiving, vendor_master, "
-        "...). Replies, if any, arrive through check_inbox.",
+        description="Send a structured request to a role (supplier, procurement, receiving, "
+        "vendor_master). The recipient acts on the request type; replies, if any, arrive "
+        "through check_inbox.",
         args=ClarificationArgs,
         writes=True,
     ),

@@ -4,6 +4,7 @@
     "invoice_id": "INV-64709",
     "outcomes": [
       {
+        "approval_requested_from": [],
         "approval_required": false,
         "clarifications": [
           {
@@ -19,6 +20,9 @@
             ],
             "recipient_roles": [
               "vendor_master"
+            ],
+            "request_types": [
+              "bank_detail_verification"
             ]
           }
         ],

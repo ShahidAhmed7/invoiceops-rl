@@ -4,6 +4,9 @@
     "invoice_id": "INV-41336",
     "outcomes": [
       {
+        "approval_requested_from": [
+          "ap_manager"
+        ],
         "approval_required": false,
         "clarifications": [],
         "evidence": [
@@ -11,22 +14,19 @@
             "INV-41336"
           ]
         ],
-        "label": "pay",
-        "payment": {
-          "amount_minor": 1986450,
-          "credit_note_ids": []
-        },
+        "label": "hold after approver declined",
+        "payment": null,
         "reason_codes": [
-          "matched"
+          "awaiting_approval"
         ],
-        "status": "ready_for_payment"
+        "status": "on_hold"
       }
     ]
   },
   "family": "F06",
   "family_name": "Approval routing",
   "oracle_hint": "",
-  "rationale": "Amount is just under the self-approval limit; no approval is needed.",
+  "rationale": "Amount is at the AP manager's level, and the AP manager declines for a budget reason: the invoice must stay on hold with no payment proposal.",
   "split": "dev",
   "task_id": "T-DC7A6B",
   "variant": 2,

@@ -226,6 +226,64 @@ def run_mutations(bundle: TaskBundle) -> list[MutationResult]:
         ]
         record("hold_flipped_to_ready", "mutation", flip)
 
+    # Escape shapes from the pre-GPU review (B1, B2, F06): every one must be rejected.
+    if pays:
+        pay_index = next(i for i, x in enumerate(base) if x[0] == "propose_payment")
+        real = base[pay_index][1]
+        wrong_first = (
+            "propose_payment",
+            {
+                **real,
+                "amount_minor": real["amount_minor"] + 100,
+                "idempotency_key": real["idempotency_key"] + "-wrong",
+            },
+        )
+        withdraw = ("withdraw_payment_proposal", {"proposal_id": LAST_PROPOSAL, "reason": "fix"})
+        record(
+            "wrong_proposal_withdrawn_then_corrected",
+            "mutation",
+            [*base[:pay_index], wrong_first, withdraw, *base[pay_index:]],
+        )
+        sub_index = base.index(_submit(base))
+        lone = [*base[:sub_index], withdraw, *base[sub_index:]]
+        lone = [
+            (t, {**a, "amount_proposed_minor": 0}) if t == "submit_case" else (t, a)
+            for t, a in lone
+        ]
+        record("only_proposal_withdrawn", "mutation", lone)
+        if primary.approval_required:
+            early = (
+                "propose_payment",
+                {**real, "idempotency_key": real["idempotency_key"] + "-early"},
+            )
+            first_request = next(i for i, x in enumerate(base) if x[0] == "request_approval")
+            record(
+                "proposal_before_approval_withdrawn",
+                "mutation",
+                [*base[:first_request], early, withdraw, *base[first_request:]],
+            )
+    approver_steps = [i for i, x in enumerate(base) if x[0] == "request_approval"]
+    if approver_steps and any(base[i][1]["approver_role"] != "cfo" for i in approver_steps):
+        over = [
+            (t, {**a, "approver_role": "cfo"}) if t == "request_approval" else (t, a)
+            for t, a in base
+        ]
+        record("approval_from_wrong_level", "mutation", over)
+    if any(t == "create_clarification" for t, _ in base):
+        others = {
+            "corrected_invoice": "price_confirmation",
+            "price_confirmation": "corrected_invoice",
+            "receipt_confirmation": "corrected_invoice",
+            "bank_detail_verification": "corrected_invoice",
+        }
+        wrong_type = [
+            (t, {**a, "request_type": others[a["request_type"]]})
+            if t == "create_clarification"
+            else (t, a)
+            for t, a in base
+        ]
+        record("clarification_wrong_request_type", "mutation", wrong_type)
+
     wrong_evidence = [
         (t, {**a, "evidence_ids": [bundle.public.world.company.id]})
         if t == "set_disposition"

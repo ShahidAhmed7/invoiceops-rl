@@ -42,7 +42,7 @@ def always_hold(ep: Episode) -> None:
         {
             "invoice_id": inv["id"],
             "recipient_role": "supplier",
-            "question": "Please send a corrected invoice.",
+            "request_type": "corrected_invoice",
             "evidence_ids": evidence,
             "idempotency_key": "hold-1",
         },
@@ -151,7 +151,9 @@ def make_random(seed: int, steps: int = 15) -> Callable[[Episode], None]:
                 "create_clarification": {
                     "invoice_id": inv["id"],
                     "recipient_role": rng.choice(roles),
-                    "question": "?",
+                    "request_type": rng.choice(
+                        ["corrected_invoice", "price_confirmation", "receipt_confirmation"]
+                    ),
                     "evidence_ids": [inv["id"]],
                     "idempotency_key": f"r{n}",
                 },

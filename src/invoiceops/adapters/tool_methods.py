@@ -147,27 +147,27 @@ class ToolMethods:
         self,
         invoice_id: str,
         recipient_role: str,
-        question: str,
+        request_type: str,
         evidence_ids: list[str],
         idempotency_key: str,
     ) -> str:
-        """Send a question to a role (supplier, procurement, receiving, vendor_master, ...). Replies, if any, arrive through check_inbox.
+        """Send a structured request to a role (supplier, procurement, receiving, vendor_master). The recipient acts on the request type; replies, if any, arrive through check_inbox.
 
         Args:
-            invoice_id: Invoice the question is about.
+            invoice_id: Invoice the request is about.
             recipient_role: Role id to ask, e.g. supplier, procurement, receiving, vendor_master.
-            question: What you need them to do or confirm.
+            request_type: What you are asking for: corrected_invoice (supplier issues a corrected invoice), price_confirmation (procurement confirms the price or amends the PO), receipt_confirmation (receiving confirms and records the goods receipt), bank_detail_verification (vendor master verifies the supplier's bank details).
             evidence_ids: The invoice and the records showing the problem.
             idempotency_key: Unique key for this request; reuse it only when retrying.
 
         Returns:
-            JSON with the clarification id.
+            JSON with the clarification id and the message sent.
         """
         return self._run(
             "create_clarification",
             invoice_id=invoice_id,
             recipient_role=recipient_role,
-            question=question,
+            request_type=request_type,
             evidence_ids=evidence_ids,
             idempotency_key=idempotency_key,
         )

@@ -19,8 +19,8 @@
 | pass^1 | 16.7% |
 | Attempts with a critical violation | 0 |
 | False completions | 0 |
-| Exception cases not paid | 5/5 |
-| Clean cases paid correctly | 0/7 |
+| Exception cases not paid | 6/6 |
+| Clean cases paid correctly | 0/6 |
 | Unscorable attempts (infrastructure) | 0 |
 | Mean tool calls per attempt | 5.0 |
 

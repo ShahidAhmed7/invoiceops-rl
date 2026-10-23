@@ -14,6 +14,7 @@ from invoiceops.domain.records import (
     PolicyParams,
     PurchaseOrder,
     ReasonCode,
+    RequestType,
 )
 from invoiceops.tasks.model import (
     CiteGroups,
@@ -105,9 +106,18 @@ def hold(
     )
 
 
-def ask(roles: tuple[str, ...] | str, *cite: tuple[str, ...]) -> ClarificationRequirement:
+# The request type the written policy names for each recipient (policy sections 3, 4, 5, 9).
+POLICY_REQUEST: dict[str, RequestType] = {
+    "supplier": RequestType.CORRECTED_INVOICE,
+    "procurement": RequestType.PRICE_CONFIRMATION,
+    "receiving": RequestType.RECEIPT_CONFIRMATION,
+    "vendor_master": RequestType.BANK_DETAIL_VERIFICATION,
+}
+
+
+def ask(role: str, *cite: tuple[str, ...]) -> ClarificationRequirement:
     return ClarificationRequirement(
-        recipient_roles=(roles,) if isinstance(roles, str) else roles, cite=tuple(cite)
+        recipient_roles=(role,), request_types=(POLICY_REQUEST[role],), cite=tuple(cite)
     )
 
 

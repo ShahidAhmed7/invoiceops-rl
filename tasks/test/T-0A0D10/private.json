@@ -4,6 +4,7 @@
     "invoice_id": "INV-30638",
     "outcomes": [
       {
+        "approval_requested_from": [],
         "approval_required": true,
         "clarifications": [],
         "evidence": [
@@ -26,7 +27,7 @@
   "family": "F06",
   "family_name": "Approval routing",
   "oracle_hint": "",
-  "rationale": "Amount exceeds the self-approval limit and is within the AP manager's limit.",
+  "rationale": "Amount exceeds the self-approval limit and is at the AP manager's level; approvers above or below that level decline.",
   "split": "test",
   "task_id": "T-0A0D10",
   "variant": 0,

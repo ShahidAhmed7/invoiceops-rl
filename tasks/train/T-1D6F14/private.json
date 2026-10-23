@@ -4,6 +4,7 @@
     "invoice_id": "INV-58844",
     "outcomes": [
       {
+        "approval_requested_from": [],
         "approval_required": false,
         "clarifications": [],
         "evidence": [

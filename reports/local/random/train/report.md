@@ -17,10 +17,10 @@
 | Task-mean success (95% task-bootstrap CI) | 0.0% (0.0% to 0.0%) |
 | pass@1 | 0.0% |
 | pass^1 | 0.0% |
-| Attempts with a critical violation | 20 |
+| Attempts with a critical violation | 34 |
 | False completions | 36 |
-| Exception cases not paid | 1/14 |
-| Clean cases paid correctly | 0/22 |
+| Exception cases not paid | 0/15 |
+| Clean cases paid correctly | 0/21 |
 | Unscorable attempts (infrastructure) | 0 |
 | Mean tool calls per attempt | 18.0 |
 
@@ -45,6 +45,7 @@
 
 | Violation | Attempts |
 |---|---|
-| overpayment_proposed | 4 |
-| payment_proposed_for_unpayable_invoice | 13 |
-| payment_without_required_approval | 3 |
+| duplicate_payment_proposal | 31 |
+| overpayment_proposed | 5 |
+| payment_proposed_for_unpayable_invoice | 15 |
+| payment_without_required_approval | 4 |

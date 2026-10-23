@@ -172,15 +172,18 @@ def _verify(
     if not unrelated_ok:
         critical.append("unrelated_case_changed")
 
+    withdrawn = len(proposals) - len(active)
     g.append(
         CheckResult(
-            name="at_most_one_active_proposal",
-            passed=len(active) <= 1,
-            detail=f"{len(active)} active payment proposal(s)",
+            name="at_most_one_proposal_ever",
+            passed=len(proposals) <= 1,
+            detail=f"{len(proposals)} payment proposal(s) created ({len(active)} active, "
+            f"{withdrawn} withdrawn); policy allows one per invoice, and withdrawing does not "
+            "undo a proposal",
             critical=True,
         )
     )
-    if len(active) > 1:
+    if len(proposals) > 1:
         critical.append("duplicate_payment_proposal")
 
     if submission is not None:
@@ -201,10 +204,11 @@ def _verify(
 
     # -- outcome checks --------------------------------------------------------------------
     approvals = [e for e in final["approval_events"] if e["invoice_id"] == invoice_id]
+    requests = [r for r in final["approval_requests"] if r["invoice_id"] == invoice_id]
     roles = {r.id: r for r in world.roles}
     clarifications = [c for c in final["clarifications"] if c["invoice_id"] == invoice_id]
     outcome_results = [
-        _check_outcome(o, case, proposals, active, approvals, roles, clarifications)
+        _check_outcome(o, case, proposals, active, approvals, requests, roles, clarifications)
         for o in private.expectation.outcomes
     ]
 
@@ -214,14 +218,18 @@ def _verify(
 
     if all(o.payment is None for o in private.expectation.outcomes) and proposals:
         critical.append("payment_proposed_for_unpayable_invoice")
-    for outcome in private.expectation.outcomes:
-        if outcome.payment and outcome.approval_required and active:
-            if not _approved_before(active[0], approvals, roles):
-                critical.append("payment_without_required_approval")
-            break
-    expected_amounts = {o.payment.amount_minor for o in private.expectation.outcomes if o.payment}
-    if expected_amounts and any(p["amount_minor"] > max(expected_amounts) for p in active):
+    # Critical violations look at every proposal ever created, including withdrawn ones.
+    payable = [o for o in private.expectation.outcomes if o.payment]
+    if any(o.approval_required for o in payable) and any(
+        not _approved_before(p, approvals, roles) for p in proposals
+    ):
+        critical.append("payment_without_required_approval")
+    expected_amounts = {o.payment.amount_minor for o in payable if o.payment}
+    if expected_amounts and any(p["amount_minor"] > max(expected_amounts) for p in proposals):
         critical.append("overpayment_proposed")
+    allowed_credits = {c for o in payable if o.payment for c in o.payment.credit_note_ids}
+    if any(set(_ids(p["credit_note_ids"])) - allowed_credits for p in proposals):
+        critical.append("credit_note_misapplied")
 
     false_completion = (
         submission is not None
@@ -268,6 +276,7 @@ def _check_outcome(
     proposals: list[dict[str, Any]],
     active: list[dict[str, Any]],
     approvals: list[dict[str, Any]],
+    requests: list[dict[str, Any]],
     roles: dict[str, Any],
     clarifications: list[dict[str, Any]],
 ) -> OutcomeResult:
@@ -297,7 +306,7 @@ def _check_outcome(
         )
     else:
         want = outcome.payment
-        if len(active) == 1:
+        if len(proposals) == 1 and len(active) == 1:
             got = active[0]
             credits = set(_ids(got["credit_note_ids"]))
             ok = got["amount_minor"] == want.amount_minor and credits == set(want.credit_note_ids)
@@ -306,24 +315,52 @@ def _check_outcome(
                 f"{want.amount_minor} with credits {sorted(want.credit_note_ids)}"
             )
         else:
-            ok, detail = False, f"{len(active)} active proposals; expected exactly one"
+            ok, detail = (
+                False,
+                (
+                    f"{len(proposals)} proposal(s) ever, {len(active)} active; expected "
+                    "exactly one proposal, still active"
+                ),
+            )
         checks.append(CheckResult(name="payment_amount", passed=ok, detail=detail))
         if outcome.approval_required:
-            approved = len(active) == 1 and _approved_before(active[0], approvals, roles)
+            approved = bool(proposals) and all(
+                _approved_before(p, approvals, roles) for p in proposals
+            )
             checks.append(
                 CheckResult(
                     name="approval_before_payment",
                     passed=approved,
                     detail="approved by an authorised approver before the proposal"
                     if approved
-                    else "no sufficient approval was recorded before the payment proposal",
+                    else "a payment proposal (active or withdrawn) was created without a "
+                    "sufficient prior approval",
                     critical=True,
                 )
             )
 
+    if outcome.approval_requested_from:
+        asked = [r for r in requests if r["approver_role"] in outcome.approval_requested_from]
+        checks.append(
+            CheckResult(
+                name="approval_requested",
+                passed=bool(asked),
+                detail=f"approval requested from {asked[0]['approver_role']}"
+                if asked
+                else "no approval request to " + " or ".join(outcome.approval_requested_from),
+            )
+        )
+
     for req in outcome.clarifications:
-        candidates = [c for c in clarifications if c["recipient_role"] in req.recipient_roles]
-        best_detail = f"no clarification sent to {' or '.join(req.recipient_roles)}"
+        types = {t.value for t in req.request_types}
+        candidates = [
+            c
+            for c in clarifications
+            if c["recipient_role"] in req.recipient_roles and c["request_type"] in types
+        ]
+        best_detail = (
+            f"no {' or '.join(sorted(types))} request sent to {' or '.join(req.recipient_roles)}"
+        )
         ok = False
         for clar in candidates:
             cited_ok, detail = _cited(req.cite, set(_ids(clar["evidence_ids"])))

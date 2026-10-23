@@ -27,11 +27,13 @@ from invoiceops.domain.records import (
     POLine,
     PurchaseOrder,
     ReceiptLine,
+    RequestType,
     Role,
     Vendor,
 )
 from invoiceops.domain.world import (
     AGENT_ROLE_ID,
+    ApprovalOverride,
     ClarificationTrigger,
     EventEffects,
     Fault,
@@ -76,6 +78,7 @@ class ScenarioBuilder:
         self.policies: list[PolicyVersion] = []
         self.events: list[ScriptedEvent] = []
         self.faults: list[Fault] = []
+        self.approval_overrides: list[ApprovalOverride] = []
         self._reserved_ids: set[str] = set()
         for vendor_spec in spec.vendors:
             self.vendors[vendor_spec.key] = self._vendor(vendor_spec)
@@ -396,12 +399,15 @@ class ScenarioBuilder:
         recipient_roles: tuple[str, ...],
         from_role: str,
         message: str,
+        request_types: tuple[RequestType, ...],
         documents: tuple[Document, ...] = (),
         receipts: tuple[GoodsReceipt, ...] = (),
     ) -> ScriptedEvent:
         record = ScriptedEvent(
             id=f"EV-{len(self.events) + 1}",
-            trigger=ClarificationTrigger(invoice_id=invoice.id, recipient_roles=recipient_roles),
+            trigger=ClarificationTrigger(
+                invoice_id=invoice.id, recipient_roles=recipient_roles, request_types=request_types
+            ),
             from_role=from_role,
             message=message,
             effects=EventEffects(documents=documents, receipts=receipts),
@@ -450,4 +456,5 @@ class ScenarioBuilder:
             queue=tuple(queue),
             events=tuple(self.events),
             faults=tuple(self.faults),
+            approval_overrides=tuple(self.approval_overrides),
         )

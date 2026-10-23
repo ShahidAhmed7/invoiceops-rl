@@ -4,6 +4,7 @@
     "invoice_id": "INV-52232",
     "outcomes": [
       {
+        "approval_requested_from": [],
         "approval_required": true,
         "clarifications": [],
         "evidence": [
@@ -26,7 +27,7 @@
   "family": "F06",
   "family_name": "Approval routing",
   "oracle_hint": "",
-  "rationale": "Amount exceeds the AP manager's limit; the controller (or CFO) must approve.",
+  "rationale": "Amount exceeds the self-approval limit and is at the controller's level; approvers above or below that level decline.",
   "split": "test",
   "task_id": "T-0A802E",
   "variant": 1,

@@ -4,6 +4,7 @@
     "invoice_id": "INV-66433",
     "outcomes": [
       {
+        "approval_requested_from": [],
         "approval_required": false,
         "clarifications": [
           {
@@ -17,6 +18,9 @@
             ],
             "recipient_roles": [
               "procurement"
+            ],
+            "request_types": [
+              "price_confirmation"
             ]
           }
         ],

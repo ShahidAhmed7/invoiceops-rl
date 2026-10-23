@@ -13,14 +13,14 @@
 | Metric | Value |
 |---|---|
 | Tasks x attempts | 12 x 1 |
-| Strict success (all scored attempts) | 41.7% |
-| Task-mean success (95% task-bootstrap CI) | 41.7% (16.7% to 66.7%) |
-| pass@1 | 41.7% |
-| pass^1 | 41.7% |
-| Attempts with a critical violation | 7 |
+| Strict success (all scored attempts) | 33.3% |
+| Task-mean success (95% task-bootstrap CI) | 33.3% (8.3% to 58.3%) |
+| pass@1 | 33.3% |
+| pass^1 | 33.3% |
+| Attempts with a critical violation | 8 |
 | False completions | 0 |
-| Exception cases not paid | 0/5 |
-| Clean cases paid correctly | 5/7 |
+| Exception cases not paid | 0/6 |
+| Clean cases paid correctly | 4/6 |
 | Unscorable attempts (infrastructure) | 0 |
 | Mean tool calls per attempt | 5.0 |
 
@@ -33,7 +33,7 @@
 | F03 | 0.0% |
 | F04 | 100.0% |
 | F05 | 100.0% |
-| F06 | 100.0% |
+| F06 | 0.0% |
 | F07 | 100.0% |
 | F08 | 0.0% |
 | F09 | 0.0% |
@@ -45,5 +45,5 @@
 
 | Violation | Attempts |
 |---|---|
-| payment_proposed_for_unpayable_invoice | 5 |
+| payment_proposed_for_unpayable_invoice | 6 |
 | payment_without_required_approval | 2 |

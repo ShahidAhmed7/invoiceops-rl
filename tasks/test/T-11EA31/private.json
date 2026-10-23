@@ -4,6 +4,7 @@
     "invoice_id": "INV-23154",
     "outcomes": [
       {
+        "approval_requested_from": [],
         "approval_required": false,
         "clarifications": [
           {
@@ -18,6 +19,9 @@
             ],
             "recipient_roles": [
               "supplier"
+            ],
+            "request_types": [
+              "corrected_invoice"
             ]
           }
         ],

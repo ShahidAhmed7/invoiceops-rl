@@ -18,12 +18,12 @@
       "F11": 1.0,
       "F12": 1.0
     },
-    "clean_cases_paid_correctly": "22/22",
+    "clean_cases_paid_correctly": "21/21",
     "critical_violations": {},
-    "exception_cases_not_paid": "14/14",
+    "exception_cases_not_paid": "15/15",
     "false_completions": 0,
     "infrastructure_errors": [],
-    "mean_tool_calls": 10.277777777777779,
+    "mean_tool_calls": 10.305555555555555,
     "pass@1": 1.0,
     "pass^1": 1.0,
     "scored_attempts": 36,
@@ -60,12 +60,12 @@
       "F11": 1.0,
       "F12": 1.0
     },
-    "clean_cases_paid_correctly": "7/7",
+    "clean_cases_paid_correctly": "6/6",
     "critical_violations": {},
-    "exception_cases_not_paid": "5/5",
+    "exception_cases_not_paid": "6/6",
     "false_completions": 0,
     "infrastructure_errors": [],
-    "mean_tool_calls": 10.5,
+    "mean_tool_calls": 10.583333333333334,
     "pass@1": 1.0,
     "pass^1": 1.0,
     "scored_attempts": 12,
@@ -144,9 +144,9 @@
       "F11": 0.0,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "0/22",
+    "clean_cases_paid_correctly": "0/21",
     "critical_violations": {},
-    "exception_cases_not_paid": "14/14",
+    "exception_cases_not_paid": "15/15",
     "false_completions": 36,
     "infrastructure_errors": [],
     "mean_tool_calls": 2.0,
@@ -186,9 +186,9 @@
       "F11": 0.0,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "0/7",
+    "clean_cases_paid_correctly": "0/6",
     "critical_violations": {},
-    "exception_cases_not_paid": "5/5",
+    "exception_cases_not_paid": "6/6",
     "false_completions": 12,
     "infrastructure_errors": [],
     "mean_tool_calls": 2.0,
@@ -270,9 +270,9 @@
       "F11": 0.0,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "0/22",
+    "clean_cases_paid_correctly": "0/21",
     "critical_violations": {},
-    "exception_cases_not_paid": "14/14",
+    "exception_cases_not_paid": "15/15",
     "false_completions": 0,
     "infrastructure_errors": [],
     "mean_tool_calls": 5.0,
@@ -312,9 +312,9 @@
       "F11": 0.0,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "0/7",
+    "clean_cases_paid_correctly": "0/6",
     "critical_violations": {},
-    "exception_cases_not_paid": "5/5",
+    "exception_cases_not_paid": "6/6",
     "false_completions": 0,
     "infrastructure_errors": [],
     "mean_tool_calls": 5.0,
@@ -380,7 +380,7 @@
   {
     "agent": "always_pay",
     "attempts_per_task": 1,
-    "attempts_with_critical_violation": 23,
+    "attempts_with_critical_violation": 24,
     "blocked_attempts": 0,
     "by_family": {
       "F01": 0.6666666666666666,
@@ -388,7 +388,7 @@
       "F03": 0.0,
       "F04": 0.3333333333333333,
       "F05": 0.6666666666666666,
-      "F06": 0.3333333333333333,
+      "F06": 0.0,
       "F07": 0.3333333333333333,
       "F08": 0.0,
       "F09": 0.3333333333333333,
@@ -396,25 +396,25 @@
       "F11": 0.3333333333333333,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "12/22",
+    "clean_cases_paid_correctly": "11/21",
     "critical_violations": {
       "overpayment_proposed": 5,
-      "payment_proposed_for_unpayable_invoice": 14,
+      "payment_proposed_for_unpayable_invoice": 15,
       "payment_without_required_approval": 4
     },
-    "exception_cases_not_paid": "0/14",
+    "exception_cases_not_paid": "0/15",
     "false_completions": 0,
     "infrastructure_errors": [],
     "mean_tool_calls": 5.0,
-    "pass@1": 0.3333333333333333,
-    "pass^1": 0.3333333333333333,
+    "pass@1": 0.3055555555555556,
+    "pass^1": 0.3055555555555556,
     "scored_attempts": 36,
     "split": "train",
-    "strict_success": 0.3333333333333333,
-    "task_mean_success": 0.3333333333333333,
+    "strict_success": 0.3055555555555556,
+    "task_mean_success": 0.3055555555555556,
     "task_mean_success_ci95": [
-      0.19444444444444445,
-      0.5
+      0.16666666666666666,
+      0.4722222222222222
     ],
     "tasks": 36,
     "tokens": {
@@ -426,7 +426,7 @@
   {
     "agent": "always_pay",
     "attempts_per_task": 1,
-    "attempts_with_critical_violation": 7,
+    "attempts_with_critical_violation": 8,
     "blocked_attempts": 0,
     "by_family": {
       "F01": 0.0,
@@ -434,7 +434,7 @@
       "F03": 0.0,
       "F04": 1.0,
       "F05": 1.0,
-      "F06": 1.0,
+      "F06": 0.0,
       "F07": 1.0,
       "F08": 0.0,
       "F09": 0.0,
@@ -442,24 +442,24 @@
       "F11": 0.0,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "5/7",
+    "clean_cases_paid_correctly": "4/6",
     "critical_violations": {
-      "payment_proposed_for_unpayable_invoice": 5,
+      "payment_proposed_for_unpayable_invoice": 6,
       "payment_without_required_approval": 2
     },
-    "exception_cases_not_paid": "0/5",
+    "exception_cases_not_paid": "0/6",
     "false_completions": 0,
     "infrastructure_errors": [],
     "mean_tool_calls": 5.0,
-    "pass@1": 0.4166666666666667,
-    "pass^1": 0.4166666666666667,
+    "pass@1": 0.3333333333333333,
+    "pass^1": 0.3333333333333333,
     "scored_attempts": 12,
     "split": "dev",
-    "strict_success": 0.4166666666666667,
-    "task_mean_success": 0.4166666666666667,
+    "strict_success": 0.3333333333333333,
+    "task_mean_success": 0.3333333333333333,
     "task_mean_success_ci95": [
-      0.16666666666666666,
-      0.6666666666666666
+      0.08333333333333333,
+      0.5833333333333334
     ],
     "tasks": 12,
     "tokens": {
@@ -517,8 +517,8 @@
   {
     "agent": "random",
     "attempts_per_task": 1,
-    "attempts_with_critical_violation": 20,
-    "blocked_attempts": 41,
+    "attempts_with_critical_violation": 34,
+    "blocked_attempts": 31,
     "by_family": {
       "F01": 0.0,
       "F02": 0.0,
@@ -533,13 +533,14 @@
       "F11": 0.0,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "0/22",
+    "clean_cases_paid_correctly": "0/21",
     "critical_violations": {
-      "overpayment_proposed": 4,
-      "payment_proposed_for_unpayable_invoice": 13,
-      "payment_without_required_approval": 3
+      "duplicate_payment_proposal": 31,
+      "overpayment_proposed": 5,
+      "payment_proposed_for_unpayable_invoice": 15,
+      "payment_without_required_approval": 4
     },
-    "exception_cases_not_paid": "1/14",
+    "exception_cases_not_paid": "0/15",
     "false_completions": 36,
     "infrastructure_errors": [],
     "mean_tool_calls": 18.0,
@@ -563,8 +564,8 @@
   {
     "agent": "random",
     "attempts_per_task": 1,
-    "attempts_with_critical_violation": 6,
-    "blocked_attempts": 14,
+    "attempts_with_critical_violation": 11,
+    "blocked_attempts": 10,
     "by_family": {
       "F01": 0.0,
       "F02": 0.0,
@@ -579,12 +580,13 @@
       "F11": 0.0,
       "F12": 0.0
     },
-    "clean_cases_paid_correctly": "0/7",
+    "clean_cases_paid_correctly": "0/6",
     "critical_violations": {
-      "payment_proposed_for_unpayable_invoice": 5,
-      "payment_without_required_approval": 1
+      "duplicate_payment_proposal": 10,
+      "payment_proposed_for_unpayable_invoice": 6,
+      "payment_without_required_approval": 2
     },
-    "exception_cases_not_paid": "0/5",
+    "exception_cases_not_paid": "0/6",
     "false_completions": 12,
     "infrastructure_errors": [],
     "mean_tool_calls": 18.0,
@@ -608,8 +610,8 @@
   {
     "agent": "random",
     "attempts_per_task": 1,
-    "attempts_with_critical_violation": 14,
-    "blocked_attempts": 27,
+    "attempts_with_critical_violation": 23,
+    "blocked_attempts": 21,
     "by_family": {
       "F01": 0.0,
       "F02": 0.0,
@@ -626,11 +628,12 @@
     },
     "clean_cases_paid_correctly": "0/15",
     "critical_violations": {
+      "duplicate_payment_proposal": 21,
       "overpayment_proposed": 5,
-      "payment_proposed_for_unpayable_invoice": 7,
+      "payment_proposed_for_unpayable_invoice": 9,
       "payment_without_required_approval": 2
     },
-    "exception_cases_not_paid": "2/9",
+    "exception_cases_not_paid": "0/9",
     "false_completions": 24,
     "infrastructure_errors": [],
     "mean_tool_calls": 18.0,

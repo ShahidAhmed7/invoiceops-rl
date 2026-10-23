@@ -12,8 +12,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from invoiceops.domain.money import format_minor
-from invoiceops.domain.records import CaseStatus, PartialInvoiceRule, PolicyParams, ReasonCode
-from invoiceops.domain.world import Fault
+from invoiceops.domain.records import (
+    CaseStatus,
+    PartialInvoiceRule,
+    PolicyParams,
+    ReasonCode,
+    RequestType,
+)
+from invoiceops.domain.world import ApprovalOverride, Fault
 from invoiceops.families.common import (
     Scenario,
     ask,
@@ -298,22 +304,49 @@ def f06_approval(b: ScenarioBuilder, variant: int) -> Scenario:
     s = b.spec
     d = standard_dates(b)
     item = max(s.items, key=lambda i: i.unit_price_minor)
-    if variant == 0:
-        target = (s.self_approval_limit_minor + s.manager_limit_minor) // 2
-        why = "Amount exceeds the self-approval limit and is within the AP manager's limit."
-    elif variant == 1:
+    if variant == 1:
         target = (s.manager_limit_minor + s.controller_limit_minor) // 2
-        why = "Amount exceeds the AP manager's limit; the controller (or CFO) must approve."
     else:
-        target = s.self_approval_limit_minor - item.unit_price_minor * 2
-        why = "Amount is just under the self-approval limit; no approval is needed."
+        target = (s.self_approval_limit_minor + s.manager_limit_minor) // 2
     qty = max(1, target // item.unit_price_minor)
     po = b.po("d", [(item, qty, item.unit_price_minor)], d.approved)
     b.receipt(po, {1: qty}, d.received)
     inv = b.invoice(po, {1: qty}, d.invoiced)
+    if variant == 2:
+        b.approval_overrides.append(
+            ApprovalOverride(
+                invoice_id=inv.id,
+                approver_role="ap_manager",
+                note=f"the {po.department} department has used its quarterly budget. Do not pay "
+                f"{inv.id} until finance confirms funding; keep it on hold.",
+            )
+        )
+        return Scenario(
+            invoice=inv,
+            outcomes=[
+                Outcome(
+                    label="hold after approver declined",
+                    status=CaseStatus.ON_HOLD,
+                    reason_codes=(R.AWAITING_APPROVAL,),
+                    payment=None,
+                    approval_requested_from=("ap_manager",),
+                    evidence=((inv.id,),),
+                )
+            ],
+            rationale="Amount is at the AP manager's level, and the AP manager declines for a "
+            "budget reason: the invoice must stay on hold with no payment proposal.",
+            difficulty="intermediate",
+        )
     outcome = pay(params, inv, inv.total_minor, (R.MATCHED,))
-    assert outcome.approval_required == (variant != 2)
-    return Scenario(invoice=inv, outcomes=[outcome], rationale=why, difficulty="intermediate")
+    assert outcome.approval_required
+    level = "AP manager" if variant == 0 else "controller"
+    return Scenario(
+        invoice=inv,
+        outcomes=[outcome],
+        rationale=f"Amount exceeds the self-approval limit and is at the {level}'s level; "
+        "approvers above or below that level decline.",
+        difficulty="intermediate",
+    )
 
 
 # -- F07 vendor-detail conflict --------------------------------------------------------------
@@ -393,6 +426,7 @@ def f08_missing_receipt(b: ScenarioBuilder, variant: int) -> Scenario:
             "receiving",
             f"Found it: the delivery for {po.id} was booked late. Receipt {grn.id} is now "
             "recorded.",
+            request_types=(RequestType.RECEIPT_CONFIRMATION,),
             receipts=(grn,),
         )
         return Scenario(
@@ -411,6 +445,7 @@ def f08_missing_receipt(b: ScenarioBuilder, variant: int) -> Scenario:
             "receiving",
             f"Checked the dock log for {po.id}: only part of the order arrived. Receipt "
             f"{grn.id} records what we received.",
+            request_types=(RequestType.RECEIPT_CONFIRMATION,),
             receipts=(grn,),
         )
         outcome = quantity_outcome(
@@ -435,6 +470,7 @@ def f08_missing_receipt(b: ScenarioBuilder, variant: int) -> Scenario:
         "receiving",
         f"Nothing has been delivered against {po.id} yet. The carrier expects delivery "
         "next week; we will book a receipt when it arrives.",
+        request_types=(RequestType.RECEIPT_CONFIRMATION,),
     )
     return Scenario(
         invoice=inv,

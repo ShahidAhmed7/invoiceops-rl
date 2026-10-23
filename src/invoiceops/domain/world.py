@@ -17,6 +17,7 @@ from invoiceops.domain.records import (
     PurchaseOrder,
     Record,
     RecordId,
+    RequestType,
     Role,
     Vendor,
 )
@@ -25,11 +26,13 @@ AGENT_ROLE_ID = "ap_assistant"
 
 
 class ClarificationTrigger(Record):
-    """Fires once a clarification about ``invoice_id`` was sent to one of ``recipient_roles``."""
+    """Fires once a clarification about ``invoice_id`` of one of ``request_types`` was sent to
+    one of ``recipient_roles``."""
 
     kind: Literal["clarification"] = "clarification"
     invoice_id: RecordId
     recipient_roles: tuple[RecordId, ...]
+    request_types: tuple[RequestType, ...]
 
 
 class EventEffects(Record):
@@ -45,6 +48,15 @@ class ScriptedEvent(Record):
     from_role: RecordId
     message: str
     effects: EventEffects = EventEffects()
+
+
+class ApprovalOverride(Record):
+    """A scripted refusal: the named approver declines requests for this invoice even though
+    the amount is within their authority (for example, a departmental budget freeze)."""
+
+    invoice_id: RecordId
+    approver_role: RecordId
+    note: str
 
 
 class Fault(Record):
@@ -74,6 +86,7 @@ class World(Record):
     queue: tuple[RecordId, ...]
     events: tuple[ScriptedEvent, ...] = ()
     faults: tuple[Fault, ...] = ()
+    approval_overrides: tuple[ApprovalOverride, ...] = ()
 
     @model_validator(mode="after")
     def _check_integrity(self) -> World:
@@ -213,6 +226,12 @@ def integrity_problems(world: World) -> list[str]:
             problems.append(f"queue references unknown invoice {invoice_id}")
         if invoice_id in paid_invoices:
             problems.append(f"queued invoice {invoice_id} already has a payment")
+
+    for override in world.approval_overrides:
+        if override.invoice_id not in invoices:
+            problems.append(f"approval override references unknown invoice {override.invoice_id}")
+        if not any(r.id == override.approver_role and r.can_approve for r in world.roles):
+            problems.append(f"approval override names non-approver {override.approver_role}")
 
     for event in world.events:
         if event.from_role not in role_ids:

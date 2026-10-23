@@ -16,9 +16,9 @@
     "F11": 0.0,
     "F12": 0.0
   },
-  "clean_cases_paid_correctly": "0/7",
+  "clean_cases_paid_correctly": "0/6",
   "critical_violations": {},
-  "exception_cases_not_paid": "5/5",
+  "exception_cases_not_paid": "6/6",
   "false_completions": 12,
   "infrastructure_errors": [],
   "mean_tool_calls": 2.0,

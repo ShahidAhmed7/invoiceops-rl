@@ -6,18 +6,18 @@ solvability; it is not an agent baseline.
 
 | Agent | Split | Tasks | Success | Attempts with critical violation | Exception cases not paid | Clean cases paid correctly |
 |---|---|---|---|---|---|---|
-| oracle | train | 36 | 100.0% | 0 | 14/14 | 22/22 |
-| oracle | dev | 12 | 100.0% | 0 | 5/5 | 7/7 |
+| oracle | train | 36 | 100.0% | 0 | 15/15 | 21/21 |
+| oracle | dev | 12 | 100.0% | 0 | 6/6 | 6/6 |
 | oracle | test | 24 | 100.0% | 0 | 9/9 | 15/15 |
-| noop | train | 36 | 0.0% | 0 | 14/14 | 0/22 |
-| noop | dev | 12 | 0.0% | 0 | 5/5 | 0/7 |
+| noop | train | 36 | 0.0% | 0 | 15/15 | 0/21 |
+| noop | dev | 12 | 0.0% | 0 | 6/6 | 0/6 |
 | noop | test | 24 | 0.0% | 0 | 9/9 | 0/15 |
-| always_hold | train | 36 | 13.9% | 0 | 14/14 | 0/22 |
-| always_hold | dev | 12 | 16.7% | 0 | 5/5 | 0/7 |
+| always_hold | train | 36 | 13.9% | 0 | 15/15 | 0/21 |
+| always_hold | dev | 12 | 16.7% | 0 | 6/6 | 0/6 |
 | always_hold | test | 24 | 8.3% | 0 | 9/9 | 0/15 |
-| always_pay | train | 36 | 33.3% | 23 | 0/14 | 12/22 |
-| always_pay | dev | 12 | 41.7% | 7 | 0/5 | 5/7 |
+| always_pay | train | 36 | 30.6% | 24 | 0/15 | 11/21 |
+| always_pay | dev | 12 | 33.3% | 8 | 0/6 | 4/6 |
 | always_pay | test | 24 | 29.2% | 16 | 0/9 | 7/15 |
-| random | train | 36 | 0.0% | 20 | 1/14 | 0/22 |
-| random | dev | 12 | 0.0% | 6 | 0/5 | 0/7 |
-| random | test | 24 | 0.0% | 14 | 2/9 | 0/15 |
+| random | train | 36 | 0.0% | 34 | 0/15 | 0/21 |
+| random | dev | 12 | 0.0% | 11 | 0/6 | 0/6 |
+| random | test | 24 | 0.0% | 23 | 0/9 | 0/15 |

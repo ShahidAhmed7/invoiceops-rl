@@ -141,27 +141,24 @@ def test_scripted_event_needs_its_trigger_and_fires_once() -> None:
     po = next(i.po_id for i in ep.world.invoices if i.id == inv)
     assert ep.step("check_inbox")["result"]["messages"] == []
     assert ep.step("get_receipts", {"po_id": po})["result"]["receipts"] == []
-    ep.step(
-        "create_clarification",
-        {
-            "invoice_id": inv,
-            "recipient_role": "supplier",
-            "question": "?",
-            "evidence_ids": [inv],
-            "idempotency_key": "c",
-        },
-    )
+
+    def clarify(role: str, request_type: str, key: str) -> None:
+        ep.step(
+            "create_clarification",
+            {
+                "invoice_id": inv,
+                "recipient_role": role,
+                "request_type": request_type,
+                "evidence_ids": [inv],
+                "idempotency_key": key,
+            },
+        )
+
+    clarify("supplier", "receipt_confirmation", "c")
     assert ep.step("check_inbox")["result"]["messages"] == []  # wrong recipient
-    ep.step(
-        "create_clarification",
-        {
-            "invoice_id": inv,
-            "recipient_role": "receiving",
-            "question": "?",
-            "evidence_ids": [inv],
-            "idempotency_key": "d",
-        },
-    )
+    clarify("receiving", "corrected_invoice", "w")
+    assert ep.step("check_inbox")["result"]["messages"] == []  # right recipient, wrong request
+    clarify("receiving", "receipt_confirmation", "d")
     assert len(ep.step("check_inbox")["result"]["messages"]) == 1
     assert ep.step("check_inbox")["result"]["messages"] == []
     assert len(ep.step("get_receipts", {"po_id": po})["result"]["receipts"]) == 1

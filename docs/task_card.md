@@ -8,8 +8,8 @@
 
 | Split | Pay | Hold | Reject |
 |---|---|---|---|
-| Train | 22 | 12 | 2 |
-| Dev | 7 | 5 | 0 |
+| Train | 21 | 13 | 2 |
+| Dev | 6 | 6 | 0 |
 | Test | 15 | 7 | 2 |
 
 Many "pay" tasks also need an approval, a credit-note deduction, a partial amount, or a follow-up, so paying the invoiced amount without checking passes only a minority of them.
@@ -23,7 +23,7 @@ Many "pay" tasks also need an approval, a credit-note deduction, a partial amoun
 | F03 | Short receipt | per company rule: hold for a corrected invoice, or pay the received portion |
 | F04 | Duplicate invoice | same supplier number; same PO, total, and date; look-alike that is not a duplicate |
 | F05 | Credit note | open credit for this invoice; credit already used; credit for another invoice |
-| F06 | Approval routing | manager range; controller range; under the self-approval limit |
+| F06 | Approval routing | AP manager's level; controller's level; right approver declines (hold) |
 | F07 | Vendor-detail conflict | changed bank account; unverified supplier; harmless notice |
 | F08 | Missing receipt, staged | receipt arrives; partial receipt arrives; still not delivered |
 | F09 | Shared PO capacity | fits the remaining quantity; exceeds it; partially received |
@@ -43,7 +43,7 @@ Many "pay" tasks also need an approval, a credit-note deduction, a partial amoun
 ## Authorship and review
 
 - Authored by the project builder with code. No real company data is used; every name is invented, and supplier email domains use `.example`.
-- **Review status: not yet reviewed.** Human review follows [`review/PRE_GPU_REVIEW.md`](review/PRE_GPU_REVIEW.md). Until an AP practitioner signs off, the suite is labelled a fictional policy simulator.
+- **Review status:** first pre-GPU review completed and **not approved** ([sign-off](review/signoff/pre-gpu.md)). Its findings are fixed ([builder response](review/builder-response.md)) and a re-check is pending. No AP practitioner has reviewed the suite, so it is labelled a fictional policy simulator.
 
 ## Additional training instances
 

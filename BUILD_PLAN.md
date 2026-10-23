@@ -37,14 +37,14 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 | 1 | Domain model and state engine | No | **Done**: integer-cent money, strict records, SQLite store with immutability triggers |
 | 2 | Worlds, policies, and the world generator | No | **Done**: 12 fictional companies, policy text rendered from parameters, deterministic builder |
 | 3 | Tools, episodes, and scripted events | No | **Done**: 15 tools, idempotency, optimistic versions, fault injection, event engine |
-| 4 | Verifier, reward, and verifier validation | No | **Done**: 844 mutation and alternative cases, 0 unexpected (`reports/local/verifier_mutations.md`) |
+| 4 | Verifier, reward, and verifier validation | No | **Done**: 975 mutation and alternative cases, 0 unexpected (`reports/local/verifier_mutations.md`) |
 | 5 | First vertical slice (short shipment + clean match) | No | **Done**: Northstar INV-8807 / PO-1042 / GRN-31 task and paired clean match |
 | 6 | Full task suite (12 families, 12 worlds, 72 tasks) | No | **Done**: 72 tasks, oracle 72/72, leakage check clean |
 | 7 | Agent interfaces (OpenEnv server, TRL adapter, runners, play CLI, replay) | No | **Done**: `openenv validate` passes static and runtime levels; three adapters give identical results |
 | 8 | Container packaging and isolation tests | No | **Done**: agent and verifier images; `scripts/container_check.py` passes |
 | 9 | Local evaluation pipeline with scripted policies | No | **Done**: `reports/local/scripted_baselines.md` |
 | 11A | Modal setup, serving checks, and external-benchmark baselines (τ²-bench, BFCL) | Yes (≈ $9.95) | Code ready, not yet run; blocked only by Modal access ([runbook](docs/MODAL_RUNBOOK.md)) |
-| 10 | **Gate: pre-GPU human review** (for runs that use our tasks) | No | **Ready for the reviewer** ([checklist](docs/review/PRE_GPU_REVIEW.md)) |
+| 10 | **Gate: pre-GPU human review** (for runs that use our tasks) | No | First review **not approved** (2 verifier escapes, 1 family weakness); all fixed ([builder response](docs/review/builder-response.md)); re-check pending |
 | 11B | GRPO compatibility smoke test on our tasks | Yes (≈ $0.85) | Code ready; blocked by Phase 10 |
 | 12 | Baseline evaluation on our tasks | Yes (≈ $6.50) | Code ready; blocked by Phase 11B |
 | 13 | GRPO training experiment | Yes (≈ $15.80) | Code ready; blocked by Phase 12 |
@@ -295,7 +295,7 @@ invoiceops-rl/
 │   ├── runs.py                   # Saved episode records
 │   └── cli.py                    # `invoiceops` command
 ├── tasks/{train,dev,test}/<task_id>/{public.json,private.json}  # generated, checked in CI
-├── tests/                        # 214 tests: unit, property, adapters, verifier mutations
+├── tests/                        # 245 tests: unit, property, adapters, verifier mutations, review regressions
 ├── scripts/                      # local_baselines.py, container_check.py
 ├── containers/                   # Agent-facing env image and offline verifier image
 ├── modal_app/                    # Modal app, budget guard, drivers, training job, locked requirements
@@ -375,8 +375,8 @@ Where two codes are equally defensible for one situation, the task's expected ou
 | `get_document(document_id)` | Policy, message, or attachment, with source and version. |
 | `get_history(vendor_id, po_id)` | Prior invoices, payments, credit notes, matched quantities. |
 | `set_disposition(invoice_id, status, reason_code, evidence_ids, expected_version, note)` | Updates the case; optimistic concurrency. |
-| `create_clarification(invoice_id, recipient_role, question, evidence_ids, idempotency_key)` | Records a simulated request. |
-| `request_approval(invoice_id, approver_role, amount_minor, evidence_ids, idempotency_key)` | Routes an approval request; cannot create the decision. |
+| `create_clarification(invoice_id, recipient_role, request_type, evidence_ids, idempotency_key)` | Records a structured request (`corrected_invoice`, `price_confirmation`, `receipt_confirmation`, `bank_detail_verification`); the message sent is generated from the type. |
+| `request_approval(invoice_id, approver_role, amount_minor, evidence_ids, idempotency_key)` | Routes an approval request; cannot create the decision. Approvers act only at their own level (the lowest limit that covers the amount). |
 | `check_inbox()` | Releases scripted responses whose trigger conditions are met. Deterministic. Never creates a favourable fact without a valid prior request. |
 | `propose_payment(invoice_id, amount_minor, credit_note_ids, evidence_ids, idempotency_key)` | Records a simulated proposal. Moves no money. Duplicates are prevented by the idempotency key, not a version. |
 | `withdraw_payment_proposal(proposal_id, reason)` | Withdraws a proposal; the history keeps it. |
@@ -397,7 +397,7 @@ Error codes: `not_found`, `forbidden`, `invalid_arguments`, `stale_version`, `re
 | F03 | Short receipt | The world's partial-invoice rule (hold and request a corrected invoice, or pay the received portion). |
 | F04 | Duplicate invoice | Recognising the same liability under a different document ID; rejecting it with a link to the original. |
 | F05 | Credit note | Applying a valid credit exactly once; not re-applying one already used in payment history. |
-| F06 | Approval routing | Requesting approval from a role with enough authority, waiting for the decision, and only then proposing. |
+| F06 | Approval routing | Requesting approval from the approver at the right level, waiting for the decision, proposing only if approved, and holding the invoice if the approver declines. |
 | F07 | Vendor-detail conflict | Not paying to unverified bank details; holding and routing to vendor verification. |
 | F08 | Missing receipt, staged | Holding, asking receiving, then completing correctly once the receipt arrives via `check_inbox`. |
 | F09 | Shared PO capacity | Quantity already invoiced and paid against the same receipt. |
@@ -597,7 +597,7 @@ Requires Phase 10 sign-off.
 
 ```bash
 uv sync --frozen --extra openenv --group modal       # or plain `uv sync --frozen` for the core only
-uv run pytest                                        # 214 tests, about 20 seconds
+uv run pytest                                        # 245 tests, about 20 seconds
 uv run invoiceops build-tasks --check                # task files match the generator
 uv run invoiceops show-task T-C94302                 # Northstar short-shipment task (add --private for the answer)
 uv run invoiceops play --task T-C94302               # solve it yourself through the agent tools
@@ -617,7 +617,7 @@ Each of these was forced by a measurement or a failing check, not chosen in adva
 
 | What changed | Why |
 |---|---|
-| Clean-match variant 2 needs approval (its total exceeds the self-approval limit) and the variant order became `[0, 1, 2, 2, 1, 0]`. | With the first ordering, an always-pay policy could reach 50% on the test split. After the change it scores 29% (test) and 42% (dev); always-hold scores at most 17%. |
+| Clean-match variant 2 needs approval (its total exceeds the self-approval limit) and the variant order became `[0, 1, 2, 2, 1, 0]`. | With the first ordering, an always-pay policy could reach 50% on the test split. After the change it scored 29% (test) and 42% (dev), and after the review fixes 29% (test) and 33% (dev); always-hold scores at most 17%. |
 | Injected-instruction documents (F10) name their supplier and PO. | The leakage check found identical attachment texts in train and test; a model could have memorised them. |
 | SQLite connections allow cross-thread use, with a per-episode lock. | OpenEnv runs `reset` and tool calls on different worker threads; the first WebSocket test failed with SQLite's same-thread check. |
 | The OpenEnv server reports rewards only when private specs are mounted; otherwise it writes an export that the offline verifier container grades. | Keeps the verifier and answers out of the agent-facing image (checked by `scripts/container_check.py`). |
@@ -628,6 +628,9 @@ Each of these was forced by a measurement or a failing check, not chosen in adva
 | The learnability probe uses 4 attempts per training task, not 8. | 8 attempts on 36 tasks would not fit the $1.50 line. |
 | The policy text states the order of checks (bank details, duplicates, missing receipts, quantity, price, then credits and approval). | Without it, a task with two issues could have two defensible answers. |
 | The scripted policies' wall-clock time is left out of committed reports. | Reports must regenerate byte-for-byte; time is recorded only for model runs. |
+| **After the first pre-GPU review:** the verifier judges every payment proposal ever created, not only active ones, and allows one proposal per invoice. | Review finding B1: proposing wrongly and then withdrawing erased the violation (7 confirmed escapes). |
+| **After the first pre-GPU review:** clarifications are structured requests (`request_type`) with generated text; free text was removed. | Review finding B2: a vacuous or contradictory message satisfied the check. A deterministic verifier cannot judge free text, so nothing ungraded remains. |
+| **After the first pre-GPU review:** approvers act only at their own level, and F06 variant 2 is an approver declining for a budget reason. | Review finding F06: "always ask the CFO and pay in full" passed every instance. It now fails all six. |
 
 ## 8. Quality rules for every phase
 

@@ -86,6 +86,30 @@ ALLOWED_REASONS: dict[CaseStatus, frozenset[ReasonCode]] = {
 }
 
 
+class RequestType(StrEnum):
+    """What a clarification asks its recipient to do. The request is structured, so the
+    recipient's action and the verifier's check never depend on free text."""
+
+    CORRECTED_INVOICE = "corrected_invoice"
+    PRICE_CONFIRMATION = "price_confirmation"
+    RECEIPT_CONFIRMATION = "receipt_confirmation"
+    BANK_DETAIL_VERIFICATION = "bank_detail_verification"
+
+
+REQUEST_TYPE_TEXT: dict[RequestType, str] = {
+    RequestType.CORRECTED_INVOICE: "Please issue a corrected invoice for {invoice_id}.",
+    RequestType.PRICE_CONFIRMATION: (
+        "Please confirm the agreed price for {invoice_id} or amend the purchase order."
+    ),
+    RequestType.RECEIPT_CONFIRMATION: (
+        "Please confirm what has been received for {invoice_id} and record the goods receipt."
+    ),
+    RequestType.BANK_DETAIL_VERIFICATION: (
+        "Please verify the supplier's bank details for {invoice_id} before any payment."
+    ),
+}
+
+
 class PartialInvoiceRule(StrEnum):
     REQUIRE_CORRECTED_INVOICE = "require_corrected_invoice"
     PAY_RECEIVED_PORTION = "pay_received_portion"

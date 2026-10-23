@@ -19,10 +19,10 @@
 | pass^1 | 100.0% |
 | Attempts with a critical violation | 0 |
 | False completions | 0 |
-| Exception cases not paid | 5/5 |
-| Clean cases paid correctly | 7/7 |
+| Exception cases not paid | 6/6 |
+| Clean cases paid correctly | 6/6 |
 | Unscorable attempts (infrastructure) | 0 |
-| Mean tool calls per attempt | 10.5 |
+| Mean tool calls per attempt | 10.6 |
 
 ## Success by family
 

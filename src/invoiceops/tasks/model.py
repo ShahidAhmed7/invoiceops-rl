@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from invoiceops.domain.records import CaseStatus, ReasonCode, Record, RecordId
+from invoiceops.domain.records import CaseStatus, ReasonCode, Record, RecordId, RequestType
 from invoiceops.domain.world import World
 
 CiteGroups = tuple[tuple[RecordId, ...], ...]
@@ -24,6 +24,7 @@ CiteGroups = tuple[tuple[RecordId, ...], ...]
 
 class ClarificationRequirement(Record):
     recipient_roles: tuple[RecordId, ...]
+    request_types: tuple[RequestType, ...]
     cite: CiteGroups = ()
 
 
@@ -41,6 +42,8 @@ class Outcome(Record):
     payment: PaymentExpectation | None
     clarifications: tuple[ClarificationRequirement, ...] = ()
     approval_required: bool = False
+    approval_requested_from: tuple[RecordId, ...] = ()
+    """If set, an approval request must have been sent to one of these roles (any decision)."""
     evidence: CiteGroups = ()
 
 

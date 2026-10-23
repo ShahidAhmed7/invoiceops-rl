@@ -17,6 +17,14 @@ from invoiceops.domain.records import PartialInvoiceRule
 from invoiceops.domain.world import effective_policy
 from invoiceops.episode import Episode
 
+# Policy sections 3, 4, 5 and 9 name one request type per recipient.
+REQUEST_FOR = {
+    "supplier": "corrected_invoice",
+    "procurement": "price_confirmation",
+    "receiving": "receipt_confirmation",
+    "vendor_master": "bank_detail_verification",
+}
+
 
 class OracleError(RuntimeError):
     pass
@@ -59,7 +67,7 @@ class _Solver:
                 "create_clarification",
                 invoice_id=self.inv_id,
                 recipient_role=ask_role,
-                question=f"Please resolve the {reason.replace('_', ' ')} on {self.inv_id}.",
+                request_type=REQUEST_FOR[ask_role],
                 evidence_ids=cite,
                 idempotency_key=self.key("clr"),
             )
@@ -216,11 +224,14 @@ class _Solver:
                 idempotency_key=self.key("apr"),
             )
             inbox = _call(ep, "check_inbox")
-            if not any(
-                m["kind"] == "approval_decision" and m["message"].startswith("Approved")
-                for m in inbox["messages"]
-            ):
-                raise OracleError("approval was not granted")
+            decisions = [m for m in inbox["messages"] if m["kind"] == "approval_decision"]
+            if not decisions:
+                raise OracleError("no approval decision arrived")
+            if not decisions[-1]["message"].startswith("Approved"):
+                # Section 8: the right approver declined, so the invoice stays on hold.
+                self.dispose("on_hold", "awaiting_approval", base)
+                self.submit("on_hold", "awaiting_approval", 0, base)
+                return
 
         self.dispose("ready_for_payment", reason, base)
         key = self.key("pay")

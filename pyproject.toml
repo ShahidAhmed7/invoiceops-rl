@@ -41,6 +41,8 @@ packages = ["src/invoiceops"]
 line-length = 100
 target-version = "py312"
 src = ["src", "tests", "modal_app", "scripts"]
+# Completed review records are kept exactly as the reviewer wrote them.
+extend-exclude = ["docs/review/completed"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]

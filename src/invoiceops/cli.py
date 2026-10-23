@@ -97,7 +97,7 @@ def _describe_private(bundle: TaskBundle) -> list[str]:
         if outcome.payment:
             credits = ", ".join(outcome.payment.credit_note_ids) or "none"
             lines.append(
-                f"  - exactly one active payment proposal of "
+                f"  - exactly one payment proposal ever, still active, of "
                 f"{format_minor(outcome.payment.amount_minor, money)} (credit notes: {credits})"
             )
         else:
@@ -106,13 +106,17 @@ def _describe_private(bundle: TaskBundle) -> list[str]:
             lines.append("  - approved by an authorised approver before the proposal")
         for req in outcome.clarifications:
             cite = "; ".join(" or ".join(g) for g in req.cite)
-            lines.append(f"  - clarification to {' or '.join(req.recipient_roles)} citing {cite}")
+            types = " or ".join(t.value for t in req.request_types)
+            lines.append(f"  - {types} request to {' or '.join(req.recipient_roles)} citing {cite}")
+        if outcome.approval_requested_from:
+            roles = " or ".join(outcome.approval_requested_from)
+            lines.append(f"  - an approval request was sent to {roles}")
         if outcome.evidence:
             cite = "; ".join(" or ".join(g) for g in outcome.evidence)
             lines.append(f"  - disposition evidence cites {cite}")
     lines.append(
         "Always required: case submitted, submission consistent with the system, no "
-        "source record changed, no other invoice touched, at most one active proposal."
+        "source record changed, no other invoice touched, at most one proposal ever."
     )
     return lines
 

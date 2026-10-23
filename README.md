@@ -21,7 +21,7 @@ Agents that do real business work need practice environments with three properti
 - **Policy-following.** Every company has its own written AP policy (price tolerances, partial-invoice rules, approval limits, bank-detail rules). The policy text is generated from the same parameters the verifier uses, so the two can never disagree.
 - **Stateful.** Each episode has its own database. Writes are transactional, versioned, and idempotent. Authoritative records are protected by database triggers, so no code path can alter them.
 - **Graded on outcomes.** The reward is a strict 0 or 1, computed from the final state and the action history. A persuasive summary over a wrong state scores 0.
-- **Hard to game.** The verifier is tested against 844 correct and deliberately wrong end states. Fixed habits such as "always hold" or "always pay" fail most tasks.
+- **Hard to game.** The verifier is tested against 975 correct and deliberately wrong end states, including every escape found in the first review. Fixed habits such as "always hold" or "always pay" fail most tasks.
 
 ## Status
 
@@ -31,7 +31,7 @@ Agents that do real business work need practice environments with three properti
 | TRL, OpenEnv, and OpenAI-compatible adapters | Built and tested |
 | Agent-facing and verifier containers | Built; isolation check passes in CI |
 | GPU phases (model baselines, external benchmarks, GRPO training) | Code written; **not yet run** |
-| Human review of the tasks | Not yet done |
+| Human review of the tasks | First review done: not approved, two verifier escapes found. Both are fixed ([builder response](docs/review/builder-response.md)); re-check pending |
 
 No language model has been evaluated or trained on this environment yet, so this README reports no model scores. Until an AP practitioner reviews the tasks, the project is a **fictional policy simulator**, not a measure of professional AP competence.
 
@@ -42,12 +42,12 @@ These numbers come from committed reports that regenerate deterministically (`uv
 | Agent | Train (36) | Dev (12) | Test (24) |
 |---|---|---|---|
 | Oracle (rule-based, reads policy parameters; proves solvability) | 100% | 100% | 100% |
-| Always pay the invoiced amount | 33.3% | 41.7% | 29.2% |
+| Always pay the invoiced amount | 30.6% | 33.3% | 29.2% |
 | Always hold and ask the supplier | 13.9% | 16.7% | 8.3% |
 | Do nothing and claim success | 0% | 0% | 0% |
 | Random tool calls | 0% | 0% | 0% |
 
-- **Verifier validation:** across all 72 tasks, every one of 695 deliberately wrong end states is rejected, and every one of 149 accepted alternative solutions passes. Details are in [`reports/local/verifier_mutations.md`](reports/local/verifier_mutations.md).
+- **Verifier validation:** across all 72 tasks, every one of 826 deliberately wrong end states is rejected, and every one of 149 accepted alternative solutions passes. The wrong states include proposing and then withdrawing, proposing before approval, asking the wrong approval level, and sending the wrong kind of request. Details are in [`reports/local/verifier_mutations.md`](reports/local/verifier_mutations.md).
 - **Two independent derivations agree:** the oracle re-derives every task's answer through the tools and matches the hand-written expected outcome on 72 of 72 tasks.
 
 ## The task suite
@@ -61,7 +61,7 @@ These numbers come from committed reports that regenerate deterministically (`uv
 | Short receipt | Hold for a corrected invoice, or pay the received portion, per company rule |
 | Duplicate invoice | Reject resubmissions; do not reject look-alikes |
 | Credit note | Apply a valid credit once; never reuse one already applied |
-| Approval routing | Ask an approver with enough authority, wait for the decision, then pay |
+| Approval routing | Ask the approver at the right level, wait for the decision, pay only if approved |
 | Vendor-detail conflict | Never pay to unverified bank details |
 | Missing receipt | Hold, ask receiving, finish correctly once the receipt arrives |
 | Shared PO capacity | Account for quantities already billed on earlier invoices |
@@ -83,8 +83,8 @@ flowchart LR
 ```
 
 - **Tools:** `list_queue`, `search_records`, `get_invoice`, `get_purchase_order`, `get_receipts`, `get_vendor`, `get_document`, `get_history`, `set_disposition`, `create_clarification`, `request_approval`, `check_inbox`, `propose_payment`, `withdraw_payment_proposal`, `submit_case`.
-- **Simulated colleagues:** approvers decide by their limits, and receiving or suppliers reply to clarifications. Nothing favourable happens unless the agent asked for it.
-- **Reward:** 1.0 only if the case was submitted, no authoritative record changed, nothing else was touched, at most one payment proposal is active, the submission matches the system, and one accepted outcome is fully met. If the verifier itself fails, the episode is marked *unscorable* rather than failed.
+- **Simulated colleagues:** each approver acts only at their own level of authority, and receiving or suppliers reply to structured requests (for example `corrected_invoice` or `receipt_confirmation`). Nothing favourable happens unless the agent asked for it, in the right way.
+- **Reward:** 1.0 only if the case was submitted, no authoritative record changed, nothing else was touched, at most one payment proposal was ever created (withdrawing does not undo one), the submission matches the system, and one accepted outcome is fully met. If the verifier itself fails, the episode is marked *unscorable* rather than failed.
 
 ## Quick start
 
@@ -92,7 +92,7 @@ Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync --frozen --extra openenv
-uv run pytest                                  # 214 tests, about 20 seconds
+uv run pytest                                  # 245 tests, about 20 seconds
 
 uv run invoiceops show-task T-C94302           # the short-shipment task above
 uv run invoiceops play --task T-C94302         # solve it yourself through the agent's tools
@@ -154,7 +154,7 @@ Results will be added here only once measured, including null or negative result
 ```text
 src/invoiceops/    environment, tools, tasks, verifier, agents, adapters, evaluation, CLI
 tasks/             72 generated tasks: public.json (agent-visible) and private.json (verifier only)
-tests/             214 tests
+tests/             245 tests
 containers/        agent-facing and verifier Docker images
 modal_app/         GPU jobs, budget guard, benchmark drivers, training job
 reports/           measured results only

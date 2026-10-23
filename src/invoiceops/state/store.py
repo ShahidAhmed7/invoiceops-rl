@@ -80,7 +80,7 @@ CREATE TABLE clarifications (
     id TEXT PRIMARY KEY,
     invoice_id TEXT NOT NULL,
     recipient_role TEXT NOT NULL,
-    question TEXT NOT NULL,
+    request_type TEXT NOT NULL,
     evidence_ids TEXT NOT NULL,
     idempotency_key TEXT NOT NULL UNIQUE,
     step INTEGER NOT NULL

@@ -2,7 +2,8 @@
 
 Nothing here can produce a favourable fact on its own: an approval decision exists only after
 the agent requested it, and a scripted reply is released only after the agent sent the
-clarification that triggers it. Repeated ``check_inbox`` calls never release anything twice.
+clarification (right recipient, right request type) that triggers it. Repeated
+``check_inbox`` calls never release anything twice.
 """
 
 from __future__ import annotations
@@ -10,8 +11,10 @@ from __future__ import annotations
 import json
 import sqlite3
 from collections.abc import Callable
+from typing import Any
 
 from invoiceops.domain.money import format_minor
+from invoiceops.domain.records import Role
 from invoiceops.domain.world import World
 from invoiceops.state.store import Store
 
@@ -22,20 +25,13 @@ def release_due_events(
     roles = {r.id: r for r in world.roles}
     currency = world.company.currency
 
+    approvers = sorted(
+        (r for r in world.roles if r.can_approve), key=lambda r: r.approval_limit_minor
+    )
     pending = store.work_rows("approval_requests", "WHERE status = 'pending'")
     for req in pending:
         role = roles[req["approver_role"]]
-        approved = req["amount_minor"] <= role.approval_limit_minor
-        decision = "approved" if approved else "declined"
-        amount = format_minor(req["amount_minor"], currency)
-        if approved:
-            note = f"Approved payment of {amount} for invoice {req['invoice_id']}."
-        else:
-            limit = format_minor(role.approval_limit_minor, currency)
-            note = (
-                f"Declined: {amount} exceeds my approval limit of {limit}. "
-                "Route this to an approver with a higher limit."
-            )
+        decision, note = _decide(req, role, approvers, world, currency)
         event_id = new_id("APE")
         conn.execute(
             "INSERT INTO approval_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -61,6 +57,7 @@ def release_due_events(
         triggered = any(
             c["invoice_id"] == event.trigger.invoice_id
             and c["recipient_role"] in event.trigger.recipient_roles
+            and c["request_type"] in event.trigger.request_types
             for c in clarifications
         )
         if not triggered:
@@ -74,6 +71,30 @@ def release_due_events(
             record_ids.append(receipt.id)
         conn.execute("INSERT INTO released_events VALUES (?, ?)", (event.id, step))
         _post(conn, step, event.from_role, "reply", event.message, record_ids)
+
+
+def _decide(
+    req: dict[str, Any], role: Role, approvers: list[Role], world: World, currency: str
+) -> tuple[str, str]:
+    """Each approver acts only at their own level of the delegation of authority: the lowest
+    approver whose limit covers the amount. Scripted overrides model a justified refusal."""
+    amount = format_minor(req["amount_minor"], currency)
+    if req["amount_minor"] > role.approval_limit_minor:
+        limit = format_minor(role.approval_limit_minor, currency)
+        return "declined", (
+            f"Declined: {amount} exceeds my approval limit of {limit}. "
+            "Route this to the approver whose limit covers it."
+        )
+    level = next(r for r in approvers if r.approval_limit_minor >= req["amount_minor"])
+    if level.id != role.id:
+        return "declined", (
+            f"Declined: {amount} is within the authority of {level.name} (`{level.id}`). "
+            "Route this request to them; I approve only payments at my level."
+        )
+    for override in world.approval_overrides:
+        if override.invoice_id == req["invoice_id"] and override.approver_role == role.id:
+            return "declined", f"Declined: {override.note}"
+    return "approved", f"Approved payment of {amount} for invoice {req['invoice_id']}."
 
 
 def _post(

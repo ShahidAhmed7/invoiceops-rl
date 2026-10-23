@@ -20,7 +20,13 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from invoiceops.domain.records import ALLOWED_REASONS, CaseStatus, ReasonCode
+from invoiceops.domain.records import (
+    ALLOWED_REASONS,
+    REQUEST_TYPE_TEXT,
+    CaseStatus,
+    ReasonCode,
+    RequestType,
+)
 from invoiceops.domain.world import AGENT_ROLE_ID, World
 from invoiceops.state.store import Store, canonical_json
 from invoiceops.tools import spec
@@ -385,12 +391,15 @@ class Episode:
         payload = {
             "invoice_id": args.invoice_id,
             "recipient_role": args.recipient_role,
-            "question": args.question,
+            "request_type": args.request_type,
             "evidence_ids": evidence,
         }
+        message = REQUEST_TYPE_TEXT[RequestType(args.request_type)].format(
+            invoice_id=args.invoice_id
+        )
         existing = self._idempotent("clarifications", args.idempotency_key, payload)
         if existing:
-            return {"clarification_id": existing["id"], "replayed": True}
+            return {"clarification_id": existing["id"], "replayed": True, "message_sent": message}
         clar_id = self._new_id("CLR")
         with self.store.transaction() as conn:
             conn.execute(
@@ -399,13 +408,13 @@ class Episode:
                     clar_id,
                     args.invoice_id,
                     args.recipient_role,
-                    args.question,
+                    args.request_type,
                     json.dumps(evidence),
                     args.idempotency_key,
                     self.step_count,
                 ),
             )
-        return {"clarification_id": clar_id, "replayed": False}
+        return {"clarification_id": clar_id, "replayed": False, "message_sent": message}
 
     def _tool_request_approval(self, args: spec.ApprovalArgs) -> dict[str, Any]:
         self._require_queued(args.invoice_id)

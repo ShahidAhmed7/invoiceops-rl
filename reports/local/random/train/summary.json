@@ -1,7 +1,7 @@
 {
   "attempts_per_task": 1,
-  "attempts_with_critical_violation": 20,
-  "blocked_attempts": 41,
+  "attempts_with_critical_violation": 34,
+  "blocked_attempts": 31,
   "by_family": {
     "F01": 0.0,
     "F02": 0.0,
@@ -16,13 +16,14 @@
     "F11": 0.0,
     "F12": 0.0
   },
-  "clean_cases_paid_correctly": "0/22",
+  "clean_cases_paid_correctly": "0/21",
   "critical_violations": {
-    "overpayment_proposed": 4,
-    "payment_proposed_for_unpayable_invoice": 13,
-    "payment_without_required_approval": 3
+    "duplicate_payment_proposal": 31,
+    "overpayment_proposed": 5,
+    "payment_proposed_for_unpayable_invoice": 15,
+    "payment_without_required_approval": 4
   },
-  "exception_cases_not_paid": "1/14",
+  "exception_cases_not_paid": "0/15",
   "false_completions": 36,
   "infrastructure_errors": [],
   "mean_tool_calls": 18.0,
