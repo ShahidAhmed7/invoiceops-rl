@@ -11,8 +11,18 @@ Results of the first credit release (`docs/MODAL_HANDOFF.md`, USD 9.50). Every f
 | 3 | `probe_and_dev` | Passed. | $0.31 |
 | 4 | `smoke_train` | Passed on the re-run. The first attempt hit a `KeyError: 'model'` in the job wrapper before loading any weights. | $0.36 |
 | 5 | `test_candidate` | Passed. See `reports/baseline.md`. | $0.35 |
-| 6 | `smoke_tau2` | **Failed twice; not re-run again.** Details below. | $0.72 |
-| 7 | `bfcl_before` | **Not run.** The handoff stops at the first failure. | — |
+| 6 | `smoke_tau2` | Passed on the third attempt, with the owner's go-ahead. The first failed on DeepGEMM, the second on missing τ² data; details below. | $1.26 |
+| 7 | `bfcl_before` | Passed. See `reports/external_baseline.md`. | $0.42 |
+| + | `probe_v2` (added) | Passed: train split, prompt v2, 43.8%; 19 of 36 tasks have mixed outcomes. | $0.30 |
+| + | `tau2_before` | Passed: pass^1 36.9%, pass^4 20.0%. | $1.16 |
+| + | `test_reference` (prompt v2) | Passed: 61.5%. See `reports/baseline.md`. | $0.35 |
+| + | `tau2_reference` | Passed: pass^1 43.8%, pass^4 27.5%. | $0.85 |
+| + | `dev_v2` (added) | Passed: dev split, prompt v2, 47.9% (CI 27.1%–70.8%). | $0.20 |
+| | **Total** | | **$5.97** |
+
+Jobs marked + ran after the owner released the rest of the $9.50 for the remaining jobs.
+- `smoke_serve_reference` was not run: the reference model was already served twice successfully.
+- `train_grpo` does not fit the release.
 
 ## Versions and revisions
 
@@ -91,18 +101,19 @@ To watch in the real run:
 - **Importance-sampling ratio:** the mean ratio between vLLM's sampling and the trainer's log-probabilities was 0.45–0.79. TRL corrects for it, but `sampling/importance_sampling_ratio` is worth watching.
 - **Wall clock:** about 23–27 s per step of 8 rollouts. The full run uses 32 rollouts per step for 150 steps; if time scaled linearly, that would pass the 225-minute wall-clock stop. vLLM batches the 32 rollouts together, so the real time per step should be lower. Watch `step_time` in the first steps of `train_grpo`.
 
-## τ²-bench (smoke_tau2): failed, not measured
+## τ²-bench (smoke_tau2)
 
-The job failed twice. The handoff allows one re-run, so it is recorded here for the next release.
+The job failed twice, and the third attempt passed after both fixes, with the owner's go-ahead:
 
 1. **First attempt: the FP8 user simulator failed to start.** vLLM's DeepGEMM FP8 kernels compile at start-up and need nvcc 12.9 or newer, while the CUDA base image has 12.8. Fix: `VLLM_USE_DEEP_GEMM=0`. vLLM then uses its CUTLASS, FlashInfer or Triton FP8 kernels.
 2. **Re-run: both servers started, then the driver failed.**
    - KV cache: the agent got 156,192 tokens at 40% memory, the user simulator 38,176 at 45%.
    - The driver stopped because a pip install from git leaves out tau2's `data/` directory, so `retail/tasks.json` was missing.
-   - Fix, committed but **not run on Modal**: the image installs tau2 from a checkout at the pinned commit and sets `TAU2_DATA_DIR`.
-   - Checked so far: the image builds on Modal, and the driver ran end to end locally against a stub server (2 simulations, none without reward).
+   - Fix: the image installs tau2 from a checkout at the pinned commit and sets `TAU2_DATA_DIR`.
+   - Checked first on Modal by an image build, and locally by running the driver end to end against a stub server.
+3. **Third attempt: passed.** 2 simulations, none without a reward, **16.3 s per simulation**.
 
-**Timing and the trials rule (`MODAL_RUNBOOK.md` §1 step 4):** `seconds_per_simulation` was not measured, so the rule cannot be applied yet. `smoke_tau2` must pass in the next release before `tau2_before` is sized.
+**Trials rule (`MODAL_RUNBOOK.md` §1 step 4):** 16.3 s × 160 / 16 + 10 minutes of start-up is about 12.7 minutes, well under 50, so `TAU2_TRIALS` stays at 4. `tau2_before` then took 15.6 minutes, of which 9.5 minutes were simulations.
 
 ## Context and generation lengths
 

@@ -15,8 +15,18 @@ The owner released **USD 9.50**. Rates in `modal_app/budget.yaml` are all-in: GP
 | 2026-10-23T21:30:02Z | `test_candidate` | L40S | succeeded | 8.5 | $2.45 | $0.35 |
 | 2026-10-23T21:39:15Z | `smoke_tau2` | H100 | failed | 3.3 | $4.45 | $0.24 |
 | 2026-10-23T21:45:06Z | `smoke_tau2` | H100 | failed | 6.4 | $4.45 | $0.48 |
-| | | | | | **Total** | **$2.14** |
+| 2026-10-23T22:24:55Z | `smoke_tau2` | H100 | succeeded | 7.3 | $4.45 | $0.54 |
+| 2026-10-23T22:24:50Z | `bfcl_before` | L40S | succeeded | 10.4 | $2.45 | $0.42 |
+| 2026-10-23T22:30:18Z | `probe_v2` | L40S | succeeded | 7.4 | $2.45 | $0.30 |
+| 2026-10-23T22:35:44Z | `tau2_before` | H100 | succeeded | 15.6 | $4.45 | $1.16 |
+| 2026-10-23T22:53:02Z | `test_reference` | H100 | succeeded | 4.7 | $4.45 | $0.35 |
+| 2026-10-23T22:58:17Z | `tau2_reference` | H100 | succeeded | 11.5 | $4.45 | $0.85 |
+| 2026-10-23T23:11:18Z | `dev_v2` | L40S | succeeded | 4.8 | $2.45 | $0.20 |
+| | | | | | **Total** | **$5.97** |
 
 The ledger multiplies wall-clock time by the rate. Wall-clock time includes image builds and container start-up before the GPU is attached, so the ledger is an overestimate. **Modal dashboard figure for the same period: not yet read** (to be filled in by the owner).
 
-By the ledger, $7.36 of the released $9.50 remains. `bfcl_before` (worst case $1.43) was not run, because the handoff stops at the first failure (`smoke_tau2`).
+**Remaining by the ledger: $3.53.**
+- `test_reference` with prompt v1 (worst case $3.71) is refused by the guard.
+- `smoke_serve_reference` (worst case $1.48) would only repeat what the reference runs already showed, so it was not run.
+- `train_grpo` ($15.80 cap) waits for the next release.
