@@ -19,6 +19,7 @@ def start(
     lora_path: str | None = None,
     extra: Sequence[str] = (),
     startup_timeout_s: int = 900,
+    max_model_len: int = settings.MAX_MODEL_LEN,
 ) -> subprocess.Popen[bytes]:
     cmd = [
         "vllm",
@@ -29,7 +30,7 @@ def start(
         "--served-model-name",
         served_name,
         "--max-model-len",
-        str(settings.MAX_MODEL_LEN),
+        str(max_model_len),
         "--gpu-memory-utilization",
         str(gpu_memory_utilization),
         "--enable-auto-tool-choice",

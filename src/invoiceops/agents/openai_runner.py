@@ -17,6 +17,12 @@ from invoiceops.episode import Episode
 from invoiceops.tools.spec import openai_tools
 
 NUDGE = "Continue using the tools. When the case is resolved, call submit_case."
+# Conservative size estimate for messages the server has not tokenized yet. The densest tool
+# observations (digit-heavy JSON) measure about 1.93 characters per token with the Qwen tokenizer.
+CHARS_PER_TOKEN = 1.8
+MESSAGE_OVERHEAD_TOKENS = 16
+# A turn needs room to finish a tool call; with less context left the episode ends unsolved.
+MIN_TURN_TOKENS = 1024
 
 
 class InfrastructureError(RuntimeError):
@@ -30,8 +36,11 @@ class ModelConfig:
     api_key: str = "EMPTY"
     temperature: float = 0.7
     top_p: float = 0.8
-    max_tokens: int = 2048
-    timeout_s: float = 180.0
+    # Per-turn generation cap; each turn also stays within the remaining context.
+    max_tokens: int = 16384
+    # The server's context window (vLLM --max-model-len); ``None`` means no client-side limit.
+    context_tokens: int | None = None
+    timeout_s: float = 900.0
     max_tool_calls: int = 40
     max_nudges: int = 2
     http_retries: int = 2
@@ -39,7 +48,10 @@ class ModelConfig:
 
 
 def chat(
-    cfg: ModelConfig, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+    cfg: ModelConfig,
+    messages: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    max_tokens: int | None = None,
 ) -> dict[str, Any]:
     body = {
         "model": cfg.model,
@@ -48,7 +60,7 @@ def chat(
         "tool_choice": "auto",
         "temperature": cfg.temperature,
         "top_p": cfg.top_p,
-        "max_tokens": cfg.max_tokens,
+        "max_tokens": max_tokens or cfg.max_tokens,
         **cfg.extra_body,
     }
     request = urllib.request.Request(
@@ -84,21 +96,46 @@ def run_episode(
         {"role": "system", "content": system},
         {"role": "user", "content": prompt},
     ]
-    usage = {"prompt_tokens": 0, "completion_tokens": 0, "requests": 0}
+    usage: dict[str, Any] = {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "requests": 0,
+        "truncated_turns": 0,
+        "max_context_tokens": 0,
+    }
     tool_calls_made = 0
     nudges = 0
+    # Tokens the server counted for the conversation so far, and how many messages that covers.
+    counted_tokens = _estimate_tokens(messages, tools)
+    counted_messages = 0
     while not episode.done and tool_calls_made < cfg.max_tool_calls:
-        response = chat(cfg, messages, tools)
+        max_tokens = cfg.max_tokens
+        if cfg.context_tokens is not None:
+            used = counted_tokens + _estimate_tokens(messages[counted_messages:], [])
+            max_tokens = min(max_tokens, cfg.context_tokens - used)
+            if max_tokens < MIN_TURN_TOKENS:
+                usage["stopped"] = "context_limit"
+                break
+        response = chat(cfg, messages, tools, max_tokens)
         usage["requests"] += 1
+        reported = response.get("usage") or {}
         for key in ("prompt_tokens", "completion_tokens"):
-            usage[key] += int((response.get("usage") or {}).get(key, 0))
+            usage[key] += int(reported.get(key, 0))
         choice = (response.get("choices") or [{}])[0]
+        if choice.get("finish_reason") == "length":
+            usage["truncated_turns"] += 1
         message = choice.get("message") or {}
         calls = message.get("tool_calls") or []
         assistant: dict[str, Any] = {"role": "assistant", "content": message.get("content") or ""}
         if calls:
             assistant["tool_calls"] = calls
         messages.append(assistant)
+        if reported.get("prompt_tokens"):
+            counted_tokens = int(reported["prompt_tokens"]) + int(
+                reported.get("completion_tokens", 0)
+            )
+            counted_messages = len(messages)
+            usage["max_context_tokens"] = max(usage["max_context_tokens"], counted_tokens)
         if not calls:
             if nudges >= cfg.max_nudges:
                 break
@@ -130,3 +167,10 @@ def run_episode(
             if episode.done:
                 break
     return messages, usage
+
+
+def _estimate_tokens(messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> int:
+    """Upper estimate of the tokens these messages (and tool schemas) add to the prompt."""
+    chars = sum(len(json.dumps(m, ensure_ascii=False)) for m in messages)
+    chars += sum(len(json.dumps(t, ensure_ascii=False)) for t in tools)
+    return int(chars / CHARS_PER_TOKEN) + MESSAGE_OVERHEAD_TOKENS * (len(messages) + 1)

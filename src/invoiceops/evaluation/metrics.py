@@ -107,6 +107,13 @@ def summarise(records: Iterable[EpisodeRecord], privates: dict[str, PrivateTask]
         "tokens": {
             "prompt": sum(int(r.usage.get("prompt_tokens", 0)) for r in scored),
             "completion": sum(int(r.usage.get("completion_tokens", 0)) for r in scored),
+            "max_context": max(
+                (int(r.usage.get("max_context_tokens", 0)) for r in scored), default=0
+            ),
+            "truncated_turns": sum(int(r.usage.get("truncated_turns", 0)) for r in scored),
+            "context_limit_stops": sum(
+                1 for r in scored if r.usage.get("stopped") == "context_limit"
+            ),
         },
         "by_family": {f: sum(v) / len(v) for f, v in sorted(family.items())},
         "infrastructure_errors": [

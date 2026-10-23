@@ -136,7 +136,7 @@ Every result records the model ID **and revision SHA**, the prompt version, deco
 
 - One system prompt for every task: the agent's role, the tool list, and "finish with `submit_case`". No task-family hints. Stored as `src/invoiceops/agents/prompts/system_v1.md` and versioned.
 - The "improved prompt" baseline (`system_v2.md`) adds general AP working practice (check policy first, compare PO, receipt, and invoice line by line, and cite records). It is written **before** looking at any test-split transcript and frozen in Phase 12.
-- Decoding for evaluation: temperature 0.7, top-p 0.8, a maximum of 40 tool calls per episode, and a 16k-token context. Four attempts per test task. The values are recorded in the run config; they are not tuned on the test split.
+- Decoding for evaluation: temperature 0.7, top-p 0.8, a maximum of 40 tool calls per episode, a 131,072-token context, and up to 16,384 new tokens per turn (each request also stays inside the context; a turn cut off at the cap is counted in the summary). An episode that would outgrow the context ends unsolved and is graded, not dropped. Measurements: `reports/compatibility.md`. Four attempts per test task. The values are recorded in the run config; they are not tuned on the test split.
 
 ### 3.4 External benchmarks: before and after training
 

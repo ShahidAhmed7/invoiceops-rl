@@ -127,6 +127,53 @@ def test_endpoint_failure_is_unscorable(
     assert summary["unscorable_attempts"] == 1 and summary["scored_attempts"] == 0
 
 
+def test_requests_stay_inside_the_context_window(
+    fake_server: tuple[str, dict[str, FakeModel]], tmp_path: Path
+) -> None:
+    url, holder = fake_server
+    bundle = by_family("F01", 0)
+    holder["model"] = FakeModel(oracle_actions(bundle))
+    cfg = ModelConfig(base_url=url, model="fake", http_retries=0, context_tokens=20000)
+    summary = evaluate("model", [bundle.public.task_id], tmp_path / "run", model=cfg)
+    assert summary["task_mean_success"] == 1.0
+    sent = [r["max_tokens"] for r in holder["model"].requests]
+    # The first request is sized from the local estimate (schemas alone are about 6k tokens);
+    # later ones from the server's count, which this fake reports as tiny.
+    assert 1024 <= sent[0] < cfg.max_tokens
+    assert all(m <= cfg.max_tokens for m in sent)
+    assert summary["tokens"]["context_limit_stops"] == 0
+
+
+def test_context_limit_ends_the_episode_as_a_graded_failure(
+    fake_server: tuple[str, dict[str, FakeModel]], tmp_path: Path
+) -> None:
+    url, holder = fake_server
+    bundle = by_family("F01", 0)
+    holder["model"] = FakeModel(oracle_actions(bundle))
+    cfg = ModelConfig(base_url=url, model="fake", http_retries=0, context_tokens=4096)
+    summary = evaluate("model", [bundle.public.task_id], tmp_path / "run", model=cfg)
+    assert holder["model"].requests == []  # the schemas alone leave no room for a turn
+    assert summary["scored_attempts"] == 1 and summary["task_mean_success"] == 0.0
+    assert summary["tokens"]["context_limit_stops"] == 1
+
+
+def test_truncated_turns_are_counted(
+    fake_server: tuple[str, dict[str, FakeModel]], tmp_path: Path
+) -> None:
+    class Truncating(FakeModel):
+        def respond(self, body: dict[str, Any]) -> dict[str, Any]:
+            reply = super().respond(body)
+            reply["choices"][0]["finish_reason"] = "length"
+            return reply
+
+    url, holder = fake_server
+    bundle = by_family("F01", 0)
+    holder["model"] = Truncating(oracle_actions(bundle))
+    cfg = ModelConfig(base_url=url, model="fake", http_retries=0)
+    summary = evaluate("model", [bundle.public.task_id], tmp_path / "run", model=cfg)
+    assert summary["tokens"]["truncated_turns"] == len(holder["model"].requests)
+
+
 def test_play_script_then_grade(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     bundle = by_family("F02", 1)
     lines = []

@@ -44,6 +44,17 @@ BFCL_CATEGORIES = (
 AGENT_TEMPERATURE = 0.7
 AGENT_TOP_P = 0.8
 USER_SIM_TEMPERATURE = 0.0
-MAX_MODEL_LEN = 16384
+# Context and generation lengths (measured in reports/compatibility.md, "Context and generation
+# lengths"). A full oracle episode is about 5.6k tokens and an agent that reads every record about
+# 12k; the worst case within 40 tool calls is about 80k. The 2507 models support 262,144 natively,
+# so no RoPE scaling is needed. vLLM allocates KV cache per token used, so a long window costs
+# memory only for episodes that actually grow.
+MAX_MODEL_LEN = 131072
+# Per-turn generation cap: Qwen's published example output length for the 2507 models. The runner
+# also keeps every request inside MAX_MODEL_LEN, so a request never fails on length.
+AGENT_MAX_TOKENS = 16384
+# The tau2 user simulator shares its H100 with the agent at 45% memory, which leaves about 40k
+# tokens of KV cache for the FP8 30B model; its dialogue never carries tool output.
+USER_SIM_MAX_MODEL_LEN = 32768
 # Qwen3 instruct models emit Hermes-style tool calls; Phase 11A smoke_serve confirms parsing.
 TOOL_CALL_PARSER = "hermes"

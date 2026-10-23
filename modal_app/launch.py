@@ -35,7 +35,8 @@ SMOKE_TRAIN = {
     "run_name": "smoke",
     "generated_variants": 0,
     "wall_clock_limit_min": 12,
-    "grpo": {"max_steps": 3, "save_steps": 3, "gradient_accumulation_steps": 1},
+    # 2 x 4 = 8 rollouts per step: one group of num_generations.
+    "grpo": {"max_steps": 3, "save_steps": 3, "gradient_accumulation_steps": 4},
 }
 # Hard timeouts (minutes) for each Modal call a job makes, in order. A job that makes several
 # calls, or reuses a long-running function for a short check, gets a per-call timeout so that

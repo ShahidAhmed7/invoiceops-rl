@@ -26,11 +26,19 @@ DEFAULTS: dict[str, Any] = {
     "grpo": {
         "learning_rate": 2e-5,
         "num_generations": 8,
-        "per_device_train_batch_size": 8,
-        "gradient_accumulation_steps": 4,
+        # 2 x 16 keeps 32 rollouts per step while each forward pass holds the logits of two
+        # sequences of up to 20k tokens (about 12 GB in bf16), not eight.
+        "per_device_train_batch_size": 2,
+        "gradient_accumulation_steps": 16,
         "max_steps": 150,
-        "max_completion_length": 6144,
-        "vllm_max_model_length": 12288,
+        # In TRL's tool loop the completion is every assistant turn plus every tool result. A full
+        # oracle rollout is about 2.4k tokens and one that reads every record about 8.7k.
+        "max_completion_length": 16384,
+        # The prompt (system prompt, tool schemas, task) is about 3.2k tokens.
+        "vllm_max_model_length": 20480,
+        # A rollout cut off by the budget is left out of the loss instead of being scored as a
+        # failure the policy never saw the end of.
+        "mask_truncated_completions": True,
         "max_tool_calling_iterations": 30,
         "temperature": 1.0,
         "use_vllm": True,

@@ -47,7 +47,7 @@ def _with_sources(image: modal.Image) -> modal.Image:
 
 cpu_image = _with_sources(
     modal.Image.debian_slim(python_version="3.12").uv_pip_install(
-        "huggingface_hub==1.33.0", "pydantic==2.14.1", "pyyaml"
+        "huggingface_hub==1.33.0", "pydantic==2.14.1", "pyyaml", "tokenizers==0.23.3"
     )
 )
 
@@ -114,6 +114,18 @@ def inspect_models() -> dict[str, Any]:
             )
             entry["architectures"] = config.get("architectures")
             entry["model_type"] = config.get("model_type")
+            entry["max_position_embeddings"] = config.get("max_position_embeddings")
+            heads = config.get("num_key_value_heads")
+            head_dim = config.get("head_dim") or (
+                config["hidden_size"] // config["num_attention_heads"]
+                if config.get("hidden_size") and config.get("num_attention_heads")
+                else None
+            )
+            if heads and head_dim and config.get("num_hidden_layers"):
+                # bf16 K and V for every layer
+                entry["kv_cache_bytes_per_token"] = (
+                    2 * 2 * config["num_hidden_layers"] * heads * head_dim
+                )
             tok = json.loads(
                 Path(hf_hub_download(model, "tokenizer_config.json", revision=info.sha)).read_text()
             )
@@ -130,8 +142,59 @@ def inspect_models() -> dict[str, Any]:
         except Exception as exc:
             entry = {"exists": False, "error": f"{type(exc).__name__}: {exc}"}
         report[model] = entry
+    report["token_counts"] = _token_counts(settings.CANDIDATE_MODEL, report)
     _save("/runs/model_verification.json", report)
     return report
+
+
+def _token_counts(model: str, report: dict[str, Any]) -> dict[str, Any]:
+    """Exact token counts of the largest texts an episode carries, with the candidate tokenizer."""
+    from huggingface_hub import hf_hub_download
+    from tokenizers import Tokenizer
+
+    from invoiceops.agents.oracle import solve
+    from invoiceops.agents.prompts import system_prompt
+    from invoiceops.episode import Episode
+    from invoiceops.tasks.store import load_bundle, task_ids
+    from invoiceops.tools.spec import openai_tools
+
+    try:
+        revision = (report.get(model) or {}).get("revision")
+        tok = Tokenizer.from_file(hf_hub_download(model, "tokenizer.json", revision=revision))
+    except Exception as exc:
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+    def count(text: str) -> int:
+        return len(tok.encode(text).ids)
+
+    tools = "\n".join(json.dumps(t, ensure_ascii=False) for t in openai_tools())
+    oracle_completion, longest_observation, longest_document = 0, 0, 0
+    for split in ("train", "dev", "test"):
+        for task_id in task_ids(split):
+            bundle = load_bundle(task_id)
+            ep = Episode(bundle.public.world, task_id, max_steps=10_000)
+            solve(ep)
+            texts = [json.dumps(e.observation, ensure_ascii=False) for e in ep.log]
+            texts += [json.dumps(e.arguments, ensure_ascii=False) for e in ep.log]
+            ep.close()
+            reader = Episode(bundle.public.world, task_id, max_steps=10_000)
+            for doc in bundle.public.world.documents:
+                obs = reader.step("get_document", {"document_id": doc.id})
+                longest_document = max(longest_document, count(json.dumps(obs, ensure_ascii=False)))
+            reader.close()
+            oracle_completion = max(oracle_completion, sum(count(t) for t in texts))
+            longest_observation = max([longest_observation, *(count(t) for t in texts)])
+    return {
+        "model": model,
+        "tool_schemas": count(tools),
+        "system_v1": count(system_prompt("v1")),
+        "system_v2": count(system_prompt("v2")),
+        "oracle_completion_max": oracle_completion,
+        "longest_oracle_observation": longest_observation,
+        "longest_document_observation": longest_document,
+        "max_model_len": settings.MAX_MODEL_LEN,
+        "agent_max_tokens": settings.AGENT_MAX_TOKENS,
+    }
 
 
 def _two_tool_roundtrip(port: int, served: str) -> dict[str, Any]:
@@ -308,7 +371,12 @@ def _tau2(
     agent_source = agent_path or agent_model
     same = agent_source == user_model
     user = vllm_server.start(
-        user_model, 8002, "user-sim", 0.45 if not same else 0.85, revision=_revision(user_model)
+        user_model,
+        8002,
+        "user-sim",
+        0.45 if not same else 0.85,
+        revision=_revision(user_model),
+        max_model_len=settings.MAX_MODEL_LEN if same else settings.USER_SIM_MAX_MODEL_LEN,
     )
     agent = None
     try:
@@ -425,6 +493,8 @@ def _invoiceops_eval(
             model="agent",
             temperature=settings.AGENT_TEMPERATURE,
             top_p=settings.AGENT_TOP_P,
+            max_tokens=settings.AGENT_MAX_TOKENS,
+            context_tokens=settings.MAX_MODEL_LEN,
         )
         tasks = [t for split in splits for t in task_ids(split)]
         summary = evaluate(
@@ -516,6 +586,8 @@ def select_checkpoint(run_name: str, attempts: int = 2, max_candidates: int = 4)
                 model="agent-lora",
                 temperature=settings.AGENT_TEMPERATURE,
                 top_p=settings.AGENT_TOP_P,
+                max_tokens=settings.AGENT_MAX_TOKENS,
+                context_tokens=settings.MAX_MODEL_LEN,
             )
             summary = evaluate(
                 "model",

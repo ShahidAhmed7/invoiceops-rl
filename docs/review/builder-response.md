@@ -72,3 +72,20 @@ The re-check ([sign-off](signoff/pre-gpu.md), re-check section) was approved. It
 | Scripted baselines | Success rates unchanged; always-pay and random now also show `payment_before_receipt` among their critical violations. |
 
 No task file, policy text, or tool changed, so every task revision is the same as the one re-checked. Under the review guide, a verifier-only change is re-checked with the mutation report and needs no new blind solve.
+
+## Before the first GPU run: context and generation lengths (owner's decision)
+
+The owner asked for a context long enough for multi-turn episodes and no generation cut off mid-turn. Measured with the Qwen tokenizer (`reports/compatibility.md`), the fixed prompt is about 3.2k tokens, a full oracle episode about 5.6k, and an agent that reads every record about 12k, so the planned 16k context was too tight.
+
+| Setting | Before | After |
+|---|---|---|
+| Agent context (vLLM `--max-model-len`) | 16,384 | 131,072 (native limit 262,144) |
+| New tokens per turn | 2,048 | 16,384, and never more than the context left |
+| Context about to run out | HTTP 400, attempt dropped as unscorable | episode ends unsolved and is graded (`context_limit_stops`) |
+| Turns cut off at the cap | not recorded | counted (`truncated_turns`) |
+| τ² user simulator context | 16,384 | 32,768 (its memory share holds about 40k tokens) |
+| Training `max_completion_length` / `vllm_max_model_length` | 6,144 / 12,288 | 16,384 / 20,480 |
+| Training batch | 8 per device × 4 | 2 per device × 16 (same 32 rollouts per step) |
+| Truncated training rollouts | in the loss | masked out (`mask_truncated_completions`) |
+
+No task, policy, tool, prompt or verifier changed. Decoding temperature and top-p are unchanged.
