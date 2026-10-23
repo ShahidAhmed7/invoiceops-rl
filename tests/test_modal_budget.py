@@ -21,8 +21,9 @@ def test_caps_fit_total_with_reserve() -> None:
 
 
 def test_unconfirmed_rates_refuse_everything() -> None:
+    unconfirmed = replace(load_budget(), rates_confirmed=False)
     with pytest.raises(BudgetError, match="rates_confirmed"):
-        check_launch(load_budget(), "inspect_models", [], signed_off=True)
+        check_launch(unconfirmed, "inspect_models", [], signed_off=True)
 
 
 def test_task_jobs_need_signoff_but_external_benchmarks_do_not(budget: Budget) -> None:
@@ -100,8 +101,13 @@ FIRST_RELEASE_CORE = (
 FIRST_RELEASE_OPTIONAL = ("smoke_tau2", "bfcl_before")
 
 
+# GPU prices used for planning, before the CPU and memory allowance is added.
+PLANNING_RATES = {"H100": 3.95, "L40S": 1.95, "CPU": 0.0}
+
+
 def test_first_release_fits_the_spend_limit(budget: Budget) -> None:
     assert budget.spend_limit_usd == pytest.approx(9.50)
+    budget = replace(budget, rates=PLANNING_RATES)
     padded = replace(budget, rates={k: v + 0.5 if v else v for k, v in budget.rates.items()})
     ledger: list[dict[str, object]] = []
     for job in FIRST_RELEASE_CORE:

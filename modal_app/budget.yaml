@@ -6,10 +6,10 @@ total_usd: 50.0
 # Credit the owner has released so far. Raise it (and commit) to release more; the launcher
 # refuses any job whose worst case would take total spend above it.
 spend_limit_usd: 9.50
-rates_confirmed: false
+rates_confirmed: true
 rates_usd_per_hour:
-  H100: 3.95
-  L40S: 1.95
+  H100: 4.45
+  L40S: 2.45
   CPU: 0.0
 
 # Each job: the plan's dollar cap, the function's hard timeout, and whether it needs the
