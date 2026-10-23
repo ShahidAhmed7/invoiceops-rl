@@ -5,6 +5,8 @@ Rules (BUILD_PLAN.md section 4.4):
 * Jobs that use InvoiceOps tasks need the signed pre-GPU review.
 * A job's worst case (timeout x rate) must fit in the money left after setting aside the caps
   of every job that has not run yet, so no job can eat another job's budget.
+* An optional ``spend_limit_usd`` caps total spend so far: the owner raises it when they
+  release more credit. A job is refused if spend so far plus its worst case would exceed it.
 * Every launch is appended to the ledger with its measured wall-clock cost.
 """
 
@@ -44,6 +46,7 @@ class Budget:
     rates_confirmed: bool
     rates: dict[str, float]
     jobs: dict[str, Job]
+    spend_limit_usd: float | None = None
 
     def rate(self, job: Job) -> float:
         return self.rates[job.gpu]
@@ -70,6 +73,9 @@ def load_budget(path: Path = CONFIG) -> Budget:
         rates_confirmed=bool(data["rates_confirmed"]),
         rates={k: float(v) for k, v in data["rates_usd_per_hour"].items()},
         jobs=jobs,
+        spend_limit_usd=(
+            None if data.get("spend_limit_usd") is None else float(data["spend_limit_usd"])
+        ),
     )
     caps = sum(j.cap_usd for j in jobs.values())
     if caps > budget.total_usd + 1e-9:
@@ -122,6 +128,13 @@ def check_launch(
     )
     available = budget.total_usd - spent - reserved
     worst = budget.worst_case(job)
+    limit = budget.spend_limit_usd
+    if limit is not None and spent + worst > limit + 1e-9:
+        raise BudgetError(
+            f"{job_name} could cost up to ${worst:.2f}, but only ${max(limit - spent, 0):.2f} "
+            f"of the released ${limit:.2f} is left (spent ${spent:.2f}); the owner raises "
+            "spend_limit_usd in budget.yaml to release more"
+        )
     if worst > available + 1e-9:
         raise BudgetError(
             f"{job_name} could cost up to ${worst:.2f} "

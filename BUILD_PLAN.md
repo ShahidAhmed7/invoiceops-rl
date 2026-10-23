@@ -238,6 +238,8 @@ Rates used for planning: H100 $3.95/h, L40S $1.95/h, CPU negligible. These are r
 
 - `modal_app/budget.py` keeps an append-only ledger at `reports/modal_ledger.jsonl`. Each entry records function, GPU type, start, end, billed seconds, rate, and cost.
 - Before launching, the launcher computes the worst case (`timeout × rate`) and **refuses to start** if that would exceed the phase cap or the remaining total. Override is only possible with an explicit `--allow-over-cap` flag and a written reason, logged in the ledger.
+- `spend_limit_usd` in `budget.yaml` is the credit the owner has released so far. A job is refused if spend so far plus its worst case would exceed it. The first release is USD 9.50, and [`docs/MODAL_HANDOFF.md`](docs/MODAL_HANDOFF.md) says which jobs it covers.
+- Jobs that make several Modal calls (or reuse the training function for the smoke test) set a per-call timeout (`CALL_MINUTES` in `modal_app/launch.py`), so their calls together never run longer than the timeout the guard priced.
 - After each run, the ledger is reconciled against the Modal dashboard's usage page, and the difference is noted.
 
 ---
@@ -295,7 +297,7 @@ invoiceops-rl/
 │   ├── runs.py                   # Saved episode records
 │   └── cli.py                    # `invoiceops` command
 ├── tasks/{train,dev,test}/<task_id>/{public.json,private.json}  # generated, checked in CI
-├── tests/                        # 247 tests: unit, property, adapters, verifier mutations, review regressions
+├── tests/                        # 250 tests: unit, property, adapters, verifier mutations, review regressions
 ├── scripts/                      # local_baselines.py, container_check.py
 ├── containers/                   # Agent-facing env image and offline verifier image
 ├── modal_app/                    # Modal app, budget guard, drivers, training job, locked requirements
@@ -597,7 +599,7 @@ Requires Phase 10 sign-off.
 
 ```bash
 uv sync --frozen --extra openenv --group modal       # or plain `uv sync --frozen` for the core only
-uv run pytest                                        # 247 tests, about 20 seconds
+uv run pytest                                        # 250 tests, about 20 seconds
 uv run invoiceops build-tasks --check                # task files match the generator
 uv run invoiceops show-task T-C94302                 # Northstar short-shipment task (add --private for the answer)
 uv run invoiceops play --task T-C94302               # solve it yourself through the agent tools

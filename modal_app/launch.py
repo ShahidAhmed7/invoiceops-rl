@@ -37,6 +37,20 @@ SMOKE_TRAIN = {
     "wall_clock_limit_min": 12,
     "grpo": {"max_steps": 3, "save_steps": 3, "gradient_accumulation_steps": 1},
 }
+# Hard timeouts (minutes) for each Modal call a job makes, in order. A job that makes several
+# calls, or reuses a long-running function for a short check, gets a per-call timeout so that
+# the calls together never run longer than the job's ``timeout_min`` in budget.yaml, which is
+# what the budget guard prices. Jobs not listed make one call with the function's own timeout.
+CALL_MINUTES: dict[str, tuple[int, ...]] = {
+    "smoke_train": (20,),
+    "probe_and_dev": (30, 20),
+    "test_candidate": (32, 32),
+    "select_and_test": (40, 10, 30),
+}
+
+
+def _limit(fn: Any, minutes: int) -> Any:
+    return fn.with_options(timeout=minutes * 60)
 
 
 def _jobs() -> dict[str, Callable[[], Any]]:
@@ -47,18 +61,20 @@ def _jobs() -> dict[str, Callable[[], Any]]:
     merged = f"/runs/train/{run_name}/selected_merged"
 
     def probe_and_dev() -> Any:
+        probe, dev = CALL_MINUTES["probe_and_dev"]
         return {
-            "probe": m.invoiceops_eval_l40s.remote(
+            "probe": _limit(m.invoiceops_eval_l40s, probe).remote(
                 "probe-train", settings.CANDIDATE_MODEL, splits=["train"], attempts=4
             ),
-            "dev": m.invoiceops_eval_l40s.remote(
+            "dev": _limit(m.invoiceops_eval_l40s, dev).remote(
                 "dev-v1", settings.CANDIDATE_MODEL, splits=["dev"], attempts=2
             ),
         }
 
     def test_candidate() -> Any:
+        minutes = dict(zip(("v1", "v2"), CALL_MINUTES["test_candidate"], strict=True))
         return {
-            p: m.invoiceops_eval_l40s.remote(
+            p: _limit(m.invoiceops_eval_l40s, minutes[p]).remote(
                 f"test-candidate-{p}",
                 settings.CANDIDATE_MODEL,
                 splits=["test"],
@@ -69,9 +85,10 @@ def _jobs() -> dict[str, Callable[[], Any]]:
         }
 
     def select_and_test() -> Any:
-        selection = m.select_checkpoint.remote(run_name)
-        path = m.merge_checkpoint.remote(run_name, selection["selected"])
-        test = m.invoiceops_eval_l40s.remote(
+        select, merge, test_min = CALL_MINUTES["select_and_test"]
+        selection = _limit(m.select_checkpoint, select).remote(run_name)
+        path = _limit(m.merge_checkpoint, merge).remote(run_name, selection["selected"])
+        test = _limit(m.invoiceops_eval_l40s, test_min).remote(
             "test-trained-v1",
             settings.CANDIDATE_MODEL,
             model_path=path,
@@ -88,7 +105,9 @@ def _jobs() -> dict[str, Callable[[], Any]]:
         "tau2_before": lambda: m.tau2_eval.remote("before", settings.CANDIDATE_MODEL),
         "tau2_reference": lambda: m.tau2_eval.remote("reference", settings.REFERENCE_FP8),
         "bfcl_before": lambda: m.bfcl_eval.remote("before"),
-        "smoke_train": lambda: m.train_grpo.remote(json.dumps(SMOKE_TRAIN)),
+        "smoke_train": lambda: _limit(m.train_grpo, CALL_MINUTES["smoke_train"][0]).remote(
+            json.dumps(SMOKE_TRAIN)
+        ),
         "probe_and_dev": probe_and_dev,
         "test_candidate": test_candidate,
         "test_reference": lambda: m.invoiceops_eval_h100.remote(

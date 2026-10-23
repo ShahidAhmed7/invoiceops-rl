@@ -3,6 +3,9 @@
 # Before the first launch, replace the rates below with the per-hour prices shown in your Modal
 # dashboard and set rates_confirmed to true. The launcher refuses to run until you do.
 total_usd: 50.0
+# Credit the owner has released so far. Raise it (and commit) to release more; the launcher
+# refuses any job whose worst case would take total spend above it.
+spend_limit_usd: 9.50
 rates_confirmed: false
 rates_usd_per_hour:
   H100: 3.95

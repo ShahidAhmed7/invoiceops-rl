@@ -67,3 +67,48 @@ def test_tau2_driver_has_no_external_model_defaults() -> None:
     text = Path("modal_app/tau2_driver.py").read_text()
     assert "EvaluationType.ENV" in text
     assert "gpt-" not in text and "api.openai.com" not in text
+
+
+def test_spend_limit_refuses_jobs_beyond_released_credit(budget: Budget) -> None:
+    limited = replace(budget, spend_limit_usd=2.0)
+    check_launch(limited, "smoke_serve_candidate", [], signed_off=True)  # worst case $0.65
+    with pytest.raises(BudgetError, match="released"):
+        check_launch(limited, "tau2_before", [], signed_off=True)  # worst case $3.95
+    spent = [{"job": "smoke_serve_candidate", "status": "succeeded", "cost_usd": 1.5}]
+    with pytest.raises(BudgetError, match="released"):
+        check_launch(limited, "bfcl_before", spent, signed_off=True)
+
+
+def test_multi_call_jobs_fit_their_priced_timeout() -> None:
+    from modal_app.launch import CALL_MINUTES
+
+    jobs = load_budget().jobs
+    for name, minutes in CALL_MINUTES.items():
+        assert sum(minutes) <= jobs[name].timeout_min, name
+
+
+# The first credit release (docs/MODAL_HANDOFF.md). The core jobs must fit even if Modal's
+# CPU and memory charges add $0.50/h to every GPU rate; the optional ones run only if the
+# guard still allows them.
+FIRST_RELEASE_CORE = (
+    "inspect_models",
+    "smoke_serve_candidate",
+    "probe_and_dev",
+    "smoke_train",
+    "test_candidate",
+)
+FIRST_RELEASE_OPTIONAL = ("smoke_tau2", "bfcl_before")
+
+
+def test_first_release_fits_the_spend_limit(budget: Budget) -> None:
+    assert budget.spend_limit_usd == pytest.approx(9.50)
+    padded = replace(budget, rates={k: v + 0.5 if v else v for k, v in budget.rates.items()})
+    ledger: list[dict[str, object]] = []
+    for job in FIRST_RELEASE_CORE:
+        money = check_launch(padded, job, ledger, signed_off=True)
+        ledger.append({"job": job, "status": "succeeded", "cost_usd": money["worst_case"]})
+    # At the planning rates, the optional jobs fit as well.
+    ledger = []
+    for job in FIRST_RELEASE_CORE + FIRST_RELEASE_OPTIONAL:
+        money = check_launch(budget, job, ledger, signed_off=True)
+        ledger.append({"job": job, "status": "succeeded", "cost_usd": money["worst_case"]})

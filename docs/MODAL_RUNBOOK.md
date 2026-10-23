@@ -13,7 +13,8 @@ The launcher refuses a job if:
 - the GPU rates in `modal_app/budget.yaml` are not confirmed,
 - the job uses InvoiceOps tasks and the pre-GPU review is not signed off,
 - the job already succeeded (pass `--rerun` to repeat it on purpose), or
-- its worst case (timeout × rate) does not fit in the budget left after reserving every other job's cap.
+- its worst case (timeout × rate) does not fit in the budget left after reserving every other job's cap, or
+- its worst case would take total spend above `spend_limit_usd`, the credit the owner has released so far. The first release is USD 9.50; see [`MODAL_HANDOFF.md`](MODAL_HANDOFF.md) for what it covers.
 
 Each launch appends its measured cost to `reports/modal_ledger.jsonl` and saves its result under `reports/modal/`. The ledger counts wall-clock time including container start-up, so it slightly overestimates. Compare it with the Modal dashboard after each job.
 

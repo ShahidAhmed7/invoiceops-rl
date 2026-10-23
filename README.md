@@ -92,7 +92,7 @@ Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync --frozen --extra openenv
-uv run pytest                                  # 247 tests, about 20 seconds
+uv run pytest                                  # 250 tests, about 20 seconds
 
 uv run invoiceops show-task T-C94302           # the short-shipment task above
 uv run invoiceops play --task T-C94302         # solve it yourself through the agent's tools
@@ -148,13 +148,14 @@ Results will be added here only once measured, including null or negative result
 | [`docs/task_card.md`](docs/task_card.md) | Task composition, generation, splits, review status |
 | [`docs/review/PRE_GPU_REVIEW.md`](docs/review/PRE_GPU_REVIEW.md) | Step-by-step human review before GPU spend |
 | [`docs/MODAL_RUNBOOK.md`](docs/MODAL_RUNBOOK.md) | How to run the GPU phases |
+| [`docs/MODAL_HANDOFF.md`](docs/MODAL_HANDOFF.md) | Brief for the first USD 9.50 of GPU work |
 
 ## Repository layout
 
 ```text
 src/invoiceops/    environment, tools, tasks, verifier, agents, adapters, evaluation, CLI
 tasks/             72 generated tasks: public.json (agent-visible) and private.json (verifier only)
-tests/             247 tests
+tests/             250 tests
 containers/        agent-facing and verifier Docker images
 modal_app/         GPU jobs, budget guard, benchmark drivers, training job
 reports/           measured results only
