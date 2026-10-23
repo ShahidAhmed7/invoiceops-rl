@@ -34,6 +34,9 @@ ENV = {
     "HF_HOME": "/hf-cache",
     "INVOICEOPS_TASK_ROOT": "/root/tasks",
     "TOKENIZERS_PARALLELISM": "false",
+    # DeepGEMM's FP8 kernels JIT-compile with the image's nvcc and need 12.9 or newer (the base
+    # image has 12.8), so the FP8 reference failed to start; vLLM falls back to its other FP8 kernels.
+    "VLLM_USE_DEEP_GEMM": "0",
 }
 
 

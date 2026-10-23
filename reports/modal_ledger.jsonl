@@ -7,3 +7,4 @@
 {"cost_usd": 0.0424, "error": "KeyError: 'model'", "gpu": "H100", "job": "smoke_train", "phase": "11B", "rate_usd_per_hour": 4.45, "seconds": 34.3, "started": "2026-10-23T21:22:53Z", "status": "failed"}
 {"cost_usd": 0.3169, "error": null, "gpu": "H100", "job": "smoke_train", "phase": "11B", "rate_usd_per_hour": 4.45, "seconds": 256.4, "started": "2026-10-23T21:25:15Z", "status": "succeeded"}
 {"cost_usd": 0.3455, "error": null, "gpu": "L40S", "job": "test_candidate", "phase": "12", "rate_usd_per_hour": 2.45, "seconds": 507.6, "started": "2026-10-23T21:30:02Z", "status": "succeeded"}
+{"cost_usd": 0.2437, "error": "RuntimeError: vLLM exited with code 1 while starting Qwen/Qwen3-30B-A3B-Instruct-2507-FP8", "gpu": "H100", "job": "smoke_tau2", "phase": "11A", "rate_usd_per_hour": 4.45, "seconds": 197.2, "started": "2026-10-23T21:39:15Z", "status": "failed"}
