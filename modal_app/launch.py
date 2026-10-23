@@ -115,8 +115,10 @@ def _jobs() -> dict[str, Callable[[], Any]]:
             "probe-train-v2", settings.CANDIDATE_MODEL, splits=["train"], attempts=4, prompt="v2"
         ),
         "test_candidate": test_candidate,
+        # Prompt v2: the transcript audit shows v1 mostly measures whether a model guesses that a
+        # payment proposal is required (reports/transcript_audit.md).
         "test_reference": lambda: m.invoiceops_eval_h100.remote(
-            "test-reference-v1", settings.REFERENCE_FP8, splits=["test"], attempts=4
+            "test-reference-v2", settings.REFERENCE_FP8, splits=["test"], attempts=4, prompt="v2"
         ),
         "train_grpo": lambda: m.train_grpo.remote(json.dumps(train_config)),
         "select_and_test": select_and_test,
