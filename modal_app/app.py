@@ -37,6 +37,7 @@ ENV = {
     # DeepGEMM's FP8 kernels JIT-compile with the image's nvcc and need 12.9 or newer (the base
     # image has 12.8), so the FP8 reference failed to start; vLLM uses its other FP8 kernels.
     "VLLM_USE_DEEP_GEMM": "0",
+    "TAU2_DATA_DIR": "/opt/tau2-src/data",
 }
 
 
@@ -63,8 +64,11 @@ serve_image = _with_sources(
     .run_commands(
         "pip install uv==0.11.32",
         "uv venv /opt/tau2 --python 3.12",
-        f"uv pip install --python /opt/tau2/bin/python "
-        f"'tau2 @ git+{settings.TAU2_REPO}@{settings.TAU2_COMMIT}'",
+        # A pip install from git leaves out tau2's data/ directory (tasks, policies, databases),
+        # so install from a checkout at the pinned commit and point TAU2_DATA_DIR at its data.
+        f"git clone {settings.TAU2_REPO} /opt/tau2-src "
+        f"&& git -C /opt/tau2-src checkout {settings.TAU2_COMMIT}",
+        "uv pip install --python /opt/tau2/bin/python /opt/tau2-src",
         "uv venv /opt/bfcl --python 3.12",
         # qwen_agent (imported by bfcl-eval) needs soundfile but does not declare it.
         f"uv pip install --python /opt/bfcl/bin/python bfcl-eval=={settings.BFCL_VERSION} "
