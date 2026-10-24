@@ -53,6 +53,7 @@ CALL_MINUTES: dict[str, tuple[int, ...]] = {
     "test_prompt": (32,),
     "test_candidate": (32, 32),
     "select_and_test": (40, 10, 30),
+    "smoke_post_train": (20, 10, 12),
 }
 
 
@@ -116,13 +117,32 @@ def _jobs(prompt: str = "v2") -> dict[str, Callable[[], Any]]:
         selection = _limit(m.select_checkpoint, select).remote(run_name)
         path = _limit(m.merge_checkpoint, merge).remote(run_name, selection["selected"])
         test = _limit(m.invoiceops_eval_l40s, test_min).remote(
-            "test-trained-v1",
+            f"test-trained-{settings.AGENT_PROMPT}",
             settings.CANDIDATE_MODEL,
             model_path=path,
             splits=["test"],
             attempts=4,
+            prompt=settings.AGENT_PROMPT,
         )
         return {"selection": selection, "merged": path, "test": test}
+
+    def smoke_post_train() -> Any:
+        # The post-training chain (LoRA serving, selection, merge, serving merged weights) on the
+        # smoke_train adapter, at minimum size, before paying for train_grpo.
+        select, merge, evaluate = CALL_MINUTES["smoke_post_train"]
+        selection = _limit(m.select_checkpoint, select).remote(
+            "smoke", attempts=1, max_candidates=2
+        )
+        path = _limit(m.merge_checkpoint, merge).remote("smoke", selection["selected"])
+        merged = _limit(m.invoiceops_eval_l40s, evaluate).remote(
+            "smoke-merged",
+            settings.CANDIDATE_MODEL,
+            model_path=path,
+            splits=["dev"],
+            attempts=1,
+            prompt=settings.AGENT_PROMPT,
+        )
+        return {"selection": selection, "merged": path, "merged_dev": merged}
 
     return {
         "inspect_models": lambda: m.inspect_models.remote(),
@@ -160,6 +180,7 @@ def _jobs(prompt: str = "v2") -> dict[str, Callable[[], Any]]:
         ),
         "train_grpo": lambda: m.train_grpo.remote(json.dumps(train_config)),
         "select_and_test": select_and_test,
+        "smoke_post_train": smoke_post_train,
         "tau2_after": lambda: m.tau2_eval.remote(
             "after", settings.CANDIDATE_MODEL, agent_path=merged
         ),

@@ -1,6 +1,6 @@
 {
-  "run_name": "grpo-v1",
+  "run_name": "grpo-v3d",
   "model": "Qwen/Qwen3-4B-Instruct-2507",
-  "prompt_version": "v1",
+  "prompt_version": "v3d",
   "generated_variants": 144
 }

@@ -572,7 +572,9 @@ def train_grpo(config_json: str) -> dict[str, Any]:
 @app.function(
     image=serve_image, gpu="L40S", volumes=VOLUMES, timeout=60 * 60, max_containers=1, retries=0
 )
-def select_checkpoint(run_name: str, attempts: int = 2, max_candidates: int = 4) -> dict[str, Any]:
+def select_checkpoint(
+    run_name: str, attempts: int = 2, max_candidates: int = 4, prompt: str = settings.AGENT_PROMPT
+) -> dict[str, Any]:
     """Pick the training checkpoint with the best development-split success (dev only)."""
     from invoiceops.agents.openai_runner import ModelConfig
     from invoiceops.evaluation.run import evaluate
@@ -605,13 +607,14 @@ def select_checkpoint(run_name: str, attempts: int = 2, max_candidates: int = 4)
                 root / "selection" / ckpt.name,
                 attempts=attempts,
                 model=cfg,
+                prompt_version=prompt,
                 concurrency=16,
             )
             scores[ckpt.name] = summary["task_mean_success"]
         finally:
             vllm_server.stop(proc)
     best = max(scores, key=lambda name: (scores[name] or 0.0, name == "final_adapter"))
-    result = {"run": run_name, "dev_scores": scores, "selected": best}
+    result = {"run": run_name, "prompt": prompt, "dev_scores": scores, "selected": best}
     _save(str(root / "selection.json"), result)
     return result
 

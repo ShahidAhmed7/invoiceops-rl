@@ -41,6 +41,10 @@ BFCL_CATEGORIES = (
 )
 
 # Decoding for every agent evaluation (BUILD_PLAN.md section 3.3). Not tuned on test data.
+# System prompt for training, checkpoint selection and the trained model's test run. Chosen on
+# train and dev before its test run (reports/prompt_trials.md); evaluations keep using it so the
+# trained model is measured with the prompt it was trained with.
+AGENT_PROMPT = "v3d"
 AGENT_TEMPERATURE = 0.7
 AGENT_TOP_P = 0.8
 USER_SIM_TEMPERATURE = 0.0

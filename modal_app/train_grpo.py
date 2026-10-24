@@ -17,7 +17,7 @@ from typing import Any
 DEFAULTS: dict[str, Any] = {
     "run_name": "grpo",
     "model": "Qwen/Qwen3-4B-Instruct-2507",
-    "prompt_version": "v1",
+    "prompt_version": "v3d",
     "generated_variants": 144,
     "seed": 7,
     "lora_r": 16,

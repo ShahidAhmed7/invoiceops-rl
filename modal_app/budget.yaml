@@ -5,7 +5,9 @@
 total_usd: 50.0
 # Credit the owner has released so far. Raise it (and commit) to release more; the launcher
 # refuses any job whose worst case would take total spend above it.
-spend_limit_usd: 9.50
+# First release USD 9.50; the owner released USD 1.50 more on 2026-10-24 for the post-training
+# pipeline smoke test.
+spend_limit_usd: 11.00
 rates_confirmed: true
 rates_usd_per_hour:
   H100: 4.45
@@ -36,6 +38,8 @@ jobs:
   # remaining released credit; raise them if a trial does not finish.
   prompt_trial:           {phase: 12,  gpu: L40S, cap_usd: 1.00,  timeout_min: 28,  needs_signoff: true}
   test_prompt:            {phase: 12,  gpu: L40S, cap_usd: 0.80,  timeout_min: 32,  needs_signoff: true}
+  # Selection, merge and merged serving on the smoke_train adapter, before train_grpo.
+  smoke_post_train:       {phase: 14,  gpu: L40S, cap_usd: 0.90,  timeout_min: 42,  needs_signoff: true}
   test_candidate:         {phase: 12,  gpu: L40S, cap_usd: 2.00,  timeout_min: 65,  needs_signoff: true}
   test_reference:         {phase: 12,  gpu: H100, cap_usd: 3.00,  timeout_min: 50,  needs_signoff: true}
   train_grpo:             {phase: 13,  gpu: H100, cap_usd: 15.80, timeout_min: 250, needs_signoff: true}
