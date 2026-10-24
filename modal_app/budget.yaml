@@ -32,7 +32,8 @@ jobs:
   dev_v2:                 {phase: 12,  gpu: L40S, cap_usd: 0.60,  timeout_min: 20,  needs_signoff: true}
   # Prompt engineering before training: a candidate prompt on train and dev (--prompt), and the
   # one test-split run of the chosen prompt.
-  prompt_trial:           {phase: 12,  gpu: L40S, cap_usd: 1.00,  timeout_min: 40,  needs_signoff: true}
+  # Limits: about twice the observed time (train about 7 min, dev about 5).
+  prompt_trial:           {phase: 12,  gpu: L40S, cap_usd: 1.00,  timeout_min: 28,  needs_signoff: true}
   test_prompt:            {phase: 12,  gpu: L40S, cap_usd: 0.80,  timeout_min: 32,  needs_signoff: true}
   test_candidate:         {phase: 12,  gpu: L40S, cap_usd: 2.00,  timeout_min: 65,  needs_signoff: true}
   test_reference:         {phase: 12,  gpu: H100, cap_usd: 3.00,  timeout_min: 50,  needs_signoff: true}

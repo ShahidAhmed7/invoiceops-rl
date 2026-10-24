@@ -5,7 +5,7 @@ from __future__ import annotations
 from importlib import resources
 
 # v3a and v3b are candidates written from train/dev transcripts only (reports/prompt_trials.md).
-VERSIONS = ("v1", "v2", "v3a", "v3b", "v3c", "v3d")
+VERSIONS = ("v1", "v2", "v3a", "v3b", "v3c", "v3d", "v4")
 
 
 def system_prompt(version: str) -> str:
