@@ -1,6 +1,6 @@
 # Compatibility report (Phase 11A)
 
-Results of the first credit release (`docs/MODAL_HANDOFF.md`, USD 9.50). Every figure comes from `reports/modal/*.json` and `reports/modal_ledger.jsonl`.
+Results of the GPU work so far (see `docs/PROJECT_HANDOFF.md`). Every figure comes from `reports/modal/*.json` and `reports/modal_ledger.jsonl`.
 
 ## What ran
 
@@ -22,7 +22,8 @@ Results of the first credit release (`docs/MODAL_HANDOFF.md`, USD 9.50). Every f
 | + | `test_prompt` v3c (added) | Passed: **72.9%** on test, the single test run of the chosen prompt. | $0.25 |
 | + | `prompt_trial` v3d, `test_prompt` v3d (added) | Passed. Train+dev 78.1%; test 71.9% (v3c 72.9%). | $0.73 |
 | + | `prompt_trial` v4 (added) | Passed. Company-style prompt with no model patches: train+dev 40.6%, critical violations 55.7%. | $0.43 |
-| | **Total** | | **$8.63** |
+| + | `smoke_post_train` (added) | Passed: the smoke adapter's checkpoints served as LoRA adapters and scored on dev with v3d, merged, and the merged model served 12 dev episodes. Pipeline check only. | $0.48 |
+| | **Total** | | **$9.11** |
 
 Jobs marked + ran after the owner released the rest of the $9.50 for the remaining jobs.
 - `smoke_serve_reference` was not run: the reference model was already served twice successfully.

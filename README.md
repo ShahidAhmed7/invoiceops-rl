@@ -30,10 +30,10 @@ Agents that do real business work need practice environments with three properti
 | Environment, 72 tasks, verifier, oracle | Built and tested |
 | TRL, OpenEnv, and OpenAI-compatible adapters | Built and tested |
 | Agent-facing and verifier containers | Built; isolation check passes in CI |
-| GPU phases (model baselines, external benchmarks, GRPO training) | Code written; **not yet run** |
-| Human review of the tasks | First review done: not approved, two verifier escapes found. Both are fixed ([builder response](docs/review/builder-response.md)); re-check pending |
+| Human review of the tasks | Approved at re-check ([sign-off](docs/review/signoff/pre-gpu.md)) after two verifier escapes were fixed |
+| GPU phases | Baselines, external benchmarks (τ²-bench, BFCL), prompt trials, and the training and post-training pipeline checks are done. **GRPO training has not run yet.** See [`docs/PROJECT_HANDOFF.md`](docs/PROJECT_HANDOFF.md) |
 
-No language model has been evaluated or trained on this environment yet, so this README reports no model scores. Until an AP practitioner reviews the tasks, the project is a **fictional policy simulator**, not a measure of professional AP competence.
+The tasks are fictional and have not been reviewed by an AP practitioner, so the project is a **fictional policy simulator**, not a measure of professional AP competence.
 
 ## Measured so far
 
@@ -99,7 +99,7 @@ Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync --frozen --extra openenv
-uv run pytest                                  # 250 tests, about 20 seconds
+uv run pytest                                  # 253 tests, about 30 seconds
 
 uv run invoiceops show-task T-C94302           # the short-shipment task above
 uv run invoiceops play --task T-C94302         # solve it yourself through the agent's tools
@@ -155,14 +155,14 @@ Results will be added here only once measured, including null or negative result
 | [`docs/task_card.md`](docs/task_card.md) | Task composition, generation, splits, review status |
 | [`docs/review/PRE_GPU_REVIEW.md`](docs/review/PRE_GPU_REVIEW.md) | Step-by-step human review before GPU spend |
 | [`docs/MODAL_RUNBOOK.md`](docs/MODAL_RUNBOOK.md) | How to run the GPU phases |
-| [`docs/MODAL_HANDOFF.md`](docs/MODAL_HANDOFF.md) | Brief for the first USD 9.50 of GPU work |
+| [`docs/PROJECT_HANDOFF.md`](docs/PROJECT_HANDOFF.md) | Project handoff: status, results, decisions, budget, next steps |
 
 ## Repository layout
 
 ```text
 src/invoiceops/    environment, tools, tasks, verifier, agents, adapters, evaluation, CLI
 tasks/             72 generated tasks: public.json (agent-visible) and private.json (verifier only)
-tests/             250 tests
+tests/             253 tests
 containers/        agent-facing and verifier Docker images
 modal_app/         GPU jobs, budget guard, benchmark drivers, training job
 reports/           measured results only

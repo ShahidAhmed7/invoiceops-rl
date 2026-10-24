@@ -1,6 +1,6 @@
-# Modal spend: first credit release
+# Modal spend
 
-The owner released **USD 9.50**. Rates in `modal_app/budget.yaml` are all-in: GPU price plus $0.50/h for CPU and memory, giving H100 $4.45/h and L40S $2.45/h. The GPU prices were read from Modal's pricing page on 2026-10-23: H100 $3.95/h, L40S $1.95/h.
+The owner released **USD 9.50**, then USD 1.50 more (USD 11.00) for the post-training pipeline check. Rates in `modal_app/budget.yaml` are all-in: GPU price plus $0.50/h for CPU and memory, giving H100 $4.45/h and L40S $2.45/h. The GPU prices were read from Modal's pricing page on 2026-10-23: H100 $3.95/h, L40S $1.95/h.
 
 | Started (UTC) | Job | GPU | Status | Minutes | Rate | Ledger cost |
 |---|---|---|---|---|---|---|
@@ -29,8 +29,9 @@ The owner released **USD 9.50**. Rates in `modal_app/budget.yaml` are all-in: GP
 | 2026-10-24T05:37:00Z | `prompt_trial` v3d | L40S | succeeded | 11.7 | $2.45 | $0.48 |
 | 2026-10-24T05:49:07Z | `test_prompt` v3d | L40S | succeeded | 6.2 | $2.45 | $0.25 |
 | 2026-10-24T06:08:21Z | `prompt_trial` v4 | L40S | succeeded | 10.4 | $2.45 | $0.43 |
-| | | | | | **Total** | **$8.63** |
+| 2026-10-24T08:23:37Z | `smoke_post_train` | L40S | succeeded | 11.6 | $2.45 | $0.48 |
+| | | | | | **Total** | **$9.11** |
 
 The ledger multiplies wall-clock time by the rate. Wall-clock time includes image builds and container start-up before the GPU is attached, so the ledger is an overestimate. **Modal dashboard figure for the same period: not yet read** (to be filled in by the owner).
 
-**Remaining by the ledger: $0.87.** The owner reported about $3.68 of credit left on the Modal account, read before the v3d and v4 runs (ledger cost of those runs: $1.16). The difference is the ledger's overestimate: it counts image builds and start-up time at the GPU rate. Under the guard, no further job fits within the released credit.
+**Remaining by the ledger: $1.89 of the released $11.00.** The owner read about $2.00 of credit left on the Modal account before `smoke_post_train`. What each remaining job needs is in `docs/PROJECT_HANDOFF.md` §6.

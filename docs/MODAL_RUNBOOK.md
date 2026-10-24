@@ -14,7 +14,7 @@ The launcher refuses a job if:
 - the job uses InvoiceOps tasks and the pre-GPU review is not signed off,
 - the job already succeeded (pass `--rerun` to repeat it on purpose), or
 - its worst case (timeout × rate) does not fit in the budget left after reserving every other job's cap, or
-- its worst case would take total spend above `spend_limit_usd`, the credit the owner has released so far. The first release is USD 9.50; see [`MODAL_HANDOFF.md`](MODAL_HANDOFF.md) for what it covers.
+- its worst case would take total spend above `spend_limit_usd`, the credit the owner has released so far. See [`PROJECT_HANDOFF.md`](PROJECT_HANDOFF.md) for the current release and what each remaining job needs.
 
 Each launch appends its measured cost to `reports/modal_ledger.jsonl` and saves its result under `reports/modal/`. The ledger counts wall-clock time including container start-up, so it slightly overestimates. Compare it with the Modal dashboard after each job.
 
@@ -22,7 +22,7 @@ Each launch appends its measured cost to `reports/modal_ledger.jsonl` and saves 
 
 1. **Account and spending limit.** In the Modal dashboard, set a workspace spending limit if your plan offers one.
 2. **Token.** Create an API token (Settings → API Tokens). If you work in a Claude Code cloud session, add it as `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET` in the environment settings, and never in chat. On your own machine, run `uv run --group modal modal token set --token-id ... --token-secret ...`.
-3. **Network.** If you run from a Claude Code cloud environment, add `api.modal.com` and `api.modal2.com` under Allowed domains.
+3. **Network.** If you run from a Claude Code cloud environment, add `api.modal.com`, `api.modal2.com`, `*.modal.com` (function calls go through `input-plane.<region>.modal.com`) and `*.modal-storage.com` (volume downloads) under Allowed domains. The Modal client connects through the session's HTTPS proxy with the `api-proxy-support` extra, which the `modal` dependency group installs.
 4. **Dependencies.** Run `uv sync --frozen --extra openenv --group modal`.
 5. **Rates.** Copy the current H100 and L40S per-hour prices from Modal's pricing page into `modal_app/budget.yaml`, set `rates_confirmed: true`, and commit.
 6. **Check.** Run `uv run python -m modal_app.launch inspect_models --dry-run`. It should print the job's worst-case cost.
@@ -63,14 +63,14 @@ Write `reports/baseline.md`.
 
 ## 4. Phase 13: training (about $15.80)
 
-1. Review `modal_app/train_config.json` (the defaults are in `modal_app/train_grpo.py`). Get the reviewer's approval of the config and the cap.
+1. Review `modal_app/train_config.json` (the defaults are in `modal_app/train_grpo.py`; the prompt is `settings.AGENT_PROMPT`, v3d). Get the reviewer's approval of the config and the cap.
 2. Run `launch train_grpo`. Training stops at `max_steps` or after `wall_clock_limit_min` (225 minutes), whichever comes first, and saves the final adapter.
 
 ## 5. Phase 14: final evaluation (about $6.55)
 
 | Step | Command | What it does |
 |---|---|---|
-| 1 | `launch select_and_test` | Picks the checkpoint by **development** success only, merges it, then runs the test split once. |
+| 1 | `launch select_and_test` | Picks the checkpoint by **development** success only (prompt `settings.AGENT_PROMPT`), merges it, then runs the test split once with the same prompt. The chain was checked on the smoke adapter (`smoke_post_train`). |
 | 2 | `launch tau2_after` | τ²-bench retail with the merged trained model; same customer model, seed, and trials as before. |
 | 3 | `launch bfcl_after` | BFCL with the merged trained model. |
 

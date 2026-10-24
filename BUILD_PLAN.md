@@ -43,12 +43,12 @@ This is the building documentation for InvoiceOps RL. It defines what we build, 
 | 7 | Agent interfaces (OpenEnv server, TRL adapter, runners, play CLI, replay) | No | **Done**: `openenv validate` passes static and runtime levels; three adapters give identical results |
 | 8 | Container packaging and isolation tests | No | **Done**: agent and verifier images; `scripts/container_check.py` passes |
 | 9 | Local evaluation pipeline with scripted policies | No | **Done**: `reports/local/scripted_baselines.md` |
-| 11A | Modal setup, serving checks, and external-benchmark baselines (τ²-bench, BFCL) | Yes (≈ $9.95) | Code ready, not yet run; blocked only by Modal access ([runbook](docs/MODAL_RUNBOOK.md)) |
-| 10 | **Gate: pre-GPU human review** (for runs that use our tasks) | No | First review **not approved** (2 verifier escapes, 1 family weakness); all fixed ([builder response](docs/review/builder-response.md)); re-check pending |
-| 11B | GRPO compatibility smoke test on our tasks | Yes (≈ $0.85) | Code ready; blocked by Phase 10 |
-| 12 | Baseline evaluation on our tasks | Yes (≈ $6.50) | Code ready; blocked by Phase 11B |
-| 13 | GRPO training experiment | Yes (≈ $15.80) | Code ready; blocked by Phase 12 |
-| 14 | Final held-out evaluation, τ²-bench and BFCL re-runs, report | Yes (≈ $6.55) | Code ready; blocked by Phase 13 |
+| 11A | Modal setup, serving checks, and external-benchmark baselines (τ²-bench, BFCL) | Yes (≈ $9.95) | **Done**: revisions pinned; serving and tool parsing verified; BFCL and τ²-bench baselines for the candidate and reference (`reports/external_baseline.md`, `reports/compatibility.md`) |
+| 10 | **Gate: pre-GPU human review** (for runs that use our tasks) | No | **Approved** at re-check after the fixes ([sign-off](docs/review/signoff/pre-gpu.md)) |
+| 11B | GRPO compatibility smoke test on our tasks | Yes (≈ $0.85) | **Done**: 3 steps, rewards flow, checkpoint saved; the post-training chain also checked (`smoke_post_train`) |
+| 12 | Baseline evaluation on our tasks | Yes (≈ $6.50) | **Done**: v1 7.3%, v2 41.7%, reference 61.5% on test; prompt trials chose v3d (71.9% on test) for training (`reports/baseline.md`, `reports/prompt_trials.md`) |
+| 13 | GRPO training experiment | Yes (≈ $15.80) | **Next**: needs the reviewer's approval of the training config and more released credit ([handoff](docs/PROJECT_HANDOFF.md)) |
+| 14 | Final held-out evaluation, τ²-bench and BFCL re-runs, report | Yes (≈ $6.55) | Code ready and checked on the smoke adapter; blocked by Phase 13 |
 | 15 | Showcase release | No | Blocked by Phase 14 |
 
 Update this table in the same commit that completes a phase.
@@ -238,7 +238,7 @@ Rates used for planning: H100 $3.95/h, L40S $1.95/h, CPU negligible. These are r
 
 - `modal_app/budget.py` keeps an append-only ledger at `reports/modal_ledger.jsonl`. Each entry records function, GPU type, start, end, billed seconds, rate, and cost.
 - Before launching, the launcher computes the worst case (`timeout × rate`) and **refuses to start** if that would exceed the phase cap or the remaining total. Override is only possible with an explicit `--allow-over-cap` flag and a written reason, logged in the ledger.
-- `spend_limit_usd` in `budget.yaml` is the credit the owner has released so far. A job is refused if spend so far plus its worst case would exceed it. The first release is USD 9.50, and [`docs/MODAL_HANDOFF.md`](docs/MODAL_HANDOFF.md) says which jobs it covers.
+- `spend_limit_usd` in `budget.yaml` is the credit the owner has released so far. A job is refused if spend so far plus its worst case would exceed it. The current release and what each remaining job needs are in [`docs/PROJECT_HANDOFF.md`](docs/PROJECT_HANDOFF.md).
 - Jobs that make several Modal calls (or reuse the training function for the smoke test) set a per-call timeout (`CALL_MINUTES` in `modal_app/launch.py`), so their calls together never run longer than the timeout the guard priced.
 - After each run, the ledger is reconciled against the Modal dashboard's usage page, and the difference is noted.
 
