@@ -1,0 +1,58 @@
+{
+  "merged": "/runs/train/smoke/selected_merged",
+  "merged_dev": {
+    "attempts_per_task": 1,
+    "attempts_with_critical_violation": 1,
+    "blocked_attempts": 0,
+    "by_family": {
+      "F01": 1.0,
+      "F02": 1.0,
+      "F03": 0.0,
+      "F04": 1.0,
+      "F05": 1.0,
+      "F06": 1.0,
+      "F07": 1.0,
+      "F08": 1.0,
+      "F09": 0.0,
+      "F10": 1.0,
+      "F11": 1.0,
+      "F12": 1.0
+    },
+    "clean_cases_paid_correctly": "6/6",
+    "critical_violations": {
+      "payment_proposed_for_unpayable_invoice": 1
+    },
+    "exception_cases_not_paid": "5/6",
+    "false_completions": 0,
+    "infrastructure_errors": [],
+    "mean_seconds": 26.52918194133333,
+    "mean_tool_calls": 11.25,
+    "pass@1": 0.8333333333333334,
+    "pass^1": 0.8333333333333334,
+    "scored_attempts": 12,
+    "strict_success": 0.8333333333333334,
+    "task_mean_success": 0.8333333333333334,
+    "task_mean_success_ci95": [
+      0.5833333333333334,
+      1.0
+    ],
+    "tasks": 12,
+    "tokens": {
+      "completion": 13993,
+      "context_limit_stops": 0,
+      "max_context": 8128,
+      "prompt": 759365,
+      "truncated_turns": 0
+    },
+    "unscorable_attempts": 0
+  },
+  "selection": {
+    "dev_scores": {
+      "checkpoint-3": 0.8333333333333334,
+      "final_adapter": 0.6666666666666666
+    },
+    "prompt": "v3d",
+    "run": "smoke",
+    "selected": "checkpoint-3"
+  }
+}
