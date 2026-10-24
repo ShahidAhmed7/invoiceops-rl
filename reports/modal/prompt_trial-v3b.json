@@ -1,0 +1,97 @@
+{
+  "dev": {
+    "attempts_per_task": 4,
+    "attempts_with_critical_violation": 24,
+    "blocked_attempts": 0,
+    "by_family": {
+      "F01": 0.0,
+      "F02": 1.0,
+      "F03": 0.0,
+      "F04": 0.25,
+      "F05": 1.0,
+      "F06": 0.0,
+      "F07": 1.0,
+      "F08": 1.0,
+      "F09": 0.0,
+      "F10": 0.0,
+      "F11": 0.0,
+      "F12": 0.0
+    },
+    "clean_cases_paid_correctly": "13/24",
+    "critical_violations": {
+      "payment_proposed_for_unpayable_invoice": 16,
+      "payment_without_required_approval": 8
+    },
+    "exception_cases_not_paid": "5/24",
+    "false_completions": 6,
+    "infrastructure_errors": [],
+    "mean_seconds": 12.744903267562501,
+    "mean_tool_calls": 9.729166666666666,
+    "pass@4": 0.4166666666666667,
+    "pass^4": 0.3333333333333333,
+    "scored_attempts": 48,
+    "strict_success": 0.3541666666666667,
+    "task_mean_success": 0.3541666666666667,
+    "task_mean_success_ci95": [
+      0.10416666666666667,
+      0.625
+    ],
+    "tasks": 12,
+    "tokens": {
+      "completion": 30042,
+      "context_limit_stops": 0,
+      "max_context": 7007,
+      "prompt": 1987890,
+      "truncated_turns": 0
+    },
+    "unscorable_attempts": 0
+  },
+  "train": {
+    "attempts_per_task": 4,
+    "attempts_with_critical_violation": 62,
+    "blocked_attempts": 6,
+    "by_family": {
+      "F01": 0.4166666666666667,
+      "F02": 0.5833333333333334,
+      "F03": 0.0,
+      "F04": 0.4166666666666667,
+      "F05": 0.4166666666666667,
+      "F06": 0.08333333333333333,
+      "F07": 0.5,
+      "F08": 0.0,
+      "F09": 0.4166666666666667,
+      "F10": 0.0,
+      "F11": 0.3333333333333333,
+      "F12": 0.0
+    },
+    "clean_cases_paid_correctly": "33/84",
+    "critical_violations": {
+      "overpayment_proposed": 16,
+      "payment_proposed_for_unpayable_invoice": 36,
+      "payment_without_required_approval": 10
+    },
+    "exception_cases_not_paid": "21/60",
+    "false_completions": 11,
+    "infrastructure_errors": [],
+    "mean_seconds": 13.024509934965279,
+    "mean_tool_calls": 9.708333333333334,
+    "pass@4": 0.4166666666666667,
+    "pass^4": 0.16666666666666666,
+    "scored_attempts": 144,
+    "strict_success": 0.2638888888888889,
+    "task_mean_success": 0.2638888888888889,
+    "task_mean_success_ci95": [
+      0.1527777777777778,
+      0.3958333333333333
+    ],
+    "tasks": 36,
+    "tokens": {
+      "completion": 88348,
+      "context_limit_stops": 0,
+      "max_context": 7893,
+      "prompt": 5987760,
+      "truncated_turns": 0
+    },
+    "unscorable_attempts": 0
+  }
+}
