@@ -22,7 +22,9 @@
 
 | v3d | v3c, plus: after any clarification or approval request, check the inbox and act on the reply before finishing; compare a payment with the policy's approval limits before proposing it; where the policy says what to do, do exactly that even when it differs from common practice. |
 
-The prompt texts are in `src/invoiceops/agents/prompts/system_v3*.md`.
+| v4 | A fresh prompt in company style, with no model patches: an AP practice guide (policy decides, three-way match, exact amounts, approval limits, follow up on replies, record decisions separately from payment requests) plus a short guide to the AP system. It has no numbered procedure, and none of the lines written to fix model mistakes. |
+
+The prompt texts are in `src/invoiceops/agents/prompts/system_v3*.md` and `system_v4.md`.
 
 ## Train and dev results
 
@@ -33,6 +35,7 @@ The prompt texts are in `src/invoiceops/agents/prompts/system_v3*.md`.
 | v3b | **28.6%** | 26.4% (15.3%–39.6%) | 35.4% | 44.8% | 17 | 9 / 6 / 21 | 9.7 |
 | v3c | **69.3%** | 70.1% (58.3%–80.6%) | 66.7% | 10.4% | 11 | 14 / 18 / 4 | 10.4 |
 | v3d | **78.1%** | 75.0% (64.6%–84.7%) | 87.5% | 6.8% | 6 | 16 / 18 / 2 | 10.7 |
+| v4 | **40.6%** | 40.3% (25.0%–55.6%) | 41.7% | 55.7% | 8 | 4 / 13 / 19 | 11.9 |
 
 ### What happened
 
@@ -114,6 +117,21 @@ The rule, set before the run, was to beat v3c on train and dev without raising t
 
 **Prompt engineering has plateaued at about 72–73% on test.** A further round is unlikely to show a real gain without many more tasks.
 
+## Company-style prompt without model patches: v4 (train and dev only)
+
+**Question:** how much of the gain comes from realistic company guidance, and how much from lines written to patch model mistakes? v4 was written as what a company would hand a new AP clerk, and was not given a test run.
+
+**Result: 40.6% on train and dev, about the same as v2 (44.8%), and the most dangerous prompt tested.** 55.7% of attempts had a critical violation: 52 payments proposed on invoices that should not be paid, 11 overpayments, and 16 payments without required approval on train, against 13, 8 and 6 for v2.
+
+The transcripts replay exactly (192 of 192). What they show:
+- **The model reads the policy but does not check the records against it.** It opened the policy in 142 of 144 training attempts, yet paid 52 of the 60 attempts that should be held or rejected. It called no `request_approval` in 144 attempts, although v4 states that large payments need approval.
+- **It acts without checking.** On `T-02FF9D` the invoice price is $118.72 per case against the PO's $112.00, a 6% variance. The model wrote "the quantities and prices align exactly", then paid.
+- **The order of work changed.** Under v4 the model read the policy after gathering the records in all 144 attempts (v2: 12 of 144, v3c: 0), then decided at once. Within v2, though, reading order alone does not predict success, so it is not the whole explanation.
+
+**Reading.** The patch lines are only part of the story. v4 also drops v2's **numbered procedure**: "apply the policy's checks in the order it gives", and "propose a payment only when the policy allows it". It describes good practice instead of prescribing an order of work, and the 4B model then gathers records and approves by default.
+
+For this model, **a step-by-step procedure matters more than realistic wording.** The v3 prompts' gain over v2 comes from the procedure plus the patches, not from AP knowledge the model lacked. A one-line ablation (v4 plus "work through the policy's checks one by one, in the order it gives, before deciding") would test the procedure explanation directly.
+
 ## Recommendation for training
 
 - **The bar to beat is about 72–73% on test**, from prompt engineering alone (v3c 72.9%, v3d 71.9%). The trained model has to beat this, not v2's 41.7%.
@@ -130,4 +148,5 @@ The rule, set before the run, was to beat v3c on train and dev without raising t
 | test_prompt v3c | $0.25 |
 | prompt_trial v3d | $0.48 |
 | test_prompt v3d | $0.25 |
-| **All prompt trials** | **$2.24** |
+| prompt_trial v4 | $0.43 |
+| **All prompt trials** | **$2.67** |

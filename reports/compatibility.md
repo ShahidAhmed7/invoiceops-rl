@@ -21,7 +21,8 @@ Results of the first credit release (`docs/MODAL_HANDOFF.md`, USD 9.50). Every f
 | + | `prompt_trial` v3a, v3b, v3c (added) | Passed. Train+dev 34.4%, 28.6%, **69.3%** (v2: 44.8%). See `reports/prompt_trials.md`. | $1.26 |
 | + | `test_prompt` v3c (added) | Passed: **72.9%** on test, the single test run of the chosen prompt. | $0.25 |
 | + | `prompt_trial` v3d, `test_prompt` v3d (added) | Passed. Train+dev 78.1%; test 71.9% (v3c 72.9%). | $0.73 |
-| | **Total** | | **$8.21** |
+| + | `prompt_trial` v4 (added) | Passed. Company-style prompt with no model patches: train+dev 40.6%, critical violations 55.7%. | $0.43 |
+| | **Total** | | **$8.63** |
 
 Jobs marked + ran after the owner released the rest of the $9.50 for the remaining jobs.
 - `smoke_serve_reference` was not run: the reference model was already served twice successfully.
