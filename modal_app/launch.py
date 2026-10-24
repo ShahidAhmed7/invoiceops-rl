@@ -49,7 +49,7 @@ CALL_MINUTES: dict[str, tuple[int, ...]] = {
     "probe_and_dev": (30, 20),
     "probe_v2": (25,),
     "dev_v2": (20,),
-    "prompt_trial": (17, 11),
+    "prompt_trial": (25, 15),
     "test_prompt": (32,),
     "test_candidate": (32, 32),
     "select_and_test": (40, 10, 30),
