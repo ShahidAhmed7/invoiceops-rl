@@ -22,11 +22,12 @@ The owner released **USD 9.50**. Rates in `modal_app/budget.yaml` are all-in: GP
 | 2026-10-23T22:53:02Z | `test_reference` | H100 | succeeded | 4.7 | $4.45 | $0.35 |
 | 2026-10-23T22:58:17Z | `tau2_reference` | H100 | succeeded | 11.5 | $4.45 | $0.85 |
 | 2026-10-23T23:11:18Z | `dev_v2` | L40S | succeeded | 4.8 | $2.45 | $0.20 |
-| | | | | | **Total** | **$5.97** |
+| 2026-10-24T05:02:41Z | `prompt_trial` v3a | L40S | succeeded | 9.3 | $2.45 | $0.38 |
+| 2026-10-24T05:02:50Z | `prompt_trial` v3b | L40S | succeeded | 9.6 | $2.45 | $0.39 |
+| 2026-10-24T05:14:29Z | `prompt_trial` v3c | L40S | succeeded | 12.1 | $2.45 | $0.49 |
+| 2026-10-24T05:27:03Z | `test_prompt` v3c | L40S | succeeded | 6.1 | $2.45 | $0.25 |
+| | | | | | **Total** | **$7.48** |
 
 The ledger multiplies wall-clock time by the rate. Wall-clock time includes image builds and container start-up before the GPU is attached, so the ledger is an overestimate. **Modal dashboard figure for the same period: not yet read** (to be filled in by the owner).
 
-**Remaining by the ledger: $3.53.**
-- `test_reference` with prompt v1 (worst case $3.71) is refused by the guard.
-- `smoke_serve_reference` (worst case $1.48) would only repeat what the reference runs already showed, so it was not run.
-- `train_grpo` ($15.80 cap) waits for the next release.
+**Remaining by the ledger: $2.02.** The prompt trials (`reports/prompt_trials.md`) used $1.51. Nothing else useful fits: a further prompt round would need its own test run, and `train_grpo` ($15.80 cap) waits for the next release.

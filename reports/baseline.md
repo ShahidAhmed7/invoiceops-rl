@@ -13,6 +13,7 @@ Success is strict: an attempt passes only if every verifier check passes. Task-m
 |---|---|---|---|---|---|
 | Untrained candidate (4B) | v1 | 7.3% | 1.0%–15.6% | 16.7% | 0.0% |
 | Untrained candidate (4B) | v2 | 41.7% | 28.1%–55.2% | 70.8% | 12.5% |
+| Untrained candidate (4B) | v3c | 72.9% | 56.2%–87.5% | 79.2% | 54.2% |
 | Reference model (30B-A3B FP8) | v1 | not run | | | |
 | Reference model (30B-A3B FP8) | v2 | 61.5% | 43.8%–78.1% | 70.8% | 50.0% |
 
@@ -54,6 +55,8 @@ Success is strict: an attempt passes only if every verifier check passes. Task-m
 | `payment_without_required_approval` | 4 | 3 |
 
 ## Reading
+
+- **Prompt v3c is the prompt-engineered baseline: 72.9% on test.** It was chosen on train and dev before its single test run; see `reports/prompt_trials.md`.
 
 - **v2 is the stronger baseline: 41.7% against 7.3% for v1.** The confidence intervals do not overlap. v2 is the frozen prompt that adds general AP working practice, with no task-family hints.
 - **v1 rarely completes a case correctly.** It has 43 false completions (a submission whose status or amount the system does not show), and pays only 7/60 clean cases correctly. Overpayment is its most frequent critical violation.

@@ -18,7 +18,9 @@ Results of the first credit release (`docs/MODAL_HANDOFF.md`, USD 9.50). Every f
 | + | `test_reference` (prompt v2) | Passed: 61.5%. See `reports/baseline.md`. | $0.35 |
 | + | `tau2_reference` | Passed: pass^1 43.8%, pass^4 27.5%. | $0.85 |
 | + | `dev_v2` (added) | Passed: dev split, prompt v2, 47.9% (CI 27.1%–70.8%). | $0.20 |
-| | **Total** | | **$5.97** |
+| + | `prompt_trial` v3a, v3b, v3c (added) | Passed. Train+dev 34.4%, 28.6%, **69.3%** (v2: 44.8%). See `reports/prompt_trials.md`. | $1.26 |
+| + | `test_prompt` v3c (added) | Passed: **72.9%** on test, the single test run of the chosen prompt. | $0.25 |
+| | **Total** | | **$7.48** |
 
 Jobs marked + ran after the owner released the rest of the $9.50 for the remaining jobs.
 - `smoke_serve_reference` was not run: the reference model was already served twice successfully.
