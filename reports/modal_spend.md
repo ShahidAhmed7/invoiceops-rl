@@ -26,8 +26,10 @@ The owner released **USD 9.50**. Rates in `modal_app/budget.yaml` are all-in: GP
 | 2026-10-24T05:02:50Z | `prompt_trial` v3b | L40S | succeeded | 9.6 | $2.45 | $0.39 |
 | 2026-10-24T05:14:29Z | `prompt_trial` v3c | L40S | succeeded | 12.1 | $2.45 | $0.49 |
 | 2026-10-24T05:27:03Z | `test_prompt` v3c | L40S | succeeded | 6.1 | $2.45 | $0.25 |
-| | | | | | **Total** | **$7.48** |
+| 2026-10-24T05:37:00Z | `prompt_trial` v3d | L40S | succeeded | 11.7 | $2.45 | $0.48 |
+| 2026-10-24T05:49:07Z | `test_prompt` v3d | L40S | succeeded | 6.2 | $2.45 | $0.25 |
+| | | | | | **Total** | **$8.21** |
 
 The ledger multiplies wall-clock time by the rate. Wall-clock time includes image builds and container start-up before the GPU is attached, so the ledger is an overestimate. **Modal dashboard figure for the same period: not yet read** (to be filled in by the owner).
 
-**Remaining by the ledger: $2.02.** The prompt trials (`reports/prompt_trials.md`) used $1.51. Nothing else useful fits: a further prompt round would need its own test run, and `train_grpo` ($15.80 cap) waits for the next release.
+**Remaining by the ledger: $1.29.** The owner reports about $3.68 of credit left on the Modal account, read before the v3d runs (ledger cost of those runs: $0.73). The difference is the ledger's overestimate: it counts image builds and start-up time at the GPU rate. The guard keeps using the ledger, so no further job fits: the cheapest remaining GPU job has a worst case of $1.31. `train_grpo` ($15.80 cap) waits for the next release.

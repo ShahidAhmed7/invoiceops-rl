@@ -20,6 +20,8 @@
 | v3b | v3a, plus: open every invoice attachment as evidence; write the amount arithmetic out in cents; pick the reason code whose policy conditions match, not one whose name sounds right. |
 | v3c | v3a, with step 1 rewritten: search for the policy, **then open it with `get_document` and read all of it**; a search result shows only the title. |
 
+| v3d | v3c, plus: after any clarification or approval request, check the inbox and act on the reply before finishing; compare a payment with the policy's approval limits before proposing it; where the policy says what to do, do exactly that even when it differs from common practice. |
+
 The prompt texts are in `src/invoiceops/agents/prompts/system_v3*.md`.
 
 ## Train and dev results
@@ -30,6 +32,7 @@ The prompt texts are in `src/invoiceops/agents/prompts/system_v3*.md`.
 | v3a | **34.4%** | 36.8% (22.9%–50.7%) | 27.1% | 41.1% | 17 | 8 / 10 / 18 | 10.0 |
 | v3b | **28.6%** | 26.4% (15.3%–39.6%) | 35.4% | 44.8% | 17 | 9 / 6 / 21 | 9.7 |
 | v3c | **69.3%** | 70.1% (58.3%–80.6%) | 66.7% | 10.4% | 11 | 14 / 18 / 4 | 10.4 |
+| v3d | **78.1%** | 75.0% (64.6%–84.7%) | 87.5% | 6.8% | 6 | 16 / 18 / 2 | 10.7 |
 
 ### What happened
 
@@ -87,11 +90,35 @@ With v3c, the untrained 4B also scores above the 30B reference model under v2.
 - Under v3c this family is also lower on train (42%, against 50% for v2).
 - This was found on the test split, so it was **not** used to tune another prompt. A further prompt round would have to be designed and selected on train and dev only, and its test number would be a second look at the test split.
 
+## Second round: v3d (train and dev evidence only)
+
+v3d targets v3c's train and dev failures:
+- asked someone but never checked the inbox: 14 train, 3 dev attempts;
+- applied a generic receipt rule instead of the company's: 16 and 3;
+- paid without the required approval: 5 and 4.
+
+The rule, set before the run, was to beat v3c on train and dev without raising the critical-violation rate.
+
+**Result on train and dev:** 78.1% against 69.3%, critical violations 6.8% against 10.4%. Missing receipt on train rose from 42% to 75%, approval routing from 50% to 67%.
+
+**Its test run, a second look at the test split:**
+
+| Agent | Task-mean success | 95% CI | pass@4 | pass^4 | Critical violations | False completions |
+|---|---|---|---|---|---|---|
+| Untrained 4B, prompt v3c | 72.9% | 56.2%–87.5% | 79.2% | 54.2% | 3 / 96 | 2 / 96 |
+| Untrained 4B, prompt v3d | 71.9% | 56.2%–85.4% | 83.3% | 50.0% | 1 / 96 | 3 / 96 |
+
+**The 9-point gain on train and dev did not carry over to test.** v3d and v3c are within a point of each other there. After several rounds of choosing prompts on train and dev, part of that gain is selection noise.
+- v3d is safer: 1 critical violation against 3.
+- It does better on missing receipt (25% against 0%) but worse on stale policy (37.5% against 50%).
+
+**Prompt engineering has plateaued at about 72–73% on test.** A further round is unlikely to show a real gain without many more tasks.
+
 ## Recommendation for training
 
-- **The bar to beat is now 72.9% on test**, from prompt engineering alone. The trained model has to beat this, not v2's 41.7%.
-- **Training with v3c starts from the strongest behaviour.** On train it leaves 14 tasks with mixed outcomes, 18 that always pass, and 4 that never pass. That is fewer learnable tasks than v2's 19, but the 144 generated training variants add more, and the remaining failures are where GRPO's signal will go: F03, F08, F09.
-- **If training uses v3c,** `select_checkpoint` and `select_and_test` must evaluate with v3c too. They currently use v1.
+- **The bar to beat is about 72–73% on test**, from prompt engineering alone (v3c 72.9%, v3d 71.9%). The trained model has to beat this, not v2's 41.7%.
+- **Train with v3d.** It matches v3c on test with fewer critical violations, and on train it leaves 16 tasks with mixed outcomes and only 2 that never pass (v3c: 14 and 4). The 144 generated training variants add more, and the remaining failures are where GRPO's signal will go: F03 short receipt, F09 shared PO capacity, F12 stale policy.
+- **Whichever prompt training uses,** `select_checkpoint` and `select_and_test` must evaluate with it too. They currently use v1.
 
 ## Cost
 
@@ -101,3 +128,6 @@ With v3c, the untrained 4B also scores above the 30B reference model under v2.
 | prompt_trial v3b | $0.39 |
 | prompt_trial v3c | $0.49 |
 | test_prompt v3c | $0.25 |
+| prompt_trial v3d | $0.48 |
+| test_prompt v3d | $0.25 |
+| **All prompt trials** | **$2.24** |
