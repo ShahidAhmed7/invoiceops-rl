@@ -31,6 +31,8 @@ from modal_app.budget import (
 )
 
 REPORTS = ROOT / "reports" / "modal"
+# Jobs that take --prompt; their reports and ledger lines carry the prompt version.
+PROMPT_JOBS = ("prompt_trial", "test_prompt")
 SMOKE_TRAIN = {
     "run_name": "smoke",
     "generated_variants": 0,
@@ -47,6 +49,8 @@ CALL_MINUTES: dict[str, tuple[int, ...]] = {
     "probe_and_dev": (30, 20),
     "probe_v2": (25,),
     "dev_v2": (20,),
+    "prompt_trial": (25, 15),
+    "test_prompt": (32,),
     "test_candidate": (32, 32),
     "select_and_test": (40, 10, 30),
 }
@@ -56,7 +60,7 @@ def _limit(fn: Any, minutes: int) -> Any:
     return fn.with_options(timeout=minutes * 60)
 
 
-def _jobs() -> dict[str, Callable[[], Any]]:
+def _jobs(prompt: str = "v2") -> dict[str, Callable[[], Any]]:
     from modal_app import app as m
 
     train_config = json.loads((ROOT / "modal_app" / "train_config.json").read_text())
@@ -71,6 +75,26 @@ def _jobs() -> dict[str, Callable[[], Any]]:
             ),
             "dev": _limit(m.invoiceops_eval_l40s, dev).remote(
                 "dev-v1", settings.CANDIDATE_MODEL, splits=["dev"], attempts=2
+            ),
+        }
+
+    def prompt_trial() -> Any:
+        # Prompt engineering on train and dev only; the test split is run once, for the winner.
+        train, dev = CALL_MINUTES["prompt_trial"]
+        return {
+            "train": _limit(m.invoiceops_eval_l40s, train).remote(
+                f"probe-train-{prompt}",
+                settings.CANDIDATE_MODEL,
+                splits=["train"],
+                attempts=4,
+                prompt=prompt,
+            ),
+            "dev": _limit(m.invoiceops_eval_l40s, dev).remote(
+                f"dev-{prompt}",
+                settings.CANDIDATE_MODEL,
+                splits=["dev"],
+                attempts=4,
+                prompt=prompt,
             ),
         }
 
@@ -118,6 +142,16 @@ def _jobs() -> dict[str, Callable[[], Any]]:
         "dev_v2": lambda: _limit(m.invoiceops_eval_l40s, CALL_MINUTES["dev_v2"][0]).remote(
             "dev-v2", settings.CANDIDATE_MODEL, splits=["dev"], attempts=4, prompt="v2"
         ),
+        "prompt_trial": prompt_trial,
+        "test_prompt": lambda: _limit(
+            m.invoiceops_eval_l40s, CALL_MINUTES["test_prompt"][0]
+        ).remote(
+            f"test-candidate-{prompt}",
+            settings.CANDIDATE_MODEL,
+            splits=["test"],
+            attempts=4,
+            prompt=prompt,
+        ),
         "test_candidate": test_candidate,
         # Prompt v2: the transcript audit shows v1 mostly measures whether a model guesses that a
         # payment proposal is required (reports/transcript_audit.md).
@@ -140,6 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("job")
     parser.add_argument("--dry-run", action="store_true", help="check the guard and stop")
     parser.add_argument("--rerun", action="store_true", help="allow re-running a succeeded job")
+    parser.add_argument("--prompt", default="v2", help="system prompt version for prompt_trial")
     args = parser.parse_args(argv)
 
     budget = load_budget()
@@ -165,7 +200,7 @@ def main(argv: list[str] | None = None) -> int:
     status, result, error = "failed", None, None
     try:
         with modal.enable_output(), modal_app_module.app.run():
-            result = _jobs()[args.job]()
+            result = _jobs(args.prompt)[args.job]()
         status = "succeeded"
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
@@ -183,11 +218,13 @@ def main(argv: list[str] | None = None) -> int:
                 "rate_usd_per_hour": budget.rate(job),
                 "cost_usd": cost,
                 "error": error,
+                **({"prompt": args.prompt} if args.job in PROMPT_JOBS else {}),
             }
         )
     REPORTS.mkdir(parents=True, exist_ok=True)
     if result is not None:
-        Path(REPORTS / f"{args.job}.json").write_text(
+        name = f"{args.job}-{args.prompt}" if args.job in PROMPT_JOBS else args.job
+        Path(REPORTS / f"{name}.json").write_text(
             json.dumps(result, indent=2, sort_keys=True, default=str)
         )
         if args.job == "inspect_models":

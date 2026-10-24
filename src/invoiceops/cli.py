@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, TextIO
 
 from invoiceops import __version__
+from invoiceops.agents.prompts import VERSIONS as PROMPT_VERSIONS
 from invoiceops.domain.money import format_minor
 from invoiceops.episode import Episode
 from invoiceops.runs import (
@@ -485,7 +486,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--run-id")
     p.add_argument("--base-url")
     p.add_argument("--model")
-    p.add_argument("--prompt", choices=["v1", "v2"], default="v1")
+    p.add_argument("--prompt", choices=list(PROMPT_VERSIONS), default="v1")
     p.add_argument("--temperature", type=float, default=0.7)
     p.add_argument("--top-p", type=float, default=0.8)
     p.add_argument("--max-tool-calls", type=int, default=40)
