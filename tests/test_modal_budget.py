@@ -88,7 +88,7 @@ def test_multi_call_jobs_fit_their_priced_timeout() -> None:
         assert sum(minutes) <= jobs[name].timeout_min, name
 
 
-# The first credit release (USD 9.50; docs/PROJECT_HANDOFF.md). The core jobs must fit even if Modal's
+# The first credit release (USD 9.50). The core jobs must fit even if Modal's
 # CPU and memory charges add $0.50/h to every GPU rate; the optional ones run only if the
 # guard still allows them.
 FIRST_RELEASE_CORE = (
