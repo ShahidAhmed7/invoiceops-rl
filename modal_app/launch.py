@@ -58,6 +58,10 @@ CALL_MINUTES: dict[str, tuple[int, ...]] = {
     "test_candidate": (32, 32),
     "select_and_test": (40, 10, 30),
     "smoke_post_train": (20, 10, 12),
+    # Final checkpoint merge + BFCL share the existing 35-minute priced limit.
+    "bfcl_after": (7, 28),
+    "bfcl_selected": (7, 28),
+    "fresh_untrained_control": (32,),
 }
 
 
@@ -124,6 +128,7 @@ def _jobs(prompt: str = "v2", run_name: str | None = None) -> dict[str, Callable
 
     def select_and_test() -> Any:
         select, merge, test_min = CALL_MINUTES["select_and_test"]
+        verification = m.verify_evaluation_adapters.remote(run_name)
         selection = _limit(m.select_checkpoint, select).remote(run_name)
         path = _limit(m.merge_checkpoint, merge).remote(run_name, selection["selected"])
         test = _limit(m.invoiceops_eval_l40s, test_min).remote(
@@ -134,7 +139,15 @@ def _jobs(prompt: str = "v2", run_name: str | None = None) -> dict[str, Callable
             attempts=4,
             prompt=settings.AGENT_PROMPT,
         )
-        return {"selection": selection, "merged": path, "test": test}
+        from modal_app.checkpoints import selection_score
+
+        selection_score(test)  # the final test must contain all 96 scored attempts
+        return {
+            "transfer_verification": verification,
+            "selection": selection,
+            "merged": path,
+            "test": test,
+        }
 
     def smoke_post_train() -> Any:
         # The post-training chain (LoRA serving, selection, merge, serving merged weights) on the
@@ -153,6 +166,47 @@ def _jobs(prompt: str = "v2", run_name: str | None = None) -> dict[str, Callable
             prompt=settings.AGENT_PROMPT,
         )
         return {"selection": selection, "merged": path, "merged_dev": merged}
+
+    def bfcl_after() -> Any:
+        merge_min, eval_min = CALL_MINUTES["bfcl_after"]
+        # BFCL was requested before dev selection. Evaluate the final adapter explicitly;
+        # keep its merged weights separate from a future dev-selected checkpoint.
+        path = _limit(m.merge_checkpoint, merge_min).remote(
+            run_name, "final_adapter", target_dir="final_merged"
+        )
+        result = _limit(m.bfcl_eval, eval_min).remote("after-final-step150", model_path=path)
+        return {**result, "training_run": run_name, "checkpoint": "final_adapter", "step": 150}
+
+    def bfcl_selected() -> Any:
+        from modal_app.checkpoints import selection_score
+
+        local = ROOT / "runs" / "modal" / "training" / run_name
+        decision = json.loads((local / "selection.json").read_text())
+        checkpoint = decision["selected"]
+        if checkpoint not in decision["dev_scores"] or decision["dev_scores"][checkpoint] != max(
+            decision["dev_scores"].values()
+        ):
+            raise ValueError("BFCL checkpoint must be the dev-selected winner")
+        dev = local / "selection" / checkpoint
+        if (
+            selection_score(json.loads((dev / "summary.json").read_text()))
+            != decision["dev_scores"][checkpoint]
+        ):
+            raise ValueError("selected dev summary does not match the selection decision")
+        digest = json.loads((dev / "config.json").read_text())["adapter_sha256"]
+        merge_min, eval_min = CALL_MINUTES["bfcl_selected"]
+        path = _limit(m.merge_checkpoint, merge_min).remote(
+            run_name, checkpoint, expected_adapter_sha256=digest
+        )
+        result = _limit(m.bfcl_eval, eval_min).remote(
+            f"after-selected-{checkpoint}", model_path=path
+        )
+        return {
+            **result,
+            "training_run": run_name,
+            "checkpoint": checkpoint,
+            "dev_selection": decision,
+        }
 
     return {
         "inspect_models": lambda: m.inspect_models.remote(),
@@ -195,7 +249,17 @@ def _jobs(prompt: str = "v2", run_name: str | None = None) -> dict[str, Callable
         "tau2_after": lambda: m.tau2_eval.remote(
             "after", settings.CANDIDATE_MODEL, agent_path=merged
         ),
-        "bfcl_after": lambda: m.bfcl_eval.remote("after", model_path=merged),
+        "bfcl_after": bfcl_after,
+        "bfcl_selected": bfcl_selected,
+        "fresh_untrained_control": lambda: _limit(
+            m.invoiceops_eval_l40s, CALL_MINUTES["fresh_untrained_control"][0]
+        ).remote(
+            "test-untrained-current-v3d",
+            settings.CANDIDATE_MODEL,
+            splits=["test"],
+            attempts=4,
+            prompt=settings.AGENT_PROMPT,
+        ),
     }
 
 
@@ -256,6 +320,10 @@ def main(argv: list[str] | None = None) -> int:
             result = _jobs(args.prompt, run_name)[args.job]()
             if args.job == "smoke_thinking" and not result["pipeline_ok"]:
                 raise RuntimeError("Thinking smoke acceptance checks failed; see its report.")
+            if args.job == "fresh_untrained_control":
+                from modal_app.checkpoints import selection_score
+
+                selection_score(result)  # require all 96 control attempts to be scored
         status = "succeeded"
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"

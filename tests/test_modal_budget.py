@@ -16,8 +16,8 @@ def test_caps_fit_total_with_reserve() -> None:
     b = load_budget()
     caps = sum(j.cap_usd for j in b.jobs.values())
     assert b.total_usd == 60.0
-    assert caps == pytest.approx(55.45)
-    assert b.total_usd - caps == pytest.approx(4.55)
+    assert caps == pytest.approx(57.60)
+    assert b.total_usd - caps == pytest.approx(2.40)
 
 
 def test_unconfirmed_rates_refuse_everything() -> None:
@@ -98,7 +98,160 @@ def test_default_pool_ignores_allocation_entries_and_jobs(budget: Budget) -> Non
     money = check_launch(budget, "tau2_before", ledger, signed_off=False)
     assert money["spent"] == 0.0  # campaign spend never enters the default pool
     # Allocation jobs no longer reserve their caps from the default pool either.
-    assert money["reserved"] == pytest.approx(55.45 - 3.30 - 0.85 - 26.70)
+    assert money["reserved"] == pytest.approx(
+        57.60 - 3.30 - 0.85 - 26.70 - 0.80 - 1.35 - 2.45 - 3.30 - 0.80
+    )
+
+
+def test_remaining_evaluations_fit_funded_account_allocation(budget: Budget) -> None:
+    for job in ("select_and_test", "tau2_after"):
+        with pytest.raises(BudgetError, match="profile"):
+            check_launch(budget, job, [], signed_off=True, account_profile=CAMPAIGN)
+    money = check_launch(
+        budget, "select_and_test", [], signed_off=True, account_profile="kazigalib143"
+    )
+    assert money["allocation_limit"] == 10.0
+    assert money["worst_case"] == pytest.approx(80 / 60 * 2.45, abs=0.0001)
+    ledger = [
+        {
+            "job": "select_and_test",
+            "status": "succeeded",
+            "cost_usd": 3.27,
+            "allocation": "post_training",
+        }
+    ]
+    money = check_launch(
+        budget, "tau2_after", ledger, signed_off=True, account_profile="kazigalib143"
+    )
+    assert money["worst_case"] == pytest.approx(4.45)
+
+
+@pytest.mark.parametrize(
+    ("job", "profile", "allocation"),
+    [
+        ("bfcl_after", "invoiceops-thinking", "bfcl_final"),
+        ("fresh_untrained_control", "kazigalib143", "fresh_control"),
+    ],
+)
+def test_post_training_jobs_have_separate_account_bound_two_dollar_limits(
+    budget: Budget, job: str, profile: str, allocation: str
+) -> None:
+    with pytest.raises(BudgetError, match="profile"):
+        check_launch(budget, job, [], signed_off=True, account_profile="wrong-account")
+    money = check_launch(budget, job, [], signed_off=True, account_profile=profile)
+    assert money["allocation_limit"] == 2.0
+    assert money["worst_case"] < 1.5
+    with pytest.raises(BudgetError, match="allocation"):
+        check_launch(
+            budget,
+            job,
+            [{"job": job, "status": "failed", "cost_usd": 0.8, "allocation": allocation}],
+            signed_off=True,
+            account_profile=profile,
+        )
+
+
+def test_bfcl_uses_final_adapter_and_prices_merge_inside_its_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pytest.importorskip("modal")
+    from modal_app import app
+    from modal_app.launch import _jobs
+
+    calls: list[tuple[str, int, tuple[object, ...], dict[str, object]]] = []
+
+    class FakeFunction:
+        def __init__(self, name: str) -> None:
+            self.name, self.timeout = name, 0
+
+        def with_options(self, *, timeout: int) -> FakeFunction:
+            self.timeout = timeout
+            return self
+
+        def remote(self, *args: object, **kwargs: object) -> object:
+            calls.append((self.name, self.timeout, args, kwargs))
+            return "/runs/train/grpo-v3d/final_merged" if self.name == "merge" else {"ok": True}
+
+    monkeypatch.setattr(app, "merge_checkpoint", FakeFunction("merge"))
+    monkeypatch.setattr(app, "bfcl_eval", FakeFunction("eval"))
+    result = _jobs()["bfcl_after"]()
+    assert result["checkpoint"] == "final_adapter" and result["step"] == 150
+    assert calls[0][1] + calls[1][1] == 35 * 60
+    assert calls[0][2:] == (("grpo-v3d", "final_adapter"), {"target_dir": "final_merged"})
+    assert calls[1][3] == {"model_path": "/runs/train/grpo-v3d/final_merged"}
+
+
+def test_selected_bfcl_uses_dev_winner_and_verifies_hash(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import json
+
+    pytest.importorskip("modal")
+    from modal_app import app, launch
+
+    config = tmp_path / "modal_app" / "train_config.json"
+    config.parent.mkdir()
+    config.write_text('{"run_name": "grpo-v3d"}')
+    local = tmp_path / "runs/modal/training/grpo-v3d"
+    dev = local / "selection/checkpoint-125"
+    dev.mkdir(parents=True)
+    (local / "selection.json").write_text(
+        json.dumps(
+            {
+                "selected": "checkpoint-125",
+                "dev_scores": {"final_adapter": 0.95, "checkpoint-125": 1.0},
+            }
+        )
+    )
+    (dev / "summary.json").write_text(
+        json.dumps(
+            {
+                "tasks": 12,
+                "attempts_per_task": 2,
+                "scored_attempts": 24,
+                "unscorable_attempts": 0,
+                "task_mean_success": 1.0,
+            }
+        )
+    )
+    (dev / "config.json").write_text('{"adapter_sha256": "selected-hash"}')
+    monkeypatch.setattr(launch, "ROOT", tmp_path)
+    calls = []
+
+    class FakeFunction:
+        def __init__(self, name: str) -> None:
+            self.name, self.timeout = name, 0
+
+        def with_options(self, *, timeout: int) -> FakeFunction:
+            self.timeout = timeout
+            return self
+
+        def remote(self, *args: object, **kwargs: object) -> object:
+            calls.append((self.name, self.timeout, args, kwargs))
+            return "/runs/train/grpo-v3d/selected_merged" if self.name == "merge" else {}
+
+    monkeypatch.setattr(app, "merge_checkpoint", FakeFunction("merge"))
+    monkeypatch.setattr(app, "bfcl_eval", FakeFunction("eval"))
+    result = launch._jobs()["bfcl_selected"]()
+    assert result["checkpoint"] == "checkpoint-125"
+    assert sum(c[1] for c in calls) == 35 * 60
+    assert calls[0][2:] == (
+        ("grpo-v3d", "checkpoint-125"),
+        {"expected_adapter_sha256": "selected-hash"},
+    )
+    assert calls[1][2][0] == "after-selected-checkpoint-125"
+    # Preserve the recorded winner when equally scoring non-final checkpoints tie;
+    # JSON key ordering must not silently change the selection decision.
+    decision = json.loads((local / "selection.json").read_text())
+    decision["dev_scores"]["checkpoint-100"] = 1.0
+    (local / "selection.json").write_text(json.dumps(decision, sort_keys=True))
+    assert launch._jobs()["bfcl_selected"]()["checkpoint"] == "checkpoint-125"
+    b = load_budget()
+    with pytest.raises(BudgetError, match="profile"):
+        check_launch(b, "bfcl_selected", [], signed_off=True, account_profile="kazigalib143")
+    money = check_launch(b, "bfcl_selected", [], signed_off=True, account_profile=CAMPAIGN)
+    assert money["allocation_limit"] == 2.5
 
 
 def test_signoff_requires_ticked_approval(tmp_path: Path) -> None:

@@ -1,4 +1,4 @@
-# Modal GPU budget for the whole project (BUILD_PLAN.md section 4.3).
+# Modal GPU budget and account-bound spending allocations.
 #
 # Before the first launch, replace the rates below with the per-hour prices shown in your Modal
 # dashboard and set rates_confirmed to true. The launcher refuses to run until you do.
@@ -21,7 +21,7 @@ rates_usd_per_hour:
 # Ledger lines for member jobs carry the allocation name; only same-allocation
 # entries count toward that pool. The default pool above is unchanged.
 #
-# grpo_training (owner handoff 2026-10-26, docs/FULL_TRAINING_HANDOFF_PROMPT.md):
+# grpo_training (owner authorization 2026-10-26):
 # originally USD 25 for the full GRPO campaign on the second account — readiness
 # smokes, failed attempts and retries included. On 2026-10-25 the owner raised
 # the cap to USD 60 ("don't worry about the budget, complete the training
@@ -31,6 +31,26 @@ allocations:
     limit_usd: 60.0
     account_profile: invoiceops-thinking
     jobs: [smoke_train, train_grpo]
+  # Owner requested BFCL on the nearly exhausted training account, within $2.
+  bfcl_final:
+    limit_usd: 2.0
+    account_profile: invoiceops-thinking
+    jobs: [bfcl_after]
+  # Owner additionally authorized a matched untrained control on the funded account.
+  fresh_control:
+    limit_usd: 2.0
+    account_profile: kazigalib143
+    jobs: [fresh_untrained_control]
+  # Owner authorized dev selection, one trained test and tau2 on the funded account.
+  post_training:
+    limit_usd: 10.0
+    account_profile: kazigalib143
+    jobs: [select_and_test, tau2_after]
+  # Owner requested the selected checkpoint's full BFCL run on the first account.
+  bfcl_selected:
+    limit_usd: 2.5
+    account_profile: invoiceops-thinking
+    jobs: [bfcl_selected]
 
 # Each job: the plan's dollar cap, the function's hard timeout, and whether it needs the
 # pre-GPU human review sign-off (only jobs that use InvoiceOps tasks do).
@@ -66,3 +86,5 @@ jobs:
   select_and_test:        {phase: 14,  gpu: L40S, cap_usd: 2.45,  timeout_min: 80,  needs_signoff: true}
   tau2_after:             {phase: 14,  gpu: H100, cap_usd: 3.30,  timeout_min: 60,  needs_signoff: true}
   bfcl_after:             {phase: 14,  gpu: L40S, cap_usd: 0.80,  timeout_min: 35,  needs_signoff: true}
+  bfcl_selected:          {phase: 14,  gpu: L40S, cap_usd: 0.80,  timeout_min: 35,  needs_signoff: true}
+  fresh_untrained_control: {phase: 14, gpu: L40S, cap_usd: 1.35, timeout_min: 32, needs_signoff: true}

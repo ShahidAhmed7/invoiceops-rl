@@ -14,9 +14,28 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 from collections import defaultdict
 from pathlib import Path
+
+
+def validate_summary(summary: dict) -> None:
+    """Reject missing rewards or partial trial coverage instead of reporting a biased score."""
+    expected = summary["tasks"] * summary["trials"]
+    if (
+        not expected
+        or summary["simulations"] != expected
+        or summary["simulations_without_reward"]
+        or summary["complete_tasks"] != summary["tasks"]
+        or summary["unexpected_task_ids"]
+        or len(summary["per_task_mean_reward"]) != summary["tasks"]
+        or any(
+            not math.isfinite(x) or not 0 <= x <= 1
+            for x in summary["per_task_mean_reward"].values()
+        )
+    ):
+        raise ValueError("tau2 evaluation requires every scheduled task and trial to be scored")
 
 
 def main() -> None:
@@ -100,6 +119,8 @@ def main() -> None:
         "seed": args.seed,
         "simulations": len(results.simulations),
         "simulations_without_reward": errors,
+        "complete_tasks": len(complete),
+        "unexpected_task_ids": sorted(set(per_task) - {str(t.id) for t in tasks}),
         "pass_1": sum(sum(r) / len(r) for r in per_task.values()) / len(per_task)
         if per_task
         else None,
@@ -110,6 +131,7 @@ def main() -> None:
         "comparable_with_public_leaderboard": False,
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+    validate_summary(summary)
     print(
         json.dumps({k_: v for k_, v in summary.items() if k_ != "per_task_mean_reward"}, indent=2)
     )

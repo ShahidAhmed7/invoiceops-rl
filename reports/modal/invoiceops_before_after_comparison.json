@@ -1,0 +1,52 @@
+{
+  "comparison": "selected checkpoint-125 versus fresh untrained v3d control",
+  "settings_and_fingerprints_match": [
+    "prompt_version",
+    "temperature",
+    "top_p",
+    "max_tool_calls",
+    "max_tokens",
+    "context_tokens",
+    "max_nudges",
+    "revision",
+    "task_data_sha256",
+    "evaluation_sources_sha256"
+  ],
+  "tasks": 24,
+  "delta": 0.08333333333333333,
+  "paired_task_bootstrap_ci95": [
+    0.0,
+    0.17708333333333334
+  ],
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 0,
+  "tasks_improved": 6,
+  "tasks_unchanged": 16,
+  "tasks_worsened": 2,
+  "per_task_delta": {
+    "T-0A0D10": 0.0,
+    "T-0A802E": 0.0,
+    "T-0B0633": 0.0,
+    "T-107867": 0.75,
+    "T-11EA31": 0.5,
+    "T-175EBC": 0.5,
+    "T-1A3136": 0.0,
+    "T-202621": -0.25,
+    "T-5B8D32": 0.0,
+    "T-5C4594": 0.25,
+    "T-6BAF87": 0.0,
+    "T-6C23E6": 0.25,
+    "T-6F7DAA": 0.0,
+    "T-739D69": -0.25,
+    "T-7E294F": 0.0,
+    "T-89B109": 0.0,
+    "T-B2A72C": 0.0,
+    "T-BBE12C": 0.0,
+    "T-C07FE6": 0.0,
+    "T-CB94BF": 0.25,
+    "T-CF549E": 0.0,
+    "T-E673B5": 0.0,
+    "T-F91D2D": 0.0,
+    "T-FB1EDA": 0.0
+  }
+}

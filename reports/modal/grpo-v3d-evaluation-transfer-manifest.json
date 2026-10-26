@@ -1,0 +1,47 @@
+{
+  "training_run": "grpo-v3d",
+  "source_profile": "invoiceops-thinking",
+  "target_profile": "kazigalib143",
+  "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+  "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "candidates": [
+    "final_adapter",
+    "checkpoint-125",
+    "checkpoint-100",
+    "checkpoint-75"
+  ],
+  "files": {
+    "final_adapter/adapter_config.json": {
+      "size": 1182,
+      "sha256": "d1cf5da07cc9994b8a9316e0f8d5c7bd8b20ef62ff594012f736cc56a112bc29"
+    },
+    "final_adapter/adapter_model.safetensors": {
+      "size": 132187888,
+      "sha256": "9f5ef7e8e82447411d601a562e3c217343bfa905a346aac8b6b4529207f1baec"
+    },
+    "checkpoints/checkpoint-125/adapter_config.json": {
+      "size": 1182,
+      "sha256": "d1cf5da07cc9994b8a9316e0f8d5c7bd8b20ef62ff594012f736cc56a112bc29"
+    },
+    "checkpoints/checkpoint-125/adapter_model.safetensors": {
+      "size": 132187888,
+      "sha256": "451f24b51081dbe1e2779a07f30bbb2fee884291a4e948b1951f9a454aaa18f7"
+    },
+    "checkpoints/checkpoint-100/adapter_config.json": {
+      "size": 1182,
+      "sha256": "d1cf5da07cc9994b8a9316e0f8d5c7bd8b20ef62ff594012f736cc56a112bc29"
+    },
+    "checkpoints/checkpoint-100/adapter_model.safetensors": {
+      "size": 132187888,
+      "sha256": "e8dd07f85431d11877d09c4576ab6042cc6195f2ee71e5489cdebee1cae5afb4"
+    },
+    "checkpoints/checkpoint-75/adapter_config.json": {
+      "size": 1182,
+      "sha256": "d1cf5da07cc9994b8a9316e0f8d5c7bd8b20ef62ff594012f736cc56a112bc29"
+    },
+    "checkpoints/checkpoint-75/adapter_model.safetensors": {
+      "size": 132187888,
+      "sha256": "572da21b43237fe0c4a9eaef85d8597807d40b97c968747f5f9a231eca5443a9"
+    }
+  }
+}

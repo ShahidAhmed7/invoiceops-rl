@@ -1,0 +1,81 @@
+{
+  "merged": "/runs/train/grpo-v3d/selected_merged",
+  "selection": {
+    "dev_scores": {
+      "checkpoint-100": 0.9166666666666666,
+      "checkpoint-125": 1.0,
+      "checkpoint-75": 0.875,
+      "final_adapter": 0.9583333333333334
+    },
+    "prompt": "v3d",
+    "run": "grpo-v3d",
+    "selected": "checkpoint-125"
+  },
+  "test": {
+    "attempts_per_task": 4,
+    "attempts_with_critical_violation": 4,
+    "blocked_attempts": 1,
+    "blocked_tool_calls": 1,
+    "by_family": {
+      "F01": 1.0,
+      "F02": 0.875,
+      "F03": 0.75,
+      "F04": 0.875,
+      "F05": 1.0,
+      "F06": 1.0,
+      "F07": 1.0,
+      "F08": 0.625,
+      "F09": 0.5,
+      "F10": 1.0,
+      "F11": 1.0,
+      "F12": 0.875
+    },
+    "clean_cases_paid_correctly": "53/60",
+    "critical_violations": {
+      "overpayment_proposed": 3,
+      "payment_proposed_for_unpayable_invoice": 1
+    },
+    "exception_cases_not_paid": "35/36",
+    "false_completions": 0,
+    "incomplete_repeat_metric_tasks": 0,
+    "infrastructure_errors": [],
+    "mean_seconds": 27.90283950466667,
+    "mean_tool_calls": 10.822916666666666,
+    "missing_attempts": 0,
+    "pass@4": 0.9583333333333334,
+    "pass^4": 0.75,
+    "recorded_attempts": 96,
+    "repeat_metric_tasks": 24,
+    "scheduled_attempts": 96,
+    "scored_attempts": 96,
+    "scored_tasks": 24,
+    "strict_success": 0.875,
+    "task_mean_success": 0.875,
+    "task_mean_success_ci95": [
+      0.7708333333333334,
+      0.96875
+    ],
+    "tasks": 24,
+    "tokens": {
+      "completion": 123178,
+      "context_limit_stops": 0,
+      "max_context": 8306,
+      "prompt": 5823762,
+      "truncated_turns": 0
+    },
+    "tool_call_limit_stops": 0,
+    "unscorable_attempts": 0,
+    "verifier_errors": []
+  },
+  "transfer_verification": {
+    "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+    "candidates": [
+      "final_adapter",
+      "checkpoint-125",
+      "checkpoint-100",
+      "checkpoint-75"
+    ],
+    "run": "grpo-v3d",
+    "verified_files": 8
+  }
+}

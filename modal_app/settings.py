@@ -42,7 +42,7 @@ BFCL_CATEGORIES = (
     "multi_turn_base",
 )
 
-# Decoding for every agent evaluation (BUILD_PLAN.md section 3.3). Not tuned on test data.
+# Shared agent-evaluation decoding. Not tuned on test data.
 # System prompt for training, checkpoint selection and the trained model's test run. Chosen on
 # train and dev before its test run (reports/prompt_trials.md); evaluations keep using it so the
 # trained model is measured with the prompt it was trained with.

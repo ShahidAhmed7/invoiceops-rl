@@ -1,0 +1,11 @@
+{
+  "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "candidates": [
+    "final_adapter",
+    "checkpoint-125",
+    "checkpoint-100",
+    "checkpoint-75"
+  ],
+  "run": "grpo-v3d",
+  "verified_files": 8
+}

@@ -43,7 +43,7 @@ Many "pay" tasks also need an approval, a credit-note deduction, a partial amoun
 ## Authorship and review
 
 - Authored by the project builder with code. No real company data is used; every name is invented, and supplier email domains use `.example`.
-- **Review status:** first pre-GPU review completed and **not approved** ([sign-off](review/signoff/pre-gpu.md)). Its findings are fixed ([builder response](review/builder-response.md)) and a re-check is pending. No AP practitioner has reviewed the suite, so it is labelled a fictional policy simulator.
+- **Review evidence:** the pre-GPU re-check approved the suite ([signed record](review/signoff/pre-gpu.md)) after the identified verifier escapes were fixed. No AP practitioner has reviewed the suite, so it is labelled a fictional policy simulator.
 
 ## Additional training instances
 

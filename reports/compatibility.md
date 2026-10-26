@@ -1,6 +1,6 @@
 # Compatibility report (Phase 11A)
 
-Results of the GPU work so far (see `docs/PROJECT_HANDOFF.md`). Every figure comes from `reports/modal/*.json` and `reports/modal_ledger.jsonl`.
+GPU compatibility measurements. Every figure comes from `reports/modal/*.json` and `reports/modal_ledger.jsonl`. The completed experiment is summarized in `reports/final.md`.
 
 ## What ran
 
@@ -119,7 +119,7 @@ The job failed twice, and the third attempt passed after both fixes, with the ow
    - Checked first on Modal by an image build, and locally by running the driver end to end against a stub server.
 3. **Third attempt: passed.** 2 simulations, none without a reward, **16.3 s per simulation**.
 
-**Trials rule (`MODAL_RUNBOOK.md` §1 step 4):** 16.3 s × 160 / 16 + 10 minutes of start-up is about 12.7 minutes, well under 50, so `TAU2_TRIALS` stays at 4. `tau2_before` then took 15.6 minutes, of which 9.5 minutes were simulations.
+**Trial budget:** 16.3 s × 160 / 16 + 10 minutes of start-up is about 12.7 minutes, well under 50, so `TAU2_TRIALS` stays at 4. `tau2_before` then took 15.6 minutes, of which 9.5 minutes were simulations.
 
 ## Context and generation lengths
 

@@ -1,0 +1,130 @@
+{
+  "simulations": 160,
+  "unique_simulation_ids": 160,
+  "unique_task_trial_pairs": 160,
+  "tasks": 40,
+  "trials_per_task": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "rewarded_simulations": 160,
+  "passes": 62.0,
+  "reward_breakdowns_recomputed": 159,
+  "pass_1": 0.3875,
+  "pass^4": 0.225,
+  "per_task_means_recomputed_exactly": true,
+  "delta_vs_untrained": 0.01874999999999999,
+  "paired_task_bootstrap_delta_ci95": [
+    -0.0625,
+    0.1
+  ],
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 0,
+  "termination_reasons": {
+    "user_stop": 159,
+    "max_steps": 1
+  },
+  "golden_action_warnings": {
+    "find_user_id_by_email({'email': 'daikisanchez1479@example.com'}): User not found": 4,
+    "find_user_id_by_name_zip({'first_name': 'Fatima', 'last_name': 'Taylor', 'zip': '85033'}): User not found": 4,
+    "exchange_delivered_order_items({'order_id': '#W7464385', 'item_ids': ['1810466394'], 'new_item_ids': ['6700049080'], 'payment_method_id': 'paypal_1261484'}): Non-delivered order cannot be exchanged": 4,
+    "find_user_id_by_name_zip({'first_name': 'Noah', 'last_name': 'Ito', 'zip': '98178'}): User not found": 4,
+    "find_user_id_by_email({'email': 'silva7872@example.com'}): User not found": 3
+  },
+  "http400_count": 0,
+  "http500_count": 0,
+  "local_files_verified": 3,
+  "raw_sha256": {
+    "invoiceops_evaluation_config.json": "ddabc75e6a57d02045e52ce939ef02b2828fcecf9bae301060963ca515344f10",
+    "results.json": "59b9603a560d46dc77792301bf4cbbbf28d441dc9e3fc46e1df8e45ba074a69c",
+    "summary.json": "03407d9b47773c1e591701e85a5e741eac89a91e10048b2c2ab3a716973e9281"
+  },
+  "config": {
+    "agent_context_tokens": 131072,
+    "agent_source": "/runs/train/grpo-v3d/selected_merged",
+    "agent_temperature": 0.7,
+    "agent_top_p": 0.8,
+    "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+    "benchmark_commit": "318fa35b1431a42e3ffdad05197378f506fac9d4",
+    "concurrency": 16,
+    "domain": "retail",
+    "grading": "ENV",
+    "merge_provenance": {
+      "adapter_sha256": "451f24b51081dbe1e2779a07f30bbb2fee884291a4e948b1951f9a454aaa18f7",
+      "base": "Qwen/Qwen3-4B-Instruct-2507",
+      "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+      "checkpoint": "checkpoint-125",
+      "training_run": "grpo-v3d"
+    },
+    "seed": 300,
+    "split": "test",
+    "trials": 4,
+    "user_context_tokens": 32768,
+    "user_model": "Qwen/Qwen3-30B-A3B-Instruct-2507-FP8",
+    "user_revision": "5a5a776300a41aaa681dd7ff0106608ef2bc90db",
+    "user_temperature": 0.0
+  },
+  "per_task_delta": {
+    "100": 0.0,
+    "101": 0.0,
+    "102": 0.0,
+    "108": 0.0,
+    "111": 0.0,
+    "12": -0.25,
+    "17": 0.0,
+    "18": 0.25,
+    "26": 0.75,
+    "27": -0.25,
+    "32": 0.0,
+    "33": -0.25,
+    "36": 0.0,
+    "38": -0.25,
+    "39": 0.0,
+    "40": 0.25,
+    "42": 0.0,
+    "45": 0.0,
+    "49": -0.25,
+    "5": 0.0,
+    "51": 0.25,
+    "53": -0.5,
+    "55": 0.0,
+    "56": -0.25,
+    "60": 0.5,
+    "61": 0.0,
+    "62": -0.75,
+    "64": 0.25,
+    "65": 0.0,
+    "68": 0.0,
+    "70": 0.0,
+    "71": 0.0,
+    "74": 0.0,
+    "77": 0.0,
+    "79": 0.0,
+    "86": 0.25,
+    "9": 0.25,
+    "90": 0.25,
+    "94": 0.0,
+    "97": 0.5
+  },
+  "premature_termination_scored_zero": [
+    {
+      "task_id": "55",
+      "trial": 0,
+      "termination_reason": "max_steps",
+      "reward": 0.0
+    }
+  ],
+  "golden_warning_task_fallbacks": {
+    "38": "Invalid email lookup followed by a valid name/ZIP lookup.",
+    "39": "New ZIP lookup fails, then the golden sequence uses the old ZIP.",
+    "64": "Exchange of a pending order fails, then the golden sequence modifies the pending order.",
+    "68": "Wrong ZIP lookup followed by the correct ZIP.",
+    "55": "First email fails, then the golden sequence uses the second email. Three ENV-graded trials; trial 0 stopped at max_steps and was scored zero."
+  },
+  "warning_sources": [
+    "https://raw.githubusercontent.com/sierra-research/tau2-bench/318fa35b1431a42e3ffdad05197378f506fac9d4/data/tau2/domains/retail/tasks.json",
+    "https://raw.githubusercontent.com/sierra-research/tau2-bench/318fa35b1431a42e3ffdad05197378f506fac9d4/src/tau2/evaluator/evaluator_env.py"
+  ]
+}

@@ -132,11 +132,18 @@ The transcripts replay exactly (192 of 192). What they show:
 
 For this model, **a step-by-step procedure matters more than realistic wording.** The v3 prompts' gain over v2 comes from the procedure plus the patches, not from AP knowledge the model lacked. A one-line ablation (v4 plus "work through the policy's checks one by one, in the order it gives, before deciding") would test the procedure explanation directly.
 
-## Recommendation for training
+## Selected prompt and completed RL experiment
 
-- **The bar to beat is about 72–73% on test**, from prompt engineering alone (v3c 72.9%, v3d 71.9%). The trained model has to beat this, not v2's 41.7%.
-- **Train with v3d.** It matches v3c on test with fewer critical violations, and on train it leaves 16 tasks with mixed outcomes and only 2 that never pass (v3c: 14 and 4). The 144 generated training variants add more, and the remaining failures are where GRPO's signal will go: F03 short receipt, F09 shared PO capacity, F12 stale policy.
-- **Whichever prompt training uses,** `select_checkpoint` and `select_and_test` must evaluate with it too. They currently use v1.
+**v3d was selected** for its train/dev score and lower critical-violation rate. It left
+16 fixed training tasks with mixed outcomes and two that never passed; 144 generated
+training variants supplemented the 36 fixed tasks. Training, checkpoint selection and
+the final InvoiceOps evaluation all used v3d.
+
+The current untrained v3d evaluation scored **76/96 (79.167%)**, compared with the
+initial v1 result of **7/96 (7.292%)**. The dev-selected RL checkpoint then scored
+**84/96 (87.500%)** with v3d, an additional **8.333 points** over the matched untrained
+control. Source results above remain frozen; see the [statistical analysis](statistical_analysis.md)
+for the three-stage comparison and paired RL inference.
 
 ## Cost
 

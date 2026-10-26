@@ -1,6 +1,6 @@
 """Budget guard and spend ledger for Modal jobs. Pure Python; no Modal import needed.
 
-Rules (BUILD_PLAN.md section 4.4):
+Budget rules:
 * Rates must be confirmed from the Modal dashboard before any launch.
 * Jobs that use InvoiceOps tasks need the signed pre-GPU review.
 * A job's worst case (timeout x rate) must fit in the money left after setting aside the caps

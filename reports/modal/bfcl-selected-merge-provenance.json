@@ -1,0 +1,7 @@
+{
+  "adapter_sha256": "451f24b51081dbe1e2779a07f30bbb2fee884291a4e948b1951f9a454aaa18f7",
+  "base": "Qwen/Qwen3-4B-Instruct-2507",
+  "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "checkpoint": "checkpoint-125",
+  "training_run": "grpo-v3d"
+}

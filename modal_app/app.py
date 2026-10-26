@@ -1,12 +1,11 @@
-"""Modal functions for the GPU phases (BUILD_PLAN.md Phases 11A-14).
+"""Budgeted Modal functions for model training and evaluation.
 
 Never call these directly: launch them with ``python -m modal_app.launch <job>``, which checks
 the budget, the review sign-off, and records the spend. Each function has no retries, one
 container at most, and a hard timeout matching ``budget.yaml``.
 
-Status: written against modal 1.6.2, vllm 0.31.0, trl 1.16.0, tau2-bench 318fa35, and
-bfcl-eval 2026.3.23 from their installed source code, but not yet executed on Modal (no Modal
-access existed while building). Phase 11A's smoke jobs are the first real execution.
+Runs use modal 1.6.2, vllm 0.31.0, trl 1.16.0, tau2-bench 318fa35, and
+bfcl-eval 2026.3.23. Completed measurements and provenance are in reports/.
 """
 
 from __future__ import annotations
@@ -398,6 +397,32 @@ def _tau2(
 
     user_model = settings.REFERENCE_FP8
     agent_source = agent_path or agent_model
+    out = Path("/runs/tau2") / tag
+    provenance_path = Path(agent_path) / "merge_provenance.json" if agent_path else None
+    _save(
+        str(out / "invoiceops_evaluation_config.json"),
+        {
+            "agent_source": agent_source,
+            "base_revision": _revision(agent_model),
+            "merge_provenance": json.loads(provenance_path.read_text())
+            if provenance_path and provenance_path.exists()
+            else None,
+            "user_model": user_model,
+            "user_revision": _revision(user_model),
+            "benchmark_commit": settings.TAU2_COMMIT,
+            "domain": settings.TAU2_DOMAIN,
+            "split": settings.TAU2_SPLIT,
+            "trials": trials,
+            "seed": settings.TAU2_SEED,
+            "agent_temperature": settings.AGENT_TEMPERATURE,
+            "agent_top_p": settings.AGENT_TOP_P,
+            "user_temperature": settings.USER_SIM_TEMPERATURE,
+            "agent_context_tokens": settings.MAX_MODEL_LEN,
+            "user_context_tokens": settings.USER_SIM_MAX_MODEL_LEN,
+            "grading": "ENV",
+            "concurrency": 16,
+        },
+    )
     same = agent_source == user_model
     user = vllm_server.start(
         user_model,
@@ -417,7 +442,6 @@ def _tau2(
                 0.40,
                 revision=None if agent_path else _revision(agent_model),
             )
-        out = Path("/runs/tau2") / tag
         cmd = [
             "/opt/tau2/bin/python",
             "/root/modal_app/tau2_driver.py",
@@ -454,6 +478,7 @@ def _tau2(
         if agent is not None:
             vllm_server.stop(agent)
         vllm_server.stop(user)
+        runs.commit()
     _save(f"/runs/tau2/{tag}/summary.json", summary)
     return summary
 
@@ -487,12 +512,63 @@ def bfcl_eval(tag: str, model_path: str = "") -> dict[str, Any]:
         source, 8001, base, 0.85, revision=None if model_path else _revision(base)
     )
     try:
-        return _bfcl(tag, base, 8001, settings.BFCL_CATEGORIES, f"{base}-FC")
+        provenance = Path(model_path) / "merge_provenance.json" if model_path else None
+        config = {
+            "model_path": source,
+            "base_revision": _revision(base),
+            "bfcl_version": settings.BFCL_VERSION,
+            "temperature": 0.001,
+            "num_threads": 16,
+            "categories": list(settings.BFCL_CATEGORIES),
+            "merge_provenance": json.loads(provenance.read_text())
+            if provenance and provenance.exists()
+            else None,
+        }
+        root = Path("/runs/bfcl") / tag
+        root.mkdir(parents=True, exist_ok=True)
+        (root / "invoiceops_evaluation_config.json").write_text(json.dumps(config, indent=2))
+        return {
+            **_bfcl(tag, base, 8001, settings.BFCL_CATEGORIES, f"{base}-FC"),
+            **config,
+        }
     finally:
         vllm_server.stop(proc)
+        runs.commit()  # retain partial raw benchmark results on failure, too
 
 
 # -- Phases 11B-14 (require the pre-GPU review sign-off) ----------------------------------------
+
+
+@app.function(image=cpu_image, volumes=VOLUMES, timeout=5 * 60, max_containers=1, retries=0)
+def verify_evaluation_adapters(run_name: str) -> dict[str, Any]:
+    """Check the cross-account copy before allocating a GPU for checkpoint selection."""
+    import hashlib
+
+    from modal_app.checkpoints import checkpoint_candidates
+
+    root = Path("/runs/train") / run_name
+    manifest = json.loads((root / "evaluation_transfer_manifest.json").read_text())
+    if manifest["base_revision"] != _revision(settings.CANDIDATE_MODEL):
+        raise ValueError("transferred adapters name a different base revision")
+    for rel, expected in manifest["files"].items():
+        path = root / rel
+        if not path.is_relative_to(root) or ".." in Path(rel).parts:
+            raise ValueError("invalid transfer path")
+        with path.open("rb") as handle:
+            digest = hashlib.file_digest(handle, "sha256").hexdigest()
+        if path.stat().st_size != expected["size"] or digest != expected["sha256"]:
+            raise ValueError(f"transferred adapter mismatch: {rel}")
+    candidates = [p.name for p in checkpoint_candidates(root, 4)]
+    if candidates != manifest["candidates"]:
+        raise ValueError("transferred checkpoint candidates differ from the planned selection")
+    result = {
+        "run": run_name,
+        "verified_files": len(manifest["files"]),
+        "candidates": candidates,
+        "base_revision": manifest["base_revision"],
+    }
+    _save(str(root / "evaluation_transfer_verified.json"), result)
+    return result
 
 
 def _invoiceops_eval(
@@ -539,11 +615,16 @@ def _invoiceops_eval(
                 "model_id": model,
                 "model_path": model_path,
                 "revision": settings.REVISIONS.get(model),
+                "merge_provenance": json.loads(
+                    (Path(model_path) / "merge_provenance.json").read_text()
+                )
+                if model_path
+                else None,
             },
         )
     finally:
         vllm_server.stop(proc)
-    runs.commit()
+        runs.commit()
     return summary
 
 
@@ -606,6 +687,10 @@ def select_checkpoint(
     base = settings.CANDIDATE_MODEL
     scores: dict[str, float | None] = {}
     for ckpt in candidates:
+        import hashlib
+
+        with (ckpt / "adapter_model.safetensors").open("rb") as handle:
+            adapter_sha256 = hashlib.file_digest(handle, "sha256").hexdigest()
         proc = vllm_server.start(
             base, 8001, "agent", 0.85, revision=_revision(base), lora_path=str(ckpt)
         )
@@ -626,10 +711,18 @@ def select_checkpoint(
                 model=cfg,
                 prompt_version=prompt,
                 concurrency=16,
+                extra_config={
+                    "model_id": base,
+                    "revision": _revision(base),
+                    "adapter_path": str(ckpt),
+                    "adapter_sha256": adapter_sha256,
+                    "split": "dev",
+                },
             )
             scores[ckpt.name] = selection_score(summary)
         finally:
             vllm_server.stop(proc)
+            runs.commit()
     best = max(scores, key=lambda name: (scores[name] or 0.0, name == "final_adapter"))
     result = {"run": run_name, "prompt": prompt, "dev_scores": scores, "selected": best}
     _save(str(root / "selection.json"), result)
@@ -639,18 +732,44 @@ def select_checkpoint(
 @app.function(
     image=train_image, gpu="L40S", volumes=VOLUMES, timeout=20 * 60, max_containers=1, retries=0
 )
-def merge_checkpoint(run_name: str, checkpoint: str) -> str:
+def merge_checkpoint(
+    run_name: str,
+    checkpoint: str,
+    target_dir: str = "selected_merged",
+    expected_adapter_sha256: str | None = None,
+) -> str:
+    import hashlib
+
     from modal_app.train_grpo import merge_adapter
 
+    if target_dir not in {"selected_merged", "final_merged"}:
+        raise ValueError("unsupported merged-model directory")
     root = Path("/runs/train") / run_name
     source = (
         root / checkpoint if checkpoint == "final_adapter" else root / "checkpoints" / checkpoint
     )
+    with (source / "adapter_model.safetensors").open("rb") as handle:
+        adapter_sha256 = hashlib.file_digest(handle, "sha256").hexdigest()
+    if expected_adapter_sha256 and adapter_sha256 != expected_adapter_sha256:
+        raise ValueError("adapter does not match the dev-selected checkpoint's verified hash")
     target = merge_adapter(
         settings.CANDIDATE_MODEL,
         _revision(settings.CANDIDATE_MODEL),
         source,
-        root / "selected_merged",
+        root / target_dir,
+    )
+    (target / "merge_provenance.json").write_text(
+        json.dumps(
+            {
+                "training_run": run_name,
+                "checkpoint": checkpoint,
+                "base": settings.CANDIDATE_MODEL,
+                "base_revision": _revision(settings.CANDIDATE_MODEL),
+                "adapter_sha256": adapter_sha256,
+            },
+            indent=2,
+            sort_keys=True,
+        )
     )
     runs.commit()
     return str(target)

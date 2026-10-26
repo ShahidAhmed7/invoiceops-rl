@@ -1,0 +1,516 @@
+{
+  "method": {
+    "bootstrap_samples": 100000,
+    "seed": 0,
+    "bootstrap_interval": "paired percentile, inverted empirical CDF, 95%",
+    "primary_unit": "task; all four attempts retained together",
+    "company_sensitivity": "exact sign-flip and leave-one-company-out; four companies",
+    "tests": "two-sided exact; no one-sided or independence-of-attempts tests",
+    "analysis_timing": "post hoc exploratory analysis of completed runs",
+    "secondary_p_values": "unadjusted, not confirmatory"
+  },
+  "invoiceops": {
+    "primary": {
+      "baseline": 0.7916666666666666,
+      "trained": 0.875,
+      "delta": 0.08333333333333333,
+      "baseline_ci95": [
+        0.6666666666666666,
+        0.90625
+      ],
+      "trained_ci95": [
+        0.7604166666666666,
+        0.96875
+      ],
+      "delta_ci95": [
+        0.0,
+        0.17708333333333337
+      ],
+      "clusters": 24,
+      "two_sided_p": 0.140625,
+      "nonzero_pairs": 8,
+      "sign_assignments": 256,
+      "extreme_assignments": 36,
+      "baseline_passes": 76,
+      "trained_passes": 84,
+      "baseline_failures": 20,
+      "trained_failures": 12,
+      "relative_failure_reduction": 0.4
+    },
+    "pass_all_four": {
+      "baseline": 0.5833333333333334,
+      "trained": 0.75,
+      "delta": 0.16666666666666666,
+      "baseline_ci95": [
+        0.375,
+        0.7916666666666666
+      ],
+      "trained_ci95": [
+        0.5833333333333334,
+        0.9166666666666666
+      ],
+      "delta_ci95": [
+        0.0,
+        0.37499999999999994
+      ],
+      "clusters": 24,
+      "gained": 5,
+      "lost": 1,
+      "two_sided_p": 0.21875
+    },
+    "pass_any_four": {
+      "baseline": 0.9583333333333334,
+      "trained": 0.9583333333333334,
+      "delta": 0.0,
+      "baseline_ci95": [
+        0.875,
+        1.0
+      ],
+      "trained_ci95": [
+        0.875,
+        1.0
+      ],
+      "delta_ci95": [
+        0.0,
+        0.0
+      ],
+      "clusters": 24,
+      "gained": 0,
+      "lost": 0,
+      "two_sided_p": 1.0
+    },
+    "companies": [
+      {
+        "id": "CO-GL",
+        "name": "Glimmerdale Labware",
+        "tasks": 6,
+        "attempts": 24,
+        "baseline_passes": 18,
+        "trained_passes": 18,
+        "baseline": 0.75,
+        "trained": 0.75,
+        "delta": 0.0
+      },
+      {
+        "id": "CO-JF",
+        "name": "Juniper Fold Logistics",
+        "tasks": 6,
+        "attempts": 24,
+        "baseline_passes": 15,
+        "trained_passes": 19,
+        "baseline": 0.625,
+        "trained": 0.7916666666666666,
+        "delta": 0.16666666666666666
+      },
+      {
+        "id": "CO-ME",
+        "name": "Marrowind Energy Services",
+        "tasks": 6,
+        "attempts": 24,
+        "baseline_passes": 22,
+        "trained_passes": 23,
+        "baseline": 0.9166666666666666,
+        "trained": 0.9583333333333334,
+        "delta": 0.041666666666666664
+      },
+      {
+        "id": "CO-PP",
+        "name": "Pellucid Print Works",
+        "tasks": 6,
+        "attempts": 24,
+        "baseline_passes": 21,
+        "trained_passes": 24,
+        "baseline": 0.875,
+        "trained": 1.0,
+        "delta": 0.125
+      }
+    ],
+    "families": [
+      {
+        "id": "F01",
+        "name": "Clean match",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 8,
+        "trained_passes": 8,
+        "baseline": 1.0,
+        "trained": 1.0,
+        "delta": 0.0
+      },
+      {
+        "id": "F02",
+        "name": "Price discrepancy",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 7,
+        "trained_passes": 7,
+        "baseline": 0.875,
+        "trained": 0.875,
+        "delta": 0.0
+      },
+      {
+        "id": "F03",
+        "name": "Short receipt",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 5,
+        "trained_passes": 6,
+        "baseline": 0.625,
+        "trained": 0.75,
+        "delta": 0.125
+      },
+      {
+        "id": "F04",
+        "name": "Duplicate invoice",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 8,
+        "trained_passes": 7,
+        "baseline": 1.0,
+        "trained": 0.875,
+        "delta": -0.125
+      },
+      {
+        "id": "F05",
+        "name": "Credit note",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 8,
+        "trained_passes": 8,
+        "baseline": 1.0,
+        "trained": 1.0,
+        "delta": 0.0
+      },
+      {
+        "id": "F06",
+        "name": "Approval routing",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 8,
+        "trained_passes": 8,
+        "baseline": 1.0,
+        "trained": 1.0,
+        "delta": 0.0
+      },
+      {
+        "id": "F07",
+        "name": "Vendor-detail conflict",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 7,
+        "trained_passes": 8,
+        "baseline": 0.875,
+        "trained": 1.0,
+        "delta": 0.125
+      },
+      {
+        "id": "F08",
+        "name": "Missing receipt and clarification",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 4,
+        "trained_passes": 5,
+        "baseline": 0.5,
+        "trained": 0.625,
+        "delta": 0.125
+      },
+      {
+        "id": "F09",
+        "name": "Shared purchase-order capacity",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 4,
+        "trained_passes": 4,
+        "baseline": 0.5,
+        "trained": 0.5,
+        "delta": 0.0
+      },
+      {
+        "id": "F10",
+        "name": "Untrusted document instructions",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 5,
+        "trained_passes": 8,
+        "baseline": 0.625,
+        "trained": 1.0,
+        "delta": 0.375
+      },
+      {
+        "id": "F11",
+        "name": "Transient tool failure",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 7,
+        "trained_passes": 8,
+        "baseline": 0.875,
+        "trained": 1.0,
+        "delta": 0.125
+      },
+      {
+        "id": "F12",
+        "name": "Stale policy and amended records",
+        "tasks": 2,
+        "attempts": 8,
+        "baseline_passes": 5,
+        "trained_passes": 7,
+        "baseline": 0.625,
+        "trained": 0.875,
+        "delta": 0.25
+      }
+    ],
+    "tasks_improved": 6,
+    "tasks_worsened": 2,
+    "tasks_unchanged": 16,
+    "company_signflip": {
+      "two_sided_p": 0.25,
+      "nonzero_pairs": 3,
+      "sign_assignments": 8,
+      "extreme_assignments": 2
+    },
+    "leave_one_company_out_delta": {
+      "CO-GL": 0.1111111111111111,
+      "CO-JF": 0.05555555555555555,
+      "CO-ME": 0.09722222222222222,
+      "CO-PP": 0.06944444444444445
+    },
+    "f10_attachment_exposures": {
+      "baseline": 0,
+      "trained": 0
+    }
+  },
+  "tau2": {
+    "mean_reward": {
+      "baseline": 0.36875,
+      "trained": 0.3875,
+      "delta": 0.01875,
+      "baseline_ci95": [
+        0.25,
+        0.49375
+      ],
+      "trained_ci95": [
+        0.26875,
+        0.5125
+      ],
+      "delta_ci95": [
+        -0.0625,
+        0.09999999999999998
+      ],
+      "clusters": 40,
+      "two_sided_p": 0.766815185546875,
+      "nonzero_pairs": 18,
+      "sign_assignments": 262144,
+      "extreme_assignments": 201016,
+      "baseline_passes": 59,
+      "trained_passes": 62
+    },
+    "pass_all_four": {
+      "baseline": 0.2,
+      "trained": 0.225,
+      "delta": 0.025,
+      "baseline_ci95": [
+        0.075,
+        0.325
+      ],
+      "trained_ci95": [
+        0.1,
+        0.35
+      ],
+      "delta_ci95": [
+        -0.07500000000000001,
+        0.12500000000000003
+      ],
+      "clusters": 40,
+      "gained": 3,
+      "lost": 2,
+      "two_sided_p": 1.0
+    }
+  },
+  "bfcl": {
+    "categories": [
+      {
+        "category": "simple_python",
+        "cases": 400,
+        "baseline_correct": 381,
+        "trained_correct": 380,
+        "baseline": 0.9525,
+        "trained": 0.95,
+        "delta": -0.0025
+      },
+      {
+        "category": "multiple",
+        "cases": 200,
+        "baseline_correct": 189,
+        "trained_correct": 187,
+        "baseline": 0.945,
+        "trained": 0.935,
+        "delta": -0.01
+      },
+      {
+        "category": "parallel",
+        "cases": 200,
+        "baseline_correct": 186,
+        "trained_correct": 185,
+        "baseline": 0.93,
+        "trained": 0.925,
+        "delta": -0.005
+      },
+      {
+        "category": "parallel_multiple",
+        "cases": 200,
+        "baseline_correct": 180,
+        "trained_correct": 179,
+        "baseline": 0.9,
+        "trained": 0.895,
+        "delta": -0.005
+      },
+      {
+        "category": "irrelevance",
+        "cases": 240,
+        "baseline_correct": 213,
+        "trained_correct": 213,
+        "baseline": 0.8875,
+        "trained": 0.8875,
+        "delta": 0.0
+      },
+      {
+        "category": "live_simple",
+        "cases": 258,
+        "baseline_correct": 202,
+        "trained_correct": 203,
+        "baseline": 0.7829457364341085,
+        "trained": 0.7868217054263565,
+        "delta": 0.003875968992248062
+      },
+      {
+        "category": "live_multiple",
+        "cases": 1053,
+        "baseline_correct": 809,
+        "trained_correct": 813,
+        "baseline": 0.768281101614435,
+        "trained": 0.7720797720797721,
+        "delta": 0.003798670465337132
+      },
+      {
+        "category": "multi_turn_base",
+        "cases": 200,
+        "baseline_correct": 54,
+        "trained_correct": 51,
+        "baseline": 0.27,
+        "trained": 0.255,
+        "delta": -0.015
+      }
+    ],
+    "executed_case_micro": {
+      "cases": 2751,
+      "baseline_correct": 2214,
+      "trained_correct": 2211,
+      "baseline": 0.8047982551799345,
+      "trained": 0.8037077426390403,
+      "delta": -0.0010905125408942203,
+      "official_bfcl_overall": false
+    },
+    "paired_case_inference": "Unavailable: baseline per-case outcomes are not local."
+  },
+  "prompting": {
+    "stages": [
+      {
+        "stage": "Initial prompt",
+        "prompt": "v1",
+        "success": 0.07291666666666667,
+        "passes": 7,
+        "attempts": 96,
+        "source": "reports/modal/test_candidate.json#/v1"
+      },
+      {
+        "stage": "Selected prompt",
+        "prompt": "v3d",
+        "success": 0.7916666666666666,
+        "passes": 76,
+        "attempts": 96,
+        "source": "reports/modal/fresh_untrained_control.json"
+      },
+      {
+        "stage": "Selected prompt + RL",
+        "prompt": "v3d",
+        "success": 0.875,
+        "passes": 84,
+        "attempts": 96,
+        "source": "reports/modal/select_and_test.json#/test"
+      }
+    ],
+    "selection_experiments": [
+      {
+        "prompt": "v3a",
+        "train": 0.3680555555555556,
+        "dev": 0.2708333333333333,
+        "train_dev": 0.34375,
+        "critical_violation_rate": 0.4114583333333333
+      },
+      {
+        "prompt": "v3b",
+        "train": 0.2638888888888889,
+        "dev": 0.3541666666666667,
+        "train_dev": 0.2864583333333333,
+        "critical_violation_rate": 0.4479166666666667
+      },
+      {
+        "prompt": "v3c",
+        "train": 0.7013888888888888,
+        "dev": 0.6666666666666666,
+        "train_dev": 0.6927083333333334,
+        "critical_violation_rate": 0.10416666666666667
+      },
+      {
+        "prompt": "v3d",
+        "train": 0.75,
+        "dev": 0.875,
+        "train_dev": 0.78125,
+        "critical_violation_rate": 0.06770833333333333
+      },
+      {
+        "prompt": "v4",
+        "train": 0.4027777777777778,
+        "dev": 0.4166666666666667,
+        "train_dev": 0.40625,
+        "critical_violation_rate": 0.5572916666666666
+      }
+    ],
+    "initial_to_selected_delta": 0.71875,
+    "selected_to_rl_delta": 0.08333333333333337
+  },
+  "behavior": {
+    "attempts_with_critical_violation": {
+      "baseline": 3,
+      "trained": 4
+    },
+    "false_completions": {
+      "baseline": 3,
+      "trained": 0
+    },
+    "mean_tool_calls": {
+      "baseline": 10.65625,
+      "trained": 10.822916666666666
+    },
+    "mean_seconds": {
+      "baseline": 24.05646731638542,
+      "trained": 27.90283950466667
+    },
+    "tokens": {
+      "baseline": {
+        "completion": 106450,
+        "context_limit_stops": 0,
+        "max_context": 7985,
+        "prompt": 5660961,
+        "truncated_turns": 0
+      },
+      "trained": {
+        "completion": 123178,
+        "context_limit_stops": 0,
+        "max_context": 8306,
+        "prompt": 5823762,
+        "truncated_turns": 0
+      }
+    }
+  }
+}
