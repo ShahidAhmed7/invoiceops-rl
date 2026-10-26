@@ -114,7 +114,7 @@ hashes and replayed without divergence.
 | Duplicate rollout ids | 0 (all 4,960 unique) |
 | Reward-group integrity | 0 violations (8/group share one row_index) |
 | Mask token accounting | 0 mismatches |
-| Status counts | `terminal_submitted` 4,917 · `unfinished_other` 43 (ended without terminal submit; all preserved with reward) |
+| Status counts | `terminal_submitted` 4,917 · `unfinished_other` 43 (episode never terminated — clean EOS without a `submit` call; not truncated, not masked) |
 | Reward | mean 0.705; first-10-step mean 0.55 → last-10 mean 0.68; `frac_reward_zero_std` 0.25–1.0 late in training (groups never collapsed) |
 | Losses/grads | all finite (204 step entries) |
 | `tool_cutoff_ratio` | 0 every step — safety mask never needed |
@@ -158,9 +158,10 @@ was registered but never used.
   resume re-generated those steps. Both versions are preserved and uniquely
   identified (ordinals 51–54 vs 55+); the ledger and `attempts` manifest
   section document the boundary.
-- 43 rollouts (0.9%) ended `unfinished_other` — episode never terminated
-  (iteration/completion limits or EOS without submit). They carry reward and
-  full transcripts; none needed safety masking.
+- 43 rollouts (0.9%) ended `unfinished_other` — the episode never terminated:
+  the model ended a turn on EOS without calling `submit` (no truncation, no
+  pending tool call, no safety masking). They carry reward and full
+  transcripts; all replayable ones verified.
 - `meta.json` + 4 completion parquet aux files can't be re-verified against
   their attempt-1 manifest hashes (overwritten in place on the volume).
 - Reward improved modestly (0.55 → 0.68 on first/last 10 steps); whether that
