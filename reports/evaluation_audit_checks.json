@@ -1,0 +1,207 @@
+{
+  "date": "2026-10-26",
+  "raw_runs": [
+    {
+      "run": "runs/always_hold-dev-test-2026-10-22T224740Z",
+      "records": 36,
+      "current_snapshots_regraded": 0,
+      "pre_review_snapshots_not_regraded": 36,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/always_hold-dev-test-2026-10-23T115521Z",
+      "records": 36,
+      "current_snapshots_regraded": 36,
+      "pre_review_snapshots_not_regraded": 0,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/always_pay-dev-test-2026-10-22T224740Z",
+      "records": 36,
+      "current_snapshots_regraded": 0,
+      "pre_review_snapshots_not_regraded": 36,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/always_pay-dev-test-2026-10-23T115521Z",
+      "records": 36,
+      "current_snapshots_regraded": 36,
+      "pre_review_snapshots_not_regraded": 0,
+      "stored_verifier_differences": [
+        {
+          "task": "T-6C23E6",
+          "attempt": 0,
+          "passed_before": false,
+          "passed_current": false,
+          "critical_before": [],
+          "critical_current": [
+            "payment_before_receipt"
+          ]
+        },
+        {
+          "task": "T-7E294F",
+          "attempt": 0,
+          "passed_before": false,
+          "passed_current": false,
+          "critical_before": [
+            "payment_proposed_for_unpayable_invoice"
+          ],
+          "critical_current": [
+            "payment_before_receipt",
+            "payment_proposed_for_unpayable_invoice"
+          ]
+        }
+      ],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/modal/smoke-thinking-v3d",
+      "records": 12,
+      "current_snapshots_regraded": 12,
+      "pre_review_snapshots_not_regraded": 0,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/noop-dev-test-2026-10-22T224740Z",
+      "records": 36,
+      "current_snapshots_regraded": 0,
+      "pre_review_snapshots_not_regraded": 36,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/noop-dev-test-2026-10-23T115521Z",
+      "records": 36,
+      "current_snapshots_regraded": 36,
+      "pre_review_snapshots_not_regraded": 0,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/oracle-dev-test-2026-10-22T224740Z",
+      "records": 36,
+      "current_snapshots_regraded": 0,
+      "pre_review_snapshots_not_regraded": 36,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/oracle-dev-test-2026-10-23T115521Z",
+      "records": 36,
+      "current_snapshots_regraded": 36,
+      "pre_review_snapshots_not_regraded": 0,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 0,
+      "blocked_attempts_after": 0
+    },
+    {
+      "run": "runs/random-dev-test-2026-10-22T224740Z",
+      "records": 36,
+      "current_snapshots_regraded": 0,
+      "pre_review_snapshots_not_regraded": 36,
+      "stored_verifier_differences": [],
+      "headline_changes": {},
+      "blocked_attempts_before": 41,
+      "blocked_attempts_after": 36
+    },
+    {
+      "run": "runs/random-dev-test-2026-10-23T115521Z",
+      "records": 36,
+      "current_snapshots_regraded": 36,
+      "pre_review_snapshots_not_regraded": 0,
+      "stored_verifier_differences": [
+        {
+          "task": "T-6C23E6",
+          "attempt": 0,
+          "passed_before": false,
+          "passed_current": false,
+          "critical_before": [
+            "duplicate_payment_proposal"
+          ],
+          "critical_current": [
+            "duplicate_payment_proposal",
+            "payment_before_receipt"
+          ]
+        },
+        {
+          "task": "T-7E294F",
+          "attempt": 0,
+          "passed_before": false,
+          "passed_current": false,
+          "critical_before": [
+            "duplicate_payment_proposal",
+            "payment_proposed_for_unpayable_invoice"
+          ],
+          "critical_current": [
+            "duplicate_payment_proposal",
+            "payment_before_receipt",
+            "payment_proposed_for_unpayable_invoice"
+          ]
+        }
+      ],
+      "headline_changes": {},
+      "blocked_attempts_before": 31,
+      "blocked_attempts_after": 31
+    }
+  ],
+  "raw_records_recomputed": 372,
+  "current_snapshots_regraded": 192,
+  "pre_review_snapshots_not_regraded": 180,
+  "raw_headline_changes": 0,
+  "current_verifier_pass_changes": 0,
+  "current_verifier_critical_label_changes": 4,
+  "committed_complete_summary_arithmetic_checks": [
+    "reports/modal/dev_v2.json",
+    "reports/modal/probe_and_dev.json/dev",
+    "reports/modal/probe_and_dev.json/probe",
+    "reports/modal/probe_v2.json",
+    "reports/modal/prompt_trial-v3a.json/dev",
+    "reports/modal/prompt_trial-v3a.json/train",
+    "reports/modal/prompt_trial-v3b.json/dev",
+    "reports/modal/prompt_trial-v3b.json/train",
+    "reports/modal/prompt_trial-v3c.json/dev",
+    "reports/modal/prompt_trial-v3c.json/train",
+    "reports/modal/prompt_trial-v3d.json/dev",
+    "reports/modal/prompt_trial-v3d.json/train",
+    "reports/modal/prompt_trial-v4.json/dev",
+    "reports/modal/prompt_trial-v4.json/train",
+    "reports/modal/smoke_post_train.json/merged_dev",
+    "reports/modal/smoke_thinking.json/dev",
+    "reports/modal/test_candidate.json/v1",
+    "reports/modal/test_candidate.json/v2",
+    "reports/modal/test_prompt-v3c.json",
+    "reports/modal/test_prompt-v3d.json",
+    "reports/modal/test_reference.json"
+  ],
+  "tau2_summary_arithmetic_checks": [
+    "tau2_before",
+    "tau2_reference"
+  ],
+  "no_model_calls_or_gpu_jobs": true,
+  "limitations": [
+    "Only local episode records were recomputed; other runs were checked from summaries.",
+    "Bootstrap intervals resample tasks, not companies; test contains only four companies.",
+    "The test split has already been inspected in prior prompt work."
+  ]
+}

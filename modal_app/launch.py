@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from collections.abc import Callable
@@ -33,12 +34,15 @@ from modal_app.budget import (
 REPORTS = ROOT / "reports" / "modal"
 # Jobs that take --prompt; their reports and ledger lines carry the prompt version.
 PROMPT_JOBS = ("prompt_trial", "test_prompt")
+# Training jobs write one report per run name so retries cannot overwrite evidence.
+TRAIN_JOBS = ("smoke_train", "train_grpo")
 SMOKE_TRAIN = {
-    "run_name": "smoke",
-    "generated_variants": 0,
-    "wall_clock_limit_min": 12,
-    # 2 x 4 = 8 rollouts per step: one group of num_generations.
-    "grpo": {"max_steps": 3, "save_steps": 3, "gradient_accumulation_steps": 4},
+    # Readiness smoke at full training settings: complete 144-row generated curriculum,
+    # full 2x16 accumulation (32 rollouts/step = 4 groups of 8), trajectory logging.
+    # run_name is set per launch (--run-name or a UTC timestamp); fresh dirs only.
+    "generated_variants": 144,
+    "wall_clock_limit_min": 14,
+    "grpo": {"max_steps": 3, "save_steps": 1},
 }
 # Hard timeouts (minutes) for each Modal call a job makes, in order. A job that makes several
 # calls, or reuses a long-running function for a short check, gets a per-call timeout so that
@@ -61,10 +65,16 @@ def _limit(fn: Any, minutes: int) -> Any:
     return fn.with_options(timeout=minutes * 60)
 
 
-def _jobs(prompt: str = "v2") -> dict[str, Callable[[], Any]]:
+def _stamp(prefix: str) -> str:
+    return f"{prefix}-{time.strftime('%Y%m%d-%H%M%S', time.gmtime())}"
+
+
+def _jobs(prompt: str = "v2", run_name: str | None = None) -> dict[str, Callable[[], Any]]:
     from modal_app import app as m
 
     train_config = json.loads((ROOT / "modal_app" / "train_config.json").read_text())
+    if run_name:
+        train_config["run_name"] = run_name
     run_name = train_config["run_name"]
     merged = f"/runs/train/{run_name}/selected_merged"
 
@@ -147,13 +157,14 @@ def _jobs(prompt: str = "v2") -> dict[str, Callable[[], Any]]:
     return {
         "inspect_models": lambda: m.inspect_models.remote(),
         "smoke_serve_candidate": lambda: m.smoke_serve_candidate.remote(),
+        "smoke_thinking": lambda: m.smoke_thinking.remote(),
         "smoke_serve_reference": lambda: m.smoke_serve_reference.remote(),
         "smoke_tau2": lambda: m.smoke_tau2.remote(),
         "tau2_before": lambda: m.tau2_eval.remote("before", settings.CANDIDATE_MODEL),
         "tau2_reference": lambda: m.tau2_eval.remote("reference", settings.REFERENCE_FP8),
         "bfcl_before": lambda: m.bfcl_eval.remote("before"),
         "smoke_train": lambda: _limit(m.train_grpo, CALL_MINUTES["smoke_train"][0]).remote(
-            json.dumps(SMOKE_TRAIN)
+            json.dumps({**SMOKE_TRAIN, "run_name": run_name if run_name else _stamp("smoke")})
         ),
         "probe_and_dev": probe_and_dev,
         "probe_v2": lambda: _limit(m.invoiceops_eval_l40s, CALL_MINUTES["probe_v2"][0]).remote(
@@ -196,19 +207,40 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true", help="check the guard and stop")
     parser.add_argument("--rerun", action="store_true", help="allow re-running a succeeded job")
     parser.add_argument("--prompt", default="v2", help="system prompt version for prompt_trial")
+    parser.add_argument(
+        "--run-name",
+        help="training run directory name for smoke_train/train_grpo "
+        "(default: train_config.json's run_name; smoke gets a UTC timestamp)",
+    )
     args = parser.parse_args(argv)
 
     budget = load_budget()
     ledger = read_ledger()
+    account_profile = os.environ.get("MODAL_PROFILE", "default")
     try:
-        money = check_launch(budget, args.job, ledger, signoff_approved(), rerun=args.rerun)
+        money = check_launch(
+            budget,
+            args.job,
+            ledger,
+            signoff_approved(),
+            rerun=args.rerun,
+            account_profile=account_profile,
+        )
     except BudgetError as exc:
         print(f"refused: {exc}")
         return 2
     job = budget.jobs[args.job]
+    alloc = budget.allocation_for(args.job)
+    run_name = args.run_name
+    if args.job == "smoke_train" and run_name is None:
+        run_name = _stamp("smoke")
+    elif args.job == "train_grpo" and run_name is None:
+        run_name = json.loads((ROOT / "modal_app" / "train_config.json").read_text())["run_name"]
     print(
         f"{args.job}: up to ${money['worst_case']:.2f} on {job.gpu} "
         f"(cap ${job.cap_usd:.2f}); spent so far ${money['spent']:.2f}"
+        + (f"; allocation {alloc.name} limit ${alloc.limit_usd:.2f}" if alloc else "")
+        + (f"; run {run_name}" if run_name else "")
     )
     if args.dry_run:
         return 0
@@ -221,7 +253,9 @@ def main(argv: list[str] | None = None) -> int:
     status, result, error = "failed", None, None
     try:
         with modal.enable_output(), modal_app_module.app.run():
-            result = _jobs(args.prompt)[args.job]()
+            result = _jobs(args.prompt, run_name)[args.job]()
+            if args.job == "smoke_thinking" and not result["pipeline_ok"]:
+                raise RuntimeError("Thinking smoke acceptance checks failed; see its report.")
         status = "succeeded"
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
@@ -231,6 +265,7 @@ def main(argv: list[str] | None = None) -> int:
         append_ledger(
             {
                 "job": args.job,
+                "account_profile": account_profile,
                 "phase": job.phase,
                 "gpu": job.gpu,
                 "status": status,
@@ -239,12 +274,19 @@ def main(argv: list[str] | None = None) -> int:
                 "rate_usd_per_hour": budget.rate(job),
                 "cost_usd": cost,
                 "error": error,
+                **({"allocation": alloc.name} if alloc else {}),
+                **({"run_name": run_name} if run_name and args.job in TRAIN_JOBS else {}),
                 **({"prompt": args.prompt} if args.job in PROMPT_JOBS else {}),
             }
         )
     REPORTS.mkdir(parents=True, exist_ok=True)
     if result is not None:
-        name = f"{args.job}-{args.prompt}" if args.job in PROMPT_JOBS else args.job
+        if args.job in PROMPT_JOBS:
+            name = f"{args.job}-{args.prompt}"
+        elif args.job in TRAIN_JOBS and run_name:
+            name = f"{args.job}-{run_name}"
+        else:
+            name = args.job
         Path(REPORTS / f"{name}.json").write_text(
             json.dumps(result, indent=2, sort_keys=True, default=str)
         )

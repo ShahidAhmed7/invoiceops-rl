@@ -23,7 +23,8 @@ Results of the GPU work so far (see `docs/PROJECT_HANDOFF.md`). Every figure com
 | + | `prompt_trial` v3d, `test_prompt` v3d (added) | Passed. Train+dev 78.1%; test 71.9% (v3c 72.9%). | $0.73 |
 | + | `prompt_trial` v4 (added) | Passed. Company-style prompt with no model patches: train+dev 40.6%, critical violations 55.7%. | $0.43 |
 | + | `smoke_post_train` (added) | Passed: the smoke adapter's checkpoints served as LoRA adapters and scored on dev with v3d, merged, and the merged model served 12 dev episodes. Pipeline check only. | $0.48 |
-| | **Total** | | **$9.11** |
+| + | `smoke_thinking` (2026-10-26, Asia/Dhaka) | Passed: Thinking-2507 served with reasoning and tool parsing; 12 dev episodes, 8 passed; no truncation or context stops. Inference check only. See `reports/thinking_smoke.md`. | $0.96 |
+| | **Total** | | **$10.07** |
 
 Jobs marked + ran after the owner released the rest of the $9.50 for the remaining jobs.
 - `smoke_serve_reference` was not run: the reference model was already served twice successfully.
@@ -176,9 +177,9 @@ The figures come from `tokens` in each summary. `inspect_models` recounted the t
 **τ² user simulator: 32,768.** It shares the H100 with the agent at 45% memory, which leaves about 40k tokens of KV cache for the FP8 30B model. Its dialogue carries no tool output. When the reference model is both agent and user, it gets the full 131,072.
 
 **Training (TRL 1.16 `environment_factory`):**
-- **Completion budget covers the whole rollout.** In TRL's tool loop the completion is every assistant turn plus every tool result (`_tool_call_loop`, `grpo_trainer.py`). Each turn may generate up to the remaining budget, and only the tail beyond `max_completion_length` is cut.
-- **`max_completion_length` 16,384.** That is nearly twice the read-everything rollout.
-- **`vllm_max_model_length` 20,480.** That is the 3.2k prompt plus 16,384, with margin, so the completion budget is always the limit reached first.
-- **Truncated rollouts are left out of the loss** (`mask_truncated_completions`).
-- **Batch: 2 per device × 16 accumulation steps.** That keeps 32 rollouts per step (4 groups of 8), but each forward pass holds logits for 2 sequences of up to 20k tokens (about 12 GB in bf16), not 8.
+- **Completion budget covers the whole rollout.** In TRL's tool loop the completion is every assistant turn plus every tool result (`_tool_call_loop`, `grpo_trainer.py`). The backend can generate beyond the remaining rollout budget before TRL slices the tail.
+- **`max_completion_length` 24,576.** Increased at the owner's request on 2026-10-26; the recorded GPU smoke used 16,384.
+- **`vllm_max_model_length` 131,072.** Increased to match the test server. The measured initial prompt plus the new rollout cap is at most 27,702 tokens, so the completion budget remains the first limit. GPU startup at this context and memory utilization 0.35 has not been verified; vLLM requires KV capacity for one maximum-length sequence.
+- **Truncation masking is enabled** (`mask_truncated_completions`). The project trainer now also excludes unfinished EOS-terminated tool calls from the loss and reward baseline, covering the audited tool-loop exits. See [`training_audit.md`](training_audit.md).
+- **Batch: 2 per device × 16 accumulation steps.** That keeps 32 rollouts per step (4 groups of 8), with two sequences per forward pass. The larger completion cap has not been GPU-tested.
 - **The smoke run uses 2 × 4**, which is one group of 8.

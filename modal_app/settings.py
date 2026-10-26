@@ -7,6 +7,7 @@ before any evaluation job, so every result names the exact weights used.
 from __future__ import annotations
 
 CANDIDATE_MODEL = "Qwen/Qwen3-4B-Instruct-2507"
+THINKING_MODEL = "Qwen/Qwen3-4B-Thinking-2507"
 CANDIDATE_FALLBACK = "Qwen/Qwen3.5-4B"
 REFERENCE_MODEL = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 REFERENCE_FP8 = "Qwen/Qwen3-30B-A3B-Instruct-2507-FP8"
@@ -15,6 +16,7 @@ REFERENCE_FALLBACK = "Qwen/Qwen3-8B"
 # Filled in from reports/model_verification.json after Phase 11A step 3. ``None`` means
 # "not yet verified": evaluation jobs refuse to run with an unpinned revision.
 REVISIONS: dict[str, str | None] = {
+    THINKING_MODEL: "768f209d9ea81521153ed38c47d515654e938aea",
     CANDIDATE_MODEL: "cdbee75f17c01a7cc42f958dc650907174af0554",
     CANDIDATE_FALLBACK: "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
     REFERENCE_MODEL: "0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe",

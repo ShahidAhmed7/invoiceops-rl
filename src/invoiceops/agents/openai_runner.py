@@ -10,6 +10,7 @@ import json
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -45,6 +46,7 @@ class ModelConfig:
     max_nudges: int = 2
     http_retries: int = 2
     extra_body: dict[str, Any] = field(default_factory=dict)
+    reasoning_token_counter: Callable[[str], int] | None = field(default=None, repr=False)
 
 
 def chat(
@@ -102,6 +104,8 @@ def run_episode(
         "requests": 0,
         "truncated_turns": 0,
         "max_context_tokens": 0,
+        "reasoning_tokens": 0,
+        "turns": [],
     }
     tool_calls_made = 0
     nudges = 0
@@ -116,7 +120,9 @@ def run_episode(
             if max_tokens < MIN_TURN_TOKENS:
                 usage["stopped"] = "context_limit"
                 break
+        started = time.monotonic()
         response = chat(cfg, messages, tools, max_tokens)
+        seconds = time.monotonic() - started
         usage["requests"] += 1
         reported = response.get("usage") or {}
         for key in ("prompt_tokens", "completion_tokens"):
@@ -125,7 +131,25 @@ def run_episode(
         if choice.get("finish_reason") == "length":
             usage["truncated_turns"] += 1
         message = choice.get("message") or {}
+        reasoning = message.get("reasoning") or message.get("reasoning_content") or ""
+        details = reported.get("completion_tokens_details") or {}
+        reasoning_tokens: int | None = int(details.get("reasoning_tokens") or 0)
+        if reasoning and cfg.reasoning_token_counter is not None:
+            reasoning_tokens = cfg.reasoning_token_counter(str(reasoning))
+        elif reasoning and not reasoning_tokens:
+            reasoning_tokens = None
+        usage["reasoning_tokens"] += reasoning_tokens or 0
         calls = message.get("tool_calls") or []
+        usage["turns"].append(
+            {
+                "seconds": seconds,
+                "prompt_tokens": int(reported.get("prompt_tokens", 0)),
+                "completion_tokens": int(reported.get("completion_tokens", 0)),
+                "reasoning_tokens": reasoning_tokens,
+                "finish_reason": choice.get("finish_reason"),
+                "tool_calls": len(calls),
+            }
+        )
         assistant: dict[str, Any] = {"role": "assistant", "content": message.get("content") or ""}
         if calls:
             assistant["tool_calls"] = calls
@@ -134,8 +158,17 @@ def run_episode(
             counted_tokens = int(reported["prompt_tokens"]) + int(
                 reported.get("completion_tokens", 0)
             )
-            counted_messages = len(messages)
             usage["max_context_tokens"] = max(usage["max_context_tokens"], counted_tokens)
+            if reasoning:
+                # Parsed thinking is recorded as counts, not re-sent in conversation history.
+                # Leave margin for the assistant message's template boundary tokens.
+                counted_tokens = int(reported["prompt_tokens"]) + (
+                    max(0, int(reported.get("completion_tokens", 0)) - reasoning_tokens)
+                    + MESSAGE_OVERHEAD_TOKENS
+                    if reasoning_tokens is not None
+                    else _estimate_tokens([assistant], [])
+                )
+            counted_messages = len(messages)
         if not calls:
             if nudges >= cfg.max_nudges:
                 break
@@ -143,6 +176,8 @@ def run_episode(
             messages.append({"role": "user", "content": NUDGE})
             continue
         for call in calls:
+            if tool_calls_made >= cfg.max_tool_calls:
+                break
             tool_calls_made += 1
             function = call.get("function") or {}
             name = str(function.get("name", ""))
@@ -166,6 +201,8 @@ def run_episode(
             )
             if episode.done:
                 break
+    if not episode.done and tool_calls_made >= cfg.max_tool_calls:
+        usage["stopped"] = "tool_call_limit"
     return messages, usage
 
 

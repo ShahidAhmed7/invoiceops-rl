@@ -83,6 +83,14 @@ train_image = _with_sources(
     .uv_pip_install(requirements=[str(HERE / "requirements-train.txt")])
 )
 
+# The thinking smoke needs only inference, without either external benchmark environment.
+thinking_image = _with_sources(
+    modal.Image.from_registry(CUDA_BASE, add_python="3.12")
+    .entrypoint([])
+    .apt_install("git")
+    .uv_pip_install(requirements=[str(HERE / "requirements-serve.txt")])
+)
+
 
 def _revision(model: str) -> str:
     revision = settings.REVISIONS.get(model)
@@ -366,6 +374,17 @@ def smoke_serve_candidate(model: str = settings.CANDIDATE_MODEL) -> dict[str, An
 
 
 @app.function(
+    image=thinking_image, gpu="L40S", volumes=VOLUMES, timeout=20 * 60, max_containers=1, retries=0
+)
+def smoke_thinking() -> dict[str, Any]:
+    from modal_app.thinking_smoke import run_smoke
+
+    result = run_smoke(Path("/runs/invoiceops/smoke-thinking-v3d"))
+    _save("/runs/smoke/thinking.json", result)
+    return result
+
+
+@app.function(
     image=serve_image, gpu="H100", volumes=VOLUMES, timeout=20 * 60, max_containers=1, retries=0
 )
 def smoke_serve_reference(model: str = settings.REFERENCE_FP8) -> dict[str, Any]:
@@ -557,7 +576,7 @@ def invoiceops_eval_h100(
 
 
 @app.function(
-    image=train_image, gpu="H100", volumes=VOLUMES, timeout=250 * 60, max_containers=1, retries=0
+    image=train_image, gpu="H100", volumes=VOLUMES, timeout=360 * 60, max_containers=1, retries=0
 )
 def train_grpo(config_json: str) -> dict[str, Any]:
     from modal_app.train_grpo import DEFAULTS, run_training
@@ -580,12 +599,10 @@ def select_checkpoint(
     from invoiceops.evaluation.run import evaluate
     from invoiceops.tasks.store import task_ids
     from modal_app import vllm_server
+    from modal_app.checkpoints import checkpoint_candidates, selection_score
 
     root = Path("/runs/train") / run_name
-    candidates = sorted(
-        (root / "checkpoints").glob("checkpoint-*"), key=lambda p: int(p.name.split("-")[1])
-    )[-(max_candidates - 1) :]
-    candidates.append(root / "final_adapter")
+    candidates = checkpoint_candidates(root, max_candidates)
     base = settings.CANDIDATE_MODEL
     scores: dict[str, float | None] = {}
     for ckpt in candidates:
@@ -610,7 +627,7 @@ def select_checkpoint(
                 prompt_version=prompt,
                 concurrency=16,
             )
-            scores[ckpt.name] = summary["task_mean_success"]
+            scores[ckpt.name] = selection_score(summary)
         finally:
             vllm_server.stop(proc)
     best = max(scores, key=lambda name: (scores[name] or 0.0, name == "final_adapter"))

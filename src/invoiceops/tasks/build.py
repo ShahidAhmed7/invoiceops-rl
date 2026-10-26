@@ -100,13 +100,20 @@ def build_suite() -> list[TaskBundle]:
 
 
 def generated_training_variants(count: int, start: int = 0) -> Iterator[TaskBundle]:
-    """Extra procedurally generated instances, drawn only from training worlds."""
+    """Extra train-only instances, interleaving variants within each company/family sweep.
+
+    Each sweep covers all company/family pairs with balanced variants. Rotating the variant
+    between sweeps visits all three variants for every pair over a full three-sweep cycle.
+    """
     train = [c for c in COMPANIES if c.split == "train"]
     families = sorted(FAMILIES_BY_ID)
     for n in range(start, start + count):
-        company = train[n % len(train)]
-        family_id = families[(n // len(train)) % len(families)]
-        variant = (n // (len(train) * len(families))) % VARIANTS_PER_FAMILY
+        company_index = n % len(train)
+        family_index = (n // len(train)) % len(families)
+        sweep = n // (len(train) * len(families))
+        company = train[company_index]
+        family_id = families[family_index]
+        variant = (company_index + family_index + sweep) % VARIANTS_PER_FAMILY
         yield build_task(company, family_id, variant, salt=f"gen{n}")
 
 

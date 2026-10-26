@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -69,6 +70,10 @@ def evaluate(
 ) -> dict[str, Any]:
     if agent not in LOCAL_AGENTS and agent != "model":
         raise ValueError(f"unknown agent {agent}")
+    if attempts < 1:
+        raise ValueError("attempts must be positive")
+    if not task_ids or len(set(task_ids)) != len(task_ids):
+        raise ValueError("task_ids must be nonempty and unique")
     run_id = run_dir.name
     jobs = [(t, a) for t in task_ids for a in range(attempts)]
 
@@ -80,7 +85,7 @@ def evaluate(
     with ThreadPoolExecutor(max_workers=max(1, concurrency)) as pool:
         records = list(pool.map(work, jobs))
     privates: dict[str, PrivateTask] = {t: load_bundle(t, task_root).private for t in task_ids}
-    summary = summarise(records, privates)
+    summary = summarise(records, privates, expected_attempts=attempts)
     config: dict[str, Any] = {
         "agent": agent,
         "tasks": len(task_ids),
@@ -95,7 +100,23 @@ def evaluate(
             top_p=model.top_p,
             max_tool_calls=model.max_tool_calls,
             max_tokens=model.max_tokens,
+            context_tokens=model.context_tokens,
+            max_nudges=model.max_nudges,
         )
+    # A task ID or git commit alone cannot distinguish dirty code or revised task contents.
+    # Keep fingerprints with each future run so historical verifier versions stay identifiable.
+    config["evaluation_sources_sha256"] = {
+        name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for name, path in {
+            "metrics": Path(__file__).with_name("metrics.py"),
+            "verifier": Path(verify_episode.__code__.co_filename),
+            "runner": Path(run_episode.__code__.co_filename),
+        }.items()
+    }
+    task_digest = hashlib.sha256()
+    for task_id in sorted(task_ids):
+        task_digest.update(load_bundle(task_id, task_root).model_dump_json().encode())
+    config["task_data_sha256"] = task_digest.hexdigest()
     write_json(run_dir / "config.json", config)
     write_json(run_dir / "summary.json", summary)
     (run_dir / "report.md").write_text(to_markdown(f"Evaluation: {agent}", config, summary))

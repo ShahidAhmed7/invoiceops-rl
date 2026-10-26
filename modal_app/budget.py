@@ -41,18 +41,40 @@ class Job:
 
 
 @dataclass(frozen=True)
+class Allocation:
+    """A separately released dollar pool bound to one Modal account profile.
+
+    Ledger entries carry ``allocation``; entries without it belong to the default pool
+    governed by ``total_usd``/``spend_limit_usd``. An allocation's limit governs its
+    member jobs regardless of the default pool's released credit.
+    """
+
+    name: str
+    limit_usd: float
+    account_profile: str
+    jobs: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class Budget:
     total_usd: float
     rates_confirmed: bool
     rates: dict[str, float]
     jobs: dict[str, Job]
     spend_limit_usd: float | None = None
+    allocations: dict[str, Allocation] | None = None
 
     def rate(self, job: Job) -> float:
         return self.rates[job.gpu]
 
     def worst_case(self, job: Job) -> float:
         return round(self.rate(job) * job.timeout_min / 60, 4)
+
+    def allocation_for(self, job_name: str) -> Allocation | None:
+        for alloc in (self.allocations or {}).values():
+            if job_name in alloc.jobs:
+                return alloc
+        return None
 
 
 def load_budget(path: Path = CONFIG) -> Budget:
@@ -68,6 +90,19 @@ def load_budget(path: Path = CONFIG) -> Budget:
         )
         for name, spec in data["jobs"].items()
     }
+    allocations = {
+        name: Allocation(
+            name=name,
+            limit_usd=float(spec["limit_usd"]),
+            account_profile=str(spec["account_profile"]),
+            jobs=tuple(spec["jobs"]),
+        )
+        for name, spec in (data.get("allocations") or {}).items()
+    }
+    for alloc in allocations.values():
+        missing = [j for j in alloc.jobs if j not in jobs]
+        if missing:
+            raise BudgetError(f"allocation {alloc.name} names unknown jobs: {missing}")
     budget = Budget(
         total_usd=float(data["total_usd"]),
         rates_confirmed=bool(data["rates_confirmed"]),
@@ -76,6 +111,7 @@ def load_budget(path: Path = CONFIG) -> Budget:
         spend_limit_usd=(
             None if data.get("spend_limit_usd") is None else float(data["spend_limit_usd"])
         ),
+        allocations=allocations,
     )
     caps = sum(j.cap_usd for j in jobs.values())
     if caps > budget.total_usd + 1e-9:
@@ -107,8 +143,15 @@ def check_launch(
     ledger: list[dict[str, Any]],
     signed_off: bool,
     rerun: bool = False,
+    account_profile: str = "default",
 ) -> dict[str, float]:
-    """Raise ``BudgetError`` if the job may not start; otherwise return the money figures."""
+    """Raise ``BudgetError`` if the job may not start; otherwise return the money figures.
+
+    Jobs named in an ``allocations`` entry are charged to that allocation: their ledger
+    lines carry the allocation name and only same-allocation entries count toward spent,
+    done and reserved. All other jobs use the default pool exactly as before, except that
+    allocation jobs no longer reserve their caps from the default pool.
+    """
     if job_name not in budget.jobs:
         raise BudgetError(f"unknown job {job_name}; known: {', '.join(budget.jobs)}")
     job = budget.jobs[job_name]
@@ -119,12 +162,21 @@ def check_launch(
     if job.needs_signoff and not signed_off:
         signoff = SIGNOFF.relative_to(ROOT)
         raise BudgetError(f"{job_name} uses InvoiceOps tasks: commit an approved {signoff} first")
-    done = {e["job"] for e in ledger if e.get("status") == "succeeded"}
+
+    alloc = budget.allocation_for(job_name)
+    if alloc is not None:
+        return _check_allocated(budget, job, alloc, ledger, rerun, account_profile)
+
+    alloc_jobs = {j for a in (budget.allocations or {}).values() for j in a.jobs}
+    unscoped = [e for e in ledger if not e.get("allocation")]
+    done = {e["job"] for e in unscoped if e.get("status") == "succeeded"}
     if job_name in done and not rerun:
         raise BudgetError(f"{job_name} already succeeded; pass --rerun to spend on it again")
-    spent = sum(float(e.get("cost_usd", 0.0)) for e in ledger)
+    spent = sum(float(e.get("cost_usd", 0.0)) for e in unscoped)
     reserved = sum(
-        j.cap_usd for name, j in budget.jobs.items() if name not in done and name != job_name
+        j.cap_usd
+        for name, j in budget.jobs.items()
+        if name not in done and name != job_name and name not in alloc_jobs
     )
     available = budget.total_usd - spent - reserved
     worst = budget.worst_case(job)
@@ -143,3 +195,51 @@ def check_launch(
             f"(spent ${spent:.2f}, reserved ${reserved:.2f})"
         )
     return {"spent": spent, "reserved": reserved, "available": available, "worst_case": worst}
+
+
+def _check_allocated(
+    budget: Budget,
+    job: Job,
+    alloc: Allocation,
+    ledger: list[dict[str, Any]],
+    rerun: bool,
+    account_profile: str,
+) -> dict[str, float]:
+    """Admission check for a job paid from a dedicated ``allocations`` entry."""
+    if account_profile != alloc.account_profile:
+        raise BudgetError(
+            f"{job.name} is paid from the '{alloc.name}' allocation, which is bound to Modal "
+            f"profile {alloc.account_profile!r} (resolved profile: {account_profile!r}); run "
+            "with the right --env-file / MODAL_PROFILE so the charge lands on that account"
+        )
+    scoped = [e for e in ledger if e.get("allocation") == alloc.name]
+    done = {e["job"] for e in scoped if e.get("status") == "succeeded"}
+    if job.name in done and not rerun:
+        raise BudgetError(
+            f"{job.name} already succeeded under allocation '{alloc.name}'; "
+            "pass --rerun to spend on it again"
+        )
+    spent = sum(float(e.get("cost_usd", 0.0)) for e in scoped)
+    # Reserve the other unfinished member jobs' worst cases inside the allocation so a
+    # smoke cannot eat the main run's money.
+    reserved = sum(
+        budget.worst_case(budget.jobs[name])
+        for name in alloc.jobs
+        if name != job.name and name not in done
+    )
+    worst = budget.worst_case(job)
+    remaining = alloc.limit_usd - spent - reserved
+    if worst > remaining + 1e-9:
+        raise BudgetError(
+            f"{job.name} could cost up to ${worst:.2f} (timeout {job.timeout_min} min on "
+            f"{job.gpu}) but allocation '{alloc.name}' has only ${max(remaining, 0):.2f} left "
+            f"of its ${alloc.limit_usd:.2f} (spent ${spent:.2f}, reserved ${reserved:.2f} "
+            "for the remaining member jobs)"
+        )
+    return {
+        "spent": spent,
+        "reserved": reserved,
+        "available": remaining,
+        "worst_case": worst,
+        "allocation_limit": alloc.limit_usd,
+    }

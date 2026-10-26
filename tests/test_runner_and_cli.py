@@ -9,8 +9,9 @@ from typing import Any
 
 import pytest
 
-from invoiceops.agents.openai_runner import InfrastructureError, ModelConfig, chat
+from invoiceops.agents.openai_runner import InfrastructureError, ModelConfig, chat, run_episode
 from invoiceops.cli import main, review_sample
+from invoiceops.episode import Episode
 from invoiceops.evaluation.run import evaluate
 from invoiceops.runs import load_episodes
 from invoiceops.verification.mutations import oracle_actions
@@ -172,6 +173,71 @@ def test_truncated_turns_are_counted(
     cfg = ModelConfig(base_url=url, model="fake", http_retries=0)
     summary = evaluate("model", [bundle.public.task_id], tmp_path / "run", model=cfg)
     assert summary["tokens"]["truncated_turns"] == len(holder["model"].requests)
+
+
+def test_parallel_tool_calls_cannot_exceed_the_episode_call_budget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    bundle = by_family("F01", 0)
+    calls = [
+        {
+            "id": f"call-{i}",
+            "function": {
+                "name": "get_invoice",
+                "arguments": json.dumps({"invoice_id": bundle.private.expectation.invoice_id}),
+            },
+        }
+        for i in range(5)
+    ]
+    monkeypatch.setattr(
+        "invoiceops.agents.openai_runner.chat",
+        lambda *args: {"choices": [{"message": {"tool_calls": calls}}]},
+    )
+    ep = Episode(bundle.public.world, bundle.public.task_id)
+    try:
+        messages, usage = run_episode(
+            ep, bundle.public.prompt, "test", ModelConfig("unused", "fake", max_tool_calls=2)
+        )
+        assert ep.step_count == 2
+        assert sum(m["role"] == "tool" for m in messages) == 2
+        assert usage["stopped"] == "tool_call_limit"
+    finally:
+        ep.close()
+
+
+@pytest.mark.parametrize("reasoning_field", ["reasoning", "reasoning_content"])
+def test_parsed_reasoning_is_measured_without_filling_followup_context(
+    fake_server: tuple[str, dict[str, FakeModel]], tmp_path: Path, reasoning_field: str
+) -> None:
+    class Thinking(FakeModel):
+        def respond(self, body: dict[str, Any]) -> dict[str, Any]:
+            reply = super().respond(body)
+            reply["choices"][0]["message"][reasoning_field] = "x" * 18000
+            reply["usage"] = {"prompt_tokens": 20000, "completion_tokens": 19000}
+            return reply
+
+    url, holder = fake_server
+    bundle = by_family("F01", 0)
+    holder["model"] = Thinking(oracle_actions(bundle))
+    cfg = ModelConfig(
+        base_url=url,
+        model="fake",
+        http_retries=0,
+        context_tokens=40000,
+        max_tokens=32768,
+        reasoning_token_counter=len,
+    )
+    summary = evaluate("model", [bundle.public.task_id], tmp_path / "run", model=cfg)
+    assert summary["task_mean_success"] == 1.0
+    assert summary["tokens"]["context_limit_stops"] == 0
+    record = load_episodes(tmp_path / "run")[0]
+    assert record.usage["reasoning_tokens"] == 18000 * len(holder["model"].requests)
+    assert len(record.usage["turns"]) == len(holder["model"].requests)
+    for request in holder["model"].requests:
+        assert all(
+            reasoning_field not in m and "xxxx" not in (m.get("content") or "")
+            for m in request["messages"]
+        )
 
 
 def test_play_script_then_grade(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

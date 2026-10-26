@@ -1,0 +1,156 @@
+{
+ "run_dir": "runs/modal/training/grpo-v3d",
+ "checks": {
+  "manifest_verify": {
+   "checked": 541,
+   "ok": 536,
+   "missing": [],
+   "mismatched": [
+    "checkpoints/completions/completions_00051.parquet",
+    "checkpoints/completions/completions_00052.parquet",
+    "checkpoints/completions/completions_00053.parquet",
+    "checkpoints/completions/completions_00054.parquet",
+    "meta.json"
+   ],
+   "manifest_status": "completed"
+  },
+  "local_files_not_in_manifest": [],
+  "rollouts": 4960,
+  "model_calls": 2210,
+  "status_counts": {
+   "terminal_submitted": 4917,
+   "unfinished_other": 43
+  },
+  "reward_distribution": {
+   "0.0": 1461,
+   "1.0": 3499
+  },
+  "unique_row_indexes": 180,
+  "unique_rollout_ids": 4960,
+  "group_violations": [],
+  "missing_required_keys": [],
+  "mask_token_mismatches": [],
+  "skeleton_rollouts": [],
+  "task_distribution": {
+   "T-A40DCC": 40,
+   "T-BACFAB": 40,
+   "T-B8224C": 40,
+   "T-FA96B2": 40,
+   "T-5DC081": 40,
+   "T-B5F8BD": 40,
+   "T-ABD2A6": 40,
+   "T-4B9141": 40,
+   "T-CB0C48": 32,
+   "T-2D6100": 32,
+   "T-A7F8AC": 32,
+   "T-FEBF06": 32,
+   "T-4ED80D": 32,
+   "T-267C02": 32,
+   "T-B129D7": 32,
+   "T-354F64": 32,
+   "T-319E48": 32,
+   "T-C94302": 32,
+   "T-D8BB7D": 32,
+   "T-E45531": 32
+  },
+  "campaign_ledger_entries": [
+   {
+    "account_profile": "invoiceops-thinking",
+    "allocation": "grpo_training",
+    "cost_usd": 0.6932,
+    "error": null,
+    "gpu": "H100",
+    "job": "smoke_train",
+    "phase": "11B",
+    "rate_usd_per_hour": 4.45,
+    "run_name": "grpo-v3d-smoke-01",
+    "seconds": 560.8,
+    "started": "2026-10-25T20:44:17Z",
+    "status": "succeeded"
+   },
+   {
+    "account_profile": "invoiceops-thinking",
+    "allocation": "grpo_training",
+    "cost_usd": 0.6181,
+    "error": null,
+    "gpu": "H100",
+    "job": "smoke_train",
+    "phase": "11B",
+    "rate_usd_per_hour": 4.45,
+    "run_name": "grpo-v3d-smoke-02",
+    "seconds": 500.0,
+    "started": "2026-10-25T20:56:56Z",
+    "status": "succeeded"
+   },
+   {
+    "account_profile": "invoiceops-thinking",
+    "allocation": "grpo_training",
+    "cost_usd": 8.3997,
+    "error": "FileExistsError: [Errno 17] File exists: '/runs/train/grpo-v3d'",
+    "gpu": "H100",
+    "job": "train_grpo",
+    "phase": "13",
+    "rate_usd_per_hour": 4.45,
+    "run_name": "grpo-v3d",
+    "seconds": 6795.2,
+    "started": "2026-10-25T21:09:10Z",
+    "status": "failed"
+   },
+   {
+    "account_profile": "invoiceops-thinking",
+    "allocation": "grpo_training",
+    "cost_usd": 15.5362,
+    "error": null,
+    "gpu": "H100",
+    "job": "train_grpo",
+    "phase": "13",
+    "rate_usd_per_hour": 4.45,
+    "run_name": "grpo-v3d",
+    "seconds": 12568.6,
+    "started": "2026-10-25T23:17:20Z",
+    "status": "succeeded"
+   }
+  ],
+  "this_run_ledger_entries": [
+   {
+    "account_profile": "invoiceops-thinking",
+    "allocation": "grpo_training",
+    "cost_usd": 8.3997,
+    "error": "FileExistsError: [Errno 17] File exists: '/runs/train/grpo-v3d'",
+    "gpu": "H100",
+    "job": "train_grpo",
+    "phase": "13",
+    "rate_usd_per_hour": 4.45,
+    "run_name": "grpo-v3d",
+    "seconds": 6795.2,
+    "started": "2026-10-25T21:09:10Z",
+    "status": "failed"
+   },
+   {
+    "account_profile": "invoiceops-thinking",
+    "allocation": "grpo_training",
+    "cost_usd": 15.5362,
+    "error": null,
+    "gpu": "H100",
+    "job": "train_grpo",
+    "phase": "13",
+    "rate_usd_per_hour": 4.45,
+    "run_name": "grpo-v3d",
+    "seconds": 12568.6,
+    "started": "2026-10-25T23:17:20Z",
+    "status": "succeeded"
+   }
+  ],
+  "campaign_spend_usd": 25.2472
+ },
+ "issues": [
+  "aux files mismatched after close: ['checkpoints/completions/completions_00051.parquet', 'checkpoints/completions/completions_00052.parquet', 'checkpoints/completions/completions_00053.parquet', 'checkpoints/completions/completions_00054.parquet', 'meta.json']"
+ ],
+ "manifest_status": "completed",
+ "manifest_counters": {
+  "model_calls": 2210,
+  "rollouts": 4960,
+  "tool_events": 49912
+ },
+ "ok": false
+}

@@ -15,9 +15,9 @@ def budget() -> Budget:
 def test_caps_fit_total_with_reserve() -> None:
     b = load_budget()
     caps = sum(j.cap_usd for j in b.jobs.values())
-    assert b.total_usd == 50.0
-    assert caps == pytest.approx(43.70)
-    assert b.total_usd - caps == pytest.approx(6.30)
+    assert b.total_usd == 60.0
+    assert caps == pytest.approx(55.45)
+    assert b.total_usd - caps == pytest.approx(4.55)
 
 
 def test_unconfirmed_rates_refuse_everything() -> None:
@@ -43,9 +43,62 @@ def test_succeeded_job_needs_explicit_rerun(budget: Budget) -> None:
 
 def test_overspending_blocks_jobs_that_would_eat_other_caps(budget: Budget) -> None:
     # Pretend failed attempts burned most of the reserve.
-    ledger = [{"job": "smoke_tau2", "status": "failed", "cost_usd": 10.0}]
+    ledger = [{"job": "smoke_tau2", "status": "failed", "cost_usd": 40.0}]
     with pytest.raises(BudgetError, match="only \\$"):
-        check_launch(budget, "train_grpo", ledger, signed_off=True)
+        check_launch(budget, "test_reference", ledger, signed_off=True)
+
+
+# The $25 GRPO training allocation (owner handoff 2026-10-26) is a separate pool bound
+# to the second Modal account; entries are tagged allocation=grpo_training.
+CAMPAIGN = "invoiceops-thinking"
+
+
+def _campaign(job: str, status: str, cost: float) -> dict[str, object]:
+    return {"job": job, "status": status, "cost_usd": cost, "allocation": "grpo_training"}
+
+
+def test_allocation_jobs_need_their_own_account(budget: Budget) -> None:
+    with pytest.raises(BudgetError, match="profile"):
+        check_launch(budget, "smoke_train", [], signed_off=True, account_profile="default")
+    money = check_launch(budget, "smoke_train", [], signed_off=True, account_profile=CAMPAIGN)
+    # 20 min on H100; the main run's 360-minute worst case stays reserved inside the pool.
+    assert money["worst_case"] == pytest.approx(1.4833)
+    assert money["reserved"] == pytest.approx(26.7)
+    assert money["allocation_limit"] == 60.0
+
+
+def test_allocation_counts_only_its_own_ledger(budget: Budget) -> None:
+    # A historical smoke success on the default pool does not block the campaign smoke.
+    ledger: list[dict[str, object]] = [
+        {"job": "smoke_train", "status": "succeeded", "cost_usd": 0.5}
+    ]
+    check_launch(budget, "smoke_train", ledger, signed_off=True, account_profile=CAMPAIGN)
+    # Once the campaign smoke succeeds, another needs an explicit rerun.
+    ledger.append(_campaign("smoke_train", "succeeded", 1.2))
+    with pytest.raises(BudgetError, match="already succeeded"):
+        check_launch(budget, "smoke_train", ledger, signed_off=True, account_profile=CAMPAIGN)
+    check_launch(
+        budget, "smoke_train", ledger, signed_off=True, rerun=True, account_profile=CAMPAIGN
+    )
+
+
+def test_allocation_guard_covers_the_full_campaign(budget: Budget) -> None:
+    ledger = [_campaign("smoke_train", "succeeded", 1.4)]
+    money = check_launch(budget, "train_grpo", ledger, signed_off=True, account_profile=CAMPAIGN)
+    assert money["worst_case"] == pytest.approx(26.7)  # 360 min on H100
+    assert money["spent"] == pytest.approx(1.4)
+    # Even after the smoke, 1.4 + 26.70 stays under the 60 limit; a bigger burn refuses.
+    ledger = [_campaign("smoke_train", "failed", 40.0)]
+    with pytest.raises(BudgetError, match="allocation"):
+        check_launch(budget, "train_grpo", ledger, signed_off=True, account_profile=CAMPAIGN)
+
+
+def test_default_pool_ignores_allocation_entries_and_jobs(budget: Budget) -> None:
+    ledger = [_campaign("train_grpo", "succeeded", 18.0)]
+    money = check_launch(budget, "tau2_before", ledger, signed_off=False)
+    assert money["spent"] == 0.0  # campaign spend never enters the default pool
+    # Allocation jobs no longer reserve their caps from the default pool either.
+    assert money["reserved"] == pytest.approx(55.45 - 3.30 - 0.85 - 26.70)
 
 
 def test_signoff_requires_ticked_approval(tmp_path: Path) -> None:
@@ -111,10 +164,23 @@ def test_first_release_fits_the_spend_limit(budget: Budget) -> None:
     padded = replace(budget, rates={k: v + 0.5 if v else v for k, v in budget.rates.items()})
     ledger: list[dict[str, object]] = []
     for job in FIRST_RELEASE_CORE:
-        money = check_launch(padded, job, ledger, signed_off=True)
-        ledger.append({"job": job, "status": "succeeded", "cost_usd": money["worst_case"]})
+        # smoke_train moved to the grpo_training allocation; it runs on that account.
+        profile = CAMPAIGN if budget.allocation_for(job) else "default"
+        money = check_launch(padded, job, ledger, signed_off=True, account_profile=profile)
+        entry: dict[str, object] = {
+            "job": job,
+            "status": "succeeded",
+            "cost_usd": money["worst_case"],
+        }
+        if budget.allocation_for(job):
+            entry["allocation"] = budget.allocation_for(job).name
+        ledger.append(entry)
     # At the planning rates, the optional jobs fit as well.
     ledger = []
     for job in FIRST_RELEASE_CORE + FIRST_RELEASE_OPTIONAL:
-        money = check_launch(budget, job, ledger, signed_off=True)
-        ledger.append({"job": job, "status": "succeeded", "cost_usd": money["worst_case"]})
+        profile = CAMPAIGN if budget.allocation_for(job) else "default"
+        money = check_launch(budget, job, ledger, signed_off=True, account_profile=profile)
+        entry = {"job": job, "status": "succeeded", "cost_usd": money["worst_case"]}
+        if budget.allocation_for(job):
+            entry["allocation"] = budget.allocation_for(job).name
+        ledger.append(entry)

@@ -2,7 +2,34 @@
 
 This is the brief for whoever continues the project. It covers what the project is, everything that has run, what we learned, the decisions made and why, what is left, what it will cost, and the rules to follow.
 
-Last updated: 2026-10-24, at commit `fae71f1` on `main` (or a later commit that updated this file).
+Last updated: 2026-10-26 (Asia/Dhaka), after the local training audit.
+
+**Execution prompt:** [`FULL_TRAINING_HANDOFF_PROMPT.md`](FULL_TRAINING_HANDOFF_PROMPT.md)
+contains the full-training handoff, including the $25 allocation, required raw-trajectory
+logging implementation, GPU readiness checks and verified local artifact delivery.
+
+**Training audit:** [Findings and effective parameters](../reports/training_audit.md).
+All 275 tests and oracle checks on all 180 training rows pass. The generated curriculum is
+now balanced (60/60/60), and a project trainer wrapper masks unfinished EOS tool calls and
+excludes them from the reward baseline. The owner clarified **$25 for training alone**, with evaluations separate. The current
+250-minute training hard limit estimates $18.54 at the configured rate, so it fits that
+allocation. After the audit the owner requested larger limits: training context is now 131,072
+and completion budget 24,576. The new limits need GPU memory validation. Released-credit
+limits were not changed and no GPU jobs were launched; the existing $11 release still blocks launch.
+
+**Evaluation audit:** [Definitions, fixes and limits](../reports/evaluation_audit.md).
+Strict verifier success is the primary metric. Fixed incomplete pass@k/pass^k accounting,
+blocked-attempt counting and tool-call budget overshoot. Checkpoint selection rejects
+incomplete dev runs and deduplicates saved adapters. Recounting 372 local episodes changes
+no headline success rates; 21 committed summaries pass arithmetic checks. Test has only
+four companies and has already been inspected during prompt work, so gains are exploratory.
+
+**Latest check:** `Qwen/Qwen3-4B-Thinking-2507` passed the inference pipeline smoke, but scored
+8/12 on dev with one attempt per task. No truncation or context stops occurred; maximum
+per-turn output was 5,922 tokens and maximum prompt plus completion was 12,299. Generation
+cost 12.54× as many tokens per episode as the existing instruct dev baseline, without an
+observed accuracy improvement. The samples and concurrency differ. The active candidate and
+training config remain Instruct-2507 with v3d. See [`../reports/thinking_smoke.md`](../reports/thinking_smoke.md).
 
 **Read first:**
 1. This file.
@@ -32,8 +59,8 @@ There are 72 tasks: 12 families across 12 fictional companies, split **by compan
 | 12 | Baselines on our tasks | **Done**: probes, dev, test for prompts v1/v2/v3c/v3d, reference model on test |
 | 12+ | Prompt engineering before training | **Done**: v3d chosen for training ([`../reports/prompt_trials.md`](../reports/prompt_trials.md)) |
 | 14 (pipeline) | Post-training chain (LoRA serving, selection, merge, merged serving) | **Done** on the smoke adapter |
-| 13 | GRPO training | **Next.** Needs the reviewer's approval of the training config and more credit (§7) |
-| 14 | Selection, final test, τ²-bench and BFCL after | After training |
+| 13 | GRPO training | **Done**: `grpo-v3d` completed 150/150 steps on 2026-10-26; 4,960 rollout trajectories preserved, verified and replayed ([`../reports/grpo_training_campaign.md`](../reports/grpo_training_campaign.md)) |
+| 14 | Selection, final test, τ²-bench and BFCL after | **Next.** Uses `final_adapter`/`checkpoint-*` from `grpo-v3d`; needs a fresh credit release |
 | 15 | Showcase release | After 14 |
 
 ## 3. Results so far
@@ -63,6 +90,14 @@ Train and dev results for every prompt are in [`../reports/prompt_trials.md`](..
 
 Neither benchmark is comparable with its public leaderboard (local models, ENV-only grading). Do not quote BFCL's printed "Overall"; it averages over categories we did not run.
 
+### 3.3 GRPO training run `grpo-v3d` (2026-10-26)
+
+- **150/150 optimizer steps completed** — 4,800 optimizer-consumed rollouts (4,960 records preserved including 160 superseded by the preemption resume), LoRA adapter in `final_adapter/`, checkpoints at 25/50/75/100/125/150.
+- Training-signal metrics: reward mean 0.705 overall, 0.55 → 0.68 (first vs last 10 steps); `frac_reward_zero_std` 0.25–1.0 late (healthy group variance); all losses/grads finite; `tool_cutoff_ratio` 0 throughout.
+- Trajectory archive: 155 committed batches, 2,210 raw vLLM calls, 49,912 env events; every shard sha256-verified in the manifest; **4,959/4,960 records replayed with zero state/observation/reward divergence** (`runs/modal/training/grpo-v3d/replay_report.json`).
+- Whether it improved the model is **untested** — selection/test/τ²/BFCL are phase 14 and need their own credit release.
+- Full detail: [`../reports/grpo_training_campaign.md`](../reports/grpo_training_campaign.md); integrity audit: `reports/modal/grpo-v3d-audit.json`.
+
 ## 4. What we learned (read before changing anything)
 
 **Prompting:**
@@ -85,7 +120,7 @@ Neither benchmark is comparable with its public leaderboard (local models, ENV-o
 **Context and lengths** ([`../reports/compatibility.md`](../reports/compatibility.md)):
 - Episodes peak around 8–10k tokens; nothing was truncated in any run.
 - Serving uses a 131,072-token context and 16,384 new tokens per turn. A runner guard keeps every request inside the context.
-- Training uses a 16,384-token completion budget and a 20,480-token vLLM context.
+- Training now uses a 24,576-token whole-rollout completion budget and a 131,072-token vLLM context, at the owner's request. The recorded GPU smoke used the previous 16,384 / 20,480 limits.
 
 ## 5. Decisions made, and why
 
@@ -94,7 +129,7 @@ Neither benchmark is comparable with its public leaderboard (local models, ENV-o
 | Train, select checkpoints and run the final test with **prompt v3d** | Won the train/dev selection rule; ties v3c on test with fewer critical violations; leaves 16 learnable training tasks (2 never pass) | `modal_app/settings.py` `AGENT_PROMPT`, `modal_app/train_config.json` (`run_name: grpo-v3d`) |
 | Context 131,072, 16,384 new tokens per turn, runner context guard | No context errors or mid-turn truncation; measured need is far smaller | `modal_app/settings.py`, `src/invoiceops/agents/openai_runner.py` |
 | τ² user simulator context 32,768 | It shares the H100 at 45% memory (about 38k tokens of KV cache) | `settings.USER_SIM_MAX_MODEL_LEN` |
-| Training: completion 16,384, vLLM context 20,480, batch 2 × 16, bf16, truncated rollouts masked, model at the pinned revision | Thorough rollouts fit; logits fit in memory; same weights as the evaluations | `modal_app/train_grpo.py` |
+| Training: completion 24,576, vLLM context 131,072, batch 2 × 16, bf16, model at the pinned revision | Owner requested more room; new limits and trainer wrapper need GPU validation; audited tool cutoffs now excluded | `modal_app/train_grpo.py`, `reports/training_audit.md` |
 | `VLLM_USE_DEEP_GEMM=0` | DeepGEMM's FP8 kernels need nvcc 12.9+, and the image has 12.8; the FP8 reference failed to start without this | `modal_app/app.py` `ENV` |
 | τ²-bench installed from a pinned checkout with `TAU2_DATA_DIR` | A pip install from git leaves out tau2's data | `modal_app/app.py` `serve_image` |
 | `soundfile` in the BFCL environment | `qwen_agent` imports it without declaring it | same |
@@ -107,51 +142,72 @@ Neither benchmark is comparable with its public leaderboard (local models, ENV-o
 
 **Released credit and ledger:**
 - The project budget is USD 50. The owner has released **USD 11.00** (`spend_limit_usd` in `modal_app/budget.yaml`).
-- The ledger (`reports/modal_ledger.jsonl`, 26 runs) shows **USD 9.11 spent**.
+- The ledger (`reports/modal_ledger.jsonl`, 27 runs) shows **USD 10.0722 spent** (USD 10.07 rounded).
 
 **The ledger overestimates.** It charges wall-clock time, including image builds and start-up, at the GPU rate. The owner read about $3.68 left on the Modal account before the last three prompt runs. Always compare against the Modal dashboard; the per-job table is in [`../reports/modal_spend.md`](../reports/modal_spend.md).
 
 **Rates** (Modal pricing page, 2026-10-23): H100 $3.95/h and L40S $1.95/h. Plus $0.50/h for CPU and memory, the guard uses **H100 $4.45/h, L40S $2.45/h**.
 
-**A second Modal account** with about $29.50 was mentioned by the owner. Using it needs its token in the environment and a decision on how the ledger tracks two accounts. Neither is done.
+**The second Modal account** was configured privately on 2026-10-26, with USD 26 credit
+reported by the owner, for the authorized thinking smoke. Use `uv run --env-file .env --group modal`
+for that account (private profile `invoiceops-thinking`). Credentials are not committed. New
+ledger entries record `account_profile`; prior entries are unchanged. Account balance was not
+read from the dashboard. This configuration and the smoke authorization do not release
+additional credit or authorize a full training run.
 
 **What the remaining jobs need.** The guard refuses a job unless *ledger spend + the job's worst case* (hard timeout × rate) fits under `spend_limit_usd`:
 
 | Job | GPU, hard limit | Worst case | Plan cap | Typical actual (ledger) |
 |---|---|---|---|---|
-| `train_grpo` | H100, 250 min | **$18.54** | $15.80 | unknown; the wall-clock stop is 225 min |
+| `train_grpo` | H100, 360 min | **$26.70** | $26.70 | **done** — $23.94 over two attempts (preempted once, resumed); soft stop 345 min never fired |
 | `select_and_test` | L40S, 40 + 10 + 30 min | $3.27 | $2.45 | about $1 (smoke chain: $0.48) |
 | `tau2_after` | H100, 60 min | $4.45 | $3.30 | about $1.20 (`tau2_before`: $1.16) |
 | `bfcl_after` | L40S, 35 min | $1.43 | $0.80 | about $0.45 (`bfcl_before`: $0.42) |
 
-- **To start training:** `spend_limit_usd` must be at least 9.11 + 18.54 = **27.65**.
-- **For the whole remaining programme**, released step by step, the worst cases sum to $27.69. Real spend will be lower.
+- **`train_grpo` is spent** — the campaign billed $25.25 under the
+  `grpo_training` allocation (USD 60, owner-authorized 2026-10-25), so the old
+  released-credit math no longer applies.
+- **For the remaining phase-14 programme** (`select_and_test`, `tau2_after`,
+  `bfcl_after`), the worst cases sum to ~$8 under the same allocation's
+  remaining headroom, but each still needs its own launch authorization.
 - **Only the owner raises `spend_limit_usd`.**
 
 ## 7. Next steps, in order
 
-### 7.1 Before training
-1. **Reviewer approval of the training config.** Review `modal_app/train_grpo.py` `DEFAULTS` and `modal_app/train_config.json`:
+### 7.1 Before training — superseded (owner authorized the campaign directly)
+1. ~~**Reviewer approval of the training config.**~~ The owner authorized the full run
+   directly on 2026-10-25 ("complete it... no human in the loop") and raised the
+   `grpo_training` allocation to USD 60; the config ran as reviewed below:
+   - prompt v3d, run `grpo-v3d`;
    - prompt v3d, run `grpo-v3d`;
    - LoRA r=16, alpha 32, learning rate 2e-5;
    - 8 generations per prompt; 2 per device × 16 accumulation steps (32 rollouts per step);
    - 150 steps, training temperature 1.0, at most 30 tool-calling iterations;
-   - completion 16,384, vLLM context 20,480;
+   - completion 24,576, vLLM context 131,072; validate GPU startup and memory at these new limits;
    - 144 generated training variants plus the 36 training tasks;
-   - 225-minute wall-clock stop.
+   - 345-minute wall-clock stop (owner raised it; 360-min Modal hard timeout).
 
-   Record the approval in `docs/review/`.
-2. **Release credit:** `spend_limit_usd` ≥ 27.65 (owner).
-3. Optional: decide whether to use the second Modal account (§6).
+2. **Credit:** covered by the `grpo_training` allocation (USD 60 authorized);
+   campaign spent $25.25 by ledger.
+3. **Account:** profile `invoiceops-thinking`; backup `kazigalib143` registered
+   but unused.
 
-### 7.2 Training
-```bash
-uv run --group modal python -m modal_app.launch train_grpo --dry-run
-uv run --group modal python -m modal_app.launch train_grpo
-```
-- **Watch the first steps' `step_time`.** The smoke run took 23–27 s per step of 8 rollouts. The real run has 32 rollouts per step; if time scaled linearly, 150 steps would take about 250 min and the 225-minute stop would end training near step 135. That is acceptable: the final adapter is saved either way.
-- **Also watch** `sampling/importance_sampling_ratio` (0.45–0.79 in the smoke run), `frac_reward_zero_std` (groups with no learning signal), and `completions/clipped_ratio` (should stay near 0).
-- **Success:** `checkpoints` and `final_adapter` exist under `/runs/train/grpo-v3d`, and `log_history` shows rewards.
+### 7.2 Training — **DONE (2026-10-26)**
+
+`grpo-v3d` completed **all 150 optimizer steps** in two attempts: the first was
+preempted by Modal at ~step 55 ($8.40), the second resumed from `checkpoint-50`
+and finished ($15.54). Step time ≈124 s; the soft wall clock (345 min, carried
+across attempts) never fired. Every rollout is durably archived and sha256
+verified; **4,959/4,960 records replayed with zero divergence** (one record had
+an empty action log — nothing to replay). Reward mean 0.705, trending 0.55 →
+0.68 (first vs last 10 steps); `frac_reward_zero_std` stayed 0.25–1.0 late in
+training; `tool_cutoff_ratio` was 0 every step. Artifacts: remote
+`invoiceops-runs:/train/grpo-v3d`, mirrored to `runs/modal/training/grpo-v3d`
+(542 files). Reports: `reports/grpo_training_campaign.md` (full detail),
+`reports/modal/grpo-v3d-audit.json` (integrity audit). The same
+`launch train_grpo` entry point now resumes an interrupted same-config run
+from its latest checkpoint instead of failing — rerun only with a **new**
+`--run-name` for a fresh lineage.
 - **Never re-run a job that hit its hard timeout.**
 
 ### 7.3 Final evaluation
@@ -175,7 +231,7 @@ uv run --group modal python -m modal_app.launch train_grpo
 | F10 attachments are never opened by the model | The injection family tests receipt logic, not injection resistance | Make the attachment necessary to solve the task (task-design change, needs review) |
 | `quantity_exceeds_receipt` vs `short_receipt` | An easy reason-code trap (8/8 attempts on two test tasks) | The verifier is right; consider clearer policy wording (task change) |
 | Test split looked at twice | The trained model's test number is a third look | One final test run only; report it as such |
-| Training time vs the 225-minute stop | Training may stop before 150 steps | Watch `step_time`; acceptable, but record the step reached |
+| ~~Training time vs the 225-minute stop~~ Modal spot preemption can kill a container mid-run | ~~Training may stop before 150 steps~~ The auto-restarted function used to die on `FileExistsError` | Resolved 2026-10-26: `run_training` resumes a same-config interrupted run from its latest checkpoint (per-attempt lineage in `manifest["attempts"]`); run finished all 150 steps |
 | GRPO signal | With v3d, 18 of 36 training tasks always pass and 2 never pass, giving no gradient | Generated variants add more; watch `frac_reward_zero_std` |
 | `docs/review/status.md` header still says "GPU phases: NOT approved" | Stale reviewer record; the sign-off approves | The reviewer updates it (reviewer-owned file) |
 | `Qwen/Qwen3-8B` fallback supports only 40,960 tokens | It would fail with the 131,072 default | Pass a smaller `max_model_len` if it is ever used |
@@ -212,7 +268,10 @@ uv run --group modal python -m modal_app.launch train_grpo
 | `modal_app/app.py` | Modal functions and images (serve, train, CPU) |
 | `modal_app/budget.yaml` | Rates, released credit, per-job caps and hard timeouts |
 | `modal_app/settings.py` | Pinned model revisions, benchmark versions, lengths, decoding, `AGENT_PROMPT` |
-| `modal_app/train_grpo.py`, `train_config.json` | GRPO training job and its config |
+| `modal_app/train_grpo.py`, `train_config.json` | GRPO training job and its config; resumes an interrupted same-config run from the latest checkpoint |
+| `src/invoiceops/adapters/rollout_log.py`, `modal_app/trajectory_logging.py`, `modal_app/grpo_safety.py` | Durable per-rollout trajectory recorder (atomic shards + manifest), vLLM call capture, safety-mask batch hooks |
+| `modal_app/sync_run.py` | Incremental volume→local mirror with sha256 verification (`--once` / `--verify-only`) |
+| `scripts/audit_training_run.py`, `scripts/replay_rollouts.py` | Offline audit of a mirrored run; per-record replay/regrade against frozen bundles |
 | `modal_app/tau2_driver.py`, `vllm_server.py` | τ²-bench driver; vLLM server start-up |
 | `reports/` | `baseline.md`, `external_baseline.md`, `compatibility.md`, `prompt_trials.md`, `transcript_audit.md`, `modal_spend.md`, `modal/*.json`, `modal_ledger.jsonl`, `model_verification.json` |
 | `docs/review/` | Pre-GPU review guide, sign-off, builder responses, completed review records |

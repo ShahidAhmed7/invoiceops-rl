@@ -1,0 +1,79 @@
+{
+  "method": "Generated completion tokens plus tokenized tool response text; excludes chat-template overhead. This is a lower bound, not a TRL rollout measurement.",
+  "over_16384_generated_only": 4,
+  "over_16384_lower_bound": 5,
+  "episodes": [
+    {
+      "task_id": "T-0222C3",
+      "generated_tokens": 12462,
+      "tool_response_text_tokens": 2748,
+      "rollout_token_lower_bound": 15210
+    },
+    {
+      "task_id": "T-71E1D2",
+      "generated_tokens": 8931,
+      "tool_response_text_tokens": 2374,
+      "rollout_token_lower_bound": 11305
+    },
+    {
+      "task_id": "T-84D47B",
+      "generated_tokens": 21235,
+      "tool_response_text_tokens": 2829,
+      "rollout_token_lower_bound": 24064
+    },
+    {
+      "task_id": "T-8F0E1E",
+      "generated_tokens": 12681,
+      "tool_response_text_tokens": 2907,
+      "rollout_token_lower_bound": 15588
+    },
+    {
+      "task_id": "T-9362E5",
+      "generated_tokens": 13159,
+      "tool_response_text_tokens": 2877,
+      "rollout_token_lower_bound": 16036
+    },
+    {
+      "task_id": "T-A680BE",
+      "generated_tokens": 13760,
+      "tool_response_text_tokens": 2495,
+      "rollout_token_lower_bound": 16255
+    },
+    {
+      "task_id": "T-C45901",
+      "generated_tokens": 14642,
+      "tool_response_text_tokens": 2568,
+      "rollout_token_lower_bound": 17210
+    },
+    {
+      "task_id": "T-CC052D",
+      "generated_tokens": 17333,
+      "tool_response_text_tokens": 2926,
+      "rollout_token_lower_bound": 20259
+    },
+    {
+      "task_id": "T-D30567",
+      "generated_tokens": 11920,
+      "tool_response_text_tokens": 2508,
+      "rollout_token_lower_bound": 14428
+    },
+    {
+      "task_id": "T-DC7A6B",
+      "generated_tokens": 10190,
+      "tool_response_text_tokens": 2583,
+      "rollout_token_lower_bound": 12773
+    },
+    {
+      "task_id": "T-E72409",
+      "generated_tokens": 18353,
+      "tool_response_text_tokens": 2672,
+      "rollout_token_lower_bound": 21025
+    },
+    {
+      "task_id": "T-F88990",
+      "generated_tokens": 21763,
+      "tool_response_text_tokens": 2767,
+      "rollout_token_lower_bound": 24530
+    }
+  ]
+}

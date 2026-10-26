@@ -1,0 +1,91 @@
+{
+  "episodes": 12,
+  "all_replays_match": true,
+  "tool_calls": 127,
+  "tasks": [
+    {
+      "task_id": "T-0222C3",
+      "family": "F03",
+      "passed": true,
+      "tool_calls": 12,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-71E1D2",
+      "family": "F08",
+      "passed": true,
+      "tool_calls": 10,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-84D47B",
+      "family": "F04",
+      "passed": true,
+      "tool_calls": 10,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-8F0E1E",
+      "family": "F01",
+      "passed": false,
+      "tool_calls": 10,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-9362E5",
+      "family": "F05",
+      "passed": true,
+      "tool_calls": 10,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-A680BE",
+      "family": "F07",
+      "passed": true,
+      "tool_calls": 11,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-C45901",
+      "family": "F11",
+      "passed": true,
+      "tool_calls": 12,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-CC052D",
+      "family": "F09",
+      "passed": false,
+      "tool_calls": 10,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-D30567",
+      "family": "F02",
+      "passed": true,
+      "tool_calls": 10,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-DC7A6B",
+      "family": "F06",
+      "passed": false,
+      "tool_calls": 11,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-E72409",
+      "family": "F10",
+      "passed": false,
+      "tool_calls": 10,
+      "replay_matches": true
+    },
+    {
+      "task_id": "T-F88990",
+      "family": "F12",
+      "passed": true,
+      "tool_calls": 11,
+      "replay_matches": true
+    }
+  ]
+}

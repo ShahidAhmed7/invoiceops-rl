@@ -1,0 +1,150 @@
+{
+  "config": {
+    "generated_variants": 144,
+    "grpo": {
+      "bf16": true,
+      "gradient_accumulation_steps": 16,
+      "gradient_checkpointing": true,
+      "learning_rate": 2e-05,
+      "log_completions": true,
+      "logging_steps": 1,
+      "mask_truncated_completions": true,
+      "max_completion_length": 24576,
+      "max_steps": 150,
+      "max_tool_calling_iterations": 30,
+      "model_init_kwargs": {
+        "dtype": "bfloat16"
+      },
+      "num_generations": 8,
+      "per_device_train_batch_size": 2,
+      "report_to": "none",
+      "save_steps": 25,
+      "save_total_limit": 8,
+      "temperature": 1.0,
+      "use_vllm": true,
+      "vllm_gpu_memory_utilization": 0.35,
+      "vllm_max_model_length": 131072,
+      "vllm_mode": "colocate"
+    },
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "lora_r": 16,
+    "model": "Qwen/Qwen3-4B-Instruct-2507",
+    "prompt_version": "v3d",
+    "run_name": "grpo-v3d",
+    "seed": 7,
+    "wall_clock_limit_min": 225
+  },
+  "config_validation": {
+    "all_grpo_keys_exist_in_pinned_versions": true,
+    "full_run_max_rollouts": 4800,
+    "generation_batch": 32,
+    "prompt_groups_per_optimizer_step": 4
+  },
+  "dataset": {
+    "all_train_only": true,
+    "family_counts": {
+      "F01": 15,
+      "F02": 15,
+      "F03": 15,
+      "F04": 15,
+      "F05": 15,
+      "F06": 15,
+      "F07": 15,
+      "F08": 15,
+      "F09": 15,
+      "F10": 15,
+      "F11": 15,
+      "F12": 15
+    },
+    "generated_variant_counts": {
+      "0": 48,
+      "1": 48,
+      "2": 48
+    },
+    "heldout_id_overlap": 0,
+    "oracle_passes_through_training_environment": 180,
+    "row_bundle_prompt_match": true,
+    "rows": 180,
+    "unique_task_ids": 180,
+    "variant_counts": {
+      "0": 60,
+      "1": 60,
+      "2": 60
+    },
+    "world_counts": {
+      "w01-northstar": 30,
+      "w02-bramblewood": 30,
+      "w03-calderline": 30,
+      "w04-quillfeather": 30,
+      "w05-redfern": 30,
+      "w06-tamsin": 30
+    }
+  },
+  "date": "2026-10-26",
+  "generation_then_discard": {
+    "completion_length": 5,
+    "detected_as_truncated_by_trl": true,
+    "executed_tools": 1,
+    "generated_tokens": 10,
+    "generation_calls": 1,
+    "last_token_is_eos": false,
+    "project_guard_model_loss_tokens": 0,
+    "project_guard_reward_excluded": true,
+    "returned_tool_calls": 2,
+    "rollouts/tool_cutoff_ratio": 1.0
+  },
+  "local_gpu_training_performed": false,
+  "model": "Qwen/Qwen3-4B-Instruct-2507",
+  "pinned_library_inherited_defaults": {
+    "beta": 0.0,
+    "loss_type": "dapo",
+    "lr_scheduler_type": "linear",
+    "max_grad_norm": 1.0,
+    "min_p": null,
+    "num_iterations": 1,
+    "scale_rewards": "group",
+    "top_k": 0,
+    "top_p": 1.0,
+    "vllm_importance_sampling_correction": true,
+    "vllm_importance_sampling_mode": "sequence_mask",
+    "warmup_steps": 0,
+    "weight_decay": 0.0
+  },
+  "revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "tokenized_initial_prompt_with_15_tools": {
+    "configured_context": 131072,
+    "max": 3126,
+    "max_plus_completion_cap": 27702,
+    "median": 3123.0,
+    "min": 3121
+  },
+  "tool_iteration_limit": {
+    "completion_length": 5,
+    "detected_as_truncated_by_trl": false,
+    "executed_tools": 1,
+    "generated_tokens": 2,
+    "generation_calls": 1,
+    "last_token_is_eos": true,
+    "project_guard_model_loss_tokens": 0,
+    "project_guard_reward_excluded": true,
+    "returned_tool_calls": 2,
+    "rollouts/tool_cutoff_ratio": 1.0
+  },
+  "tool_result_over_budget": {
+    "completion_length": 2,
+    "detected_as_truncated_by_trl": false,
+    "executed_tools": 1,
+    "generated_tokens": 0,
+    "generation_calls": 0,
+    "last_token_is_eos": true,
+    "project_guard_model_loss_tokens": 0,
+    "project_guard_reward_excluded": true,
+    "returned_tool_calls": 1,
+    "rollouts/tool_cutoff_ratio": 1.0
+  },
+  "trl_source": {
+    "sha256": "1c3dc2253fb3653269c11dfce4f946f74201a4cb63e0887a37e8e3bb4a3f5503",
+    "version": "1.16.0"
+  }
+}

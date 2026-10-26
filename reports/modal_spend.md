@@ -30,8 +30,18 @@ The owner released **USD 9.50**, then USD 1.50 more (USD 11.00) for the post-tra
 | 2026-10-24T05:49:07Z | `test_prompt` v3d | L40S | succeeded | 6.2 | $2.45 | $0.25 |
 | 2026-10-24T06:08:21Z | `prompt_trial` v4 | L40S | succeeded | 10.4 | $2.45 | $0.43 |
 | 2026-10-24T08:23:37Z | `smoke_post_train` | L40S | succeeded | 11.6 | $2.45 | $0.48 |
-| | | | | | **Total** | **$9.11** |
+| 2026-10-25T18:33:49Z | `smoke_thinking` (second account) | L40S | succeeded | 23.6 | $2.45 | $0.96 |
+| 2026-10-25T20:44:17Z | `smoke_train` grpo-v3d-smoke-01 | H100 | succeeded | 9.3 | $4.45 | $0.69 |
+| 2026-10-25T20:56:56Z | `smoke_train` grpo-v3d-smoke-02 | H100 | succeeded | 8.3 | $4.45 | $0.62 |
+| 2026-10-25T21:09:10Z | `train_grpo` grpo-v3d (attempt 1) | H100 | failed (preempted) | 113.3 | $4.45 | $8.40 |
+| 2026-10-25T23:17:20Z | `train_grpo` grpo-v3d (attempt 2, resumed) | H100 | succeeded | 209.5 | $4.45 | $15.54 |
+| | | | | | **Total** | **$35.32** |
 
 The ledger multiplies wall-clock time by the rate. Wall-clock time includes image builds and container start-up before the GPU is attached, so the ledger is an overestimate. **Modal dashboard figure for the same period: not yet read** (to be filled in by the owner).
 
-**Remaining by the ledger: $1.89 of the released $11.00.** The owner read about $2.00 of credit left on the Modal account before `smoke_post_train`. What each remaining job needs is in `docs/PROJECT_HANDOFF.md` §6.
+**The GRPO campaign (`grpo_training` allocation, USD 60 authorized by the owner on
+2026-10-25) spent $25.25 by ledger** — two readiness smokes ($1.31), a preempted first
+attempt ($8.40; Modal reclaimed the H100 at step ~55 and restarted the container), and the
+resumed second attempt that completed 150/150 steps ($15.54). The backup profile
+`kazigalib143` (USD 30) was registered but never used. Full details:
+`reports/grpo_training_campaign.md`, `reports/modal/grpo-v3d-audit.json`.
